@@ -1,0 +1,255 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Who's mad?! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_lm1.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD loon_med_phone1_m1:
+//FORWARD clean_up_loon_med_phone1_m1:
+
+COUNTER l_m_1_assassins_died = 0
+COUNTER l_m_1_ass_1_on_screen = 0
+COUNTER l_m_1_ass_2_on_screen = 0
+COUNTER l_m_1_ass_3_on_screen = 0
+COUNTER l_m_1_ass_1_died = 0
+COUNTER l_m_1_ass_2_died = 0
+COUNTER l_m_1_ass_3_died = 0
+
+CHAR_DATA l_m_1_assassin_1_char
+CHAR_DATA l_m_1_assassin_2_char
+CHAR_DATA l_m_1_assassin_3_char
+
+OBJ_DATA l_m_1_armour_powerup
+
+CAR_DATA l_m_1_assassin_1_car
+CAR_DATA l_m_1_assassin_2_car
+CAR_DATA l_m_1_assassin_3_car
+
+loon_med_phone1_m1:
+
+	SET flag_on_loon_mission = 1
+	SET flag_on_mission = 1
+ 
+	SET flag_failed_loon_med_phone1_m1 = 0
+ 
+	DISPLAY_MESSAGE (1970)                //  WHO'S MAD?
+	DISPLAY_BRIEF (1463)                  //  "Hey, Jumbo! You should meet Cosmo Trouble, Downtown. He's got a bonkers mad job for you!"
+ 
+	POINT_ARROW_AT (arrow1, 128.50, 195.50, 2.00)
+ 
+	l_m_1_armour_powerup = CREATE_OBJ (128.50, 195.50, 2.00) 0 COLLECT_31 END            //  armour?
+ 
+ WHILE ( NOT ( LOCATE_CHARACTER_ANY_MEANS(p1, 128.50, 195.50, 2.00, 2.00, 2.00) ) )        //  While the player didn't reached at the meeting location
+    DO_NOWT
+ ENDWHILE
+ 
+ //  Player arrived at the meeting location
+ 
+	REMOVE_ARROW (arrow1)             //  Remove arrow from the meeting location
+	DISPLAY_BRIEF (1464)              //  "Jumbo, it's me, Elmo. That call was a hoax [...] You'd better kill them - quick!"
+ 
+ 
+ //  Creating assassins cars
+	l_m_1_assassin_1_car = CREATE_GANG_CAR (149.50, 192.50, 2.00) 2 0 VTYPE END
+	l_m_1_assassin_2_car = CREATE_GANG_CAR (168.50, 212.50, 2.00) 2 0 VTYPE END
+	l_m_1_assassin_3_car = CREATE_GANG_CAR (126.50, 213.50, 2.00) 2 0 VTYPE END
+ 
+ //  Creating the assassins
+	l_m_1_assassin_1_char = CREATE_CHAR_INSIDE_CAR (l_m_1_assassin_1_car) 8 CRIMINAL END
+	l_m_1_assassin_2_char = CREATE_CHAR_INSIDE_CAR (l_m_1_assassin_2_car) 8 CRIMINAL END
+	l_m_1_assassin_3_char = CREATE_CHAR_INSIDE_CAR (l_m_1_assassin_3_car) 8 CRIMINAL END
+ 
+ //  Set their favourite model should they lose their cars
+	SET_FAVOURITE_MODEL (l_m_1_assassin_1_char, VTYPE)
+	SET_FAVOURITE_MODEL (l_m_1_assassin_2_char, VTYPE)
+	SET_FAVOURITE_MODEL (l_m_1_assassin_3_char, VTYPE)
+ 
+ //  Set how the assassins will search threats
+	SET_CHAR_THREAT_SEARCH (l_m_1_assassin_1_char, AREA)
+	SET_CHAR_THREAT_SEARCH (l_m_1_assassin_2_char, AREA)
+	SET_CHAR_THREAT_SEARCH (l_m_1_assassin_3_char, AREA)
+ 
+ //  Set them to not flee from the threat
+	SET_CHAR_THREAT_REACTION (l_m_1_assassin_1_char, REACT_AS_NORMAL)
+	SET_CHAR_THREAT_REACTION (l_m_1_assassin_2_char, REACT_AS_NORMAL)
+	SET_CHAR_THREAT_REACTION (l_m_1_assassin_3_char, REACT_AS_NORMAL)
+ 
+ //  Give weapons to them
+	GIVE_WEAPON (l_m_1_assassin_1_char, MACHINE_GUN)
+	GIVE_WEAPON (l_m_1_assassin_2_char, MACHINE_GUN)
+	GIVE_WEAPON (l_m_1_assassin_3_char, PISTOL)
+ 
+ //  Set their objectives to kill the player
+	SET_CHAR_OBJECTIVE (l_m_1_assassin_1_char, KILL_CHAR_ANY_MEANS, p1)
+	SET_CHAR_OBJECTIVE (l_m_1_assassin_2_char, KILL_CHAR_ANY_MEANS, p1)
+	SET_CHAR_OBJECTIVE (l_m_1_assassin_3_char, KILL_CHAR_ANY_MEANS, p1)
+ 
+ //  Add them to the zaibatsu gang
+	ADD_CHAR_TO_GANG (l_m_1_assassin_1_char, zaibatsugang)
+	ADD_CHAR_TO_GANG (l_m_1_assassin_2_char, zaibatsugang)
+	ADD_CHAR_TO_GANG (l_m_1_assassin_3_char, zaibatsugang)
+ 
+ WHILE_EXEC ( NOT ( l_m_1_assassins_died = 3 ) )           //  While the number of assassins dead isn't three
+    
+    IF ( ( l_m_1_ass_1_died = 0 ) AND ( HAS_CHARACTER_DIED(l_m_1_assassin_1_char) ) )      //  Assassin 1 died
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1466)          //  "Nicely done, Jumbo! You NAILED his bitch ass."
+	      ++l_m_1_assassins_died                         //  Count +1 assassin dead
+	      ADD_SCORE (p1, 500)               //  A little reward
+	      REMOVE_ARROW (arrow2)             //  Remove arrow from him
+	      SET l_m_1_ass_1_died = 1                   //  Lock this IF
+    ENDIF
+    
+    IF ( ( l_m_1_ass_2_died = 0 ) AND ( HAS_CHARACTER_DIED(l_m_1_assassin_2_char) ) )      //  Assassin 2 died
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1466)          //  "Nicely done, Jumbo! You NAILED his bitch ass."
+	      ++l_m_1_assassins_died                         //  Count +1 assassin dead
+	      ADD_SCORE (p1, 500)               //  A little reward
+	      REMOVE_ARROW (arrow3)             //  Remove arrow from him
+	      SET l_m_1_ass_2_died = 1                   //  Lock this IF
+    ENDIF
+    
+    IF ( ( l_m_1_ass_3_died = 0 ) AND ( HAS_CHARACTER_DIED(l_m_1_assassin_3_char) ) )      //  Assassin 3 died
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1466)          //  "Nicely done, Jumbo! You NAILED his bitch ass."
+	      ++l_m_1_assassins_died                         //  Count +1 assassin dead
+	      ADD_SCORE (p1, 500)               //  A little reward
+	      REMOVE_ARROW (arrow4)             //  Remove arrow from him
+	      SET l_m_1_ass_3_died = 1                   //  Lock this IF
+    ENDIF
+    
+    
+    
+    IF ( ( l_m_1_ass_1_died = 0 ) AND ( IS_ITEM_ONSCREEN(l_m_1_assassin_1_char) ) )      //  If assassin 1 is alive and on player screen
+    
+       POINT_ARROW_AT (arrow2, l_m_1_assassin_1_char)                           //  Point arrow at him
+	      SET l_m_1_ass_1_on_screen = 1                                         //  Assassin 1 is on screen
+       
+       IF ( IS_CHARACTER_IN_ANY_CAR(p1) )                      //  If the player is in a car
+          SET_CHAR_MAX_DRIVESPEED (l_m_1_assassin_1_char, 0.40)                 //  Tell the assassin to accelerate
+       ELSE
+          SET_CHAR_MAX_DRIVESPEED (l_m_1_assassin_1_char, 0.00)                 //  or make him kill the player on foot?
+       ENDIF
+       
+    ENDIF
+    
+    
+    IF ( ( l_m_1_ass_2_died = 0 ) AND ( IS_ITEM_ONSCREEN(l_m_1_assassin_2_char) ) )      //  If assassin 2 is alive and on player screen
+    
+       POINT_ARROW_AT (arrow3, l_m_1_assassin_2_char)                           //  Point arrow at him
+	      SET l_m_1_ass_2_on_screen = 1                                         //  Assassin 2 is on screen
+       
+       IF ( IS_CHARACTER_IN_ANY_CAR(p1) )                      //  If the player is in a car
+          SET_CHAR_MAX_DRIVESPEED (l_m_1_assassin_2_char, 0.40)                 //  Tell the assassin to accelerate
+       ELSE
+          SET_CHAR_MAX_DRIVESPEED (l_m_1_assassin_2_char, 0.00)                 //  or make him kill the player on foot?
+       ENDIF
+       
+    ENDIF
+    
+    
+    IF ( ( l_m_1_ass_3_died = 0 ) AND ( IS_ITEM_ONSCREEN(l_m_1_assassin_3_char) ) )      //  If assassin 3 is alive and on player screen
+    
+       POINT_ARROW_AT (arrow4, l_m_1_assassin_3_char)                           //  Point arrow at him
+	      SET l_m_1_ass_3_on_screen = 1                                         //  Assassin 3 is on screen
+       
+       IF ( IS_CHARACTER_IN_ANY_CAR(p1) )                      //  If the player is in a car
+          SET_CHAR_MAX_DRIVESPEED (l_m_1_assassin_3_char, 0.40)                 //  Tell the assassin to accelerate
+       ELSE
+          SET_CHAR_MAX_DRIVESPEED (l_m_1_assassin_3_char, 0.00)                 //  or make him kill the player on foot?
+       ENDIF
+       
+    ENDIF
+    
+    
+    IF ( ( NOT ( IS_ITEM_ONSCREEN(l_m_1_assassin_1_char) ) ) AND ( l_m_1_ass_1_on_screen = 1 ) )    //  If the asssassin 1 isn't on player screen and he has an arrow
+       REMOVE_ARROW (arrow2)                                         //  Remove their arrow
+	      SET l_m_1_ass_1_on_screen = 0                                               //  He isn't on the player screen
+    ENDIF
+    
+    IF ( ( NOT ( IS_ITEM_ONSCREEN(l_m_1_assassin_2_char) ) ) AND ( l_m_1_ass_2_on_screen = 1 ) )    //  If the asssassin 2 isn't on player screen and he has an arrow
+       REMOVE_ARROW (arrow3)                                         //  Remove their arrow
+	      SET l_m_1_ass_2_on_screen = 0                                               //  He isn't on the player screen
+    ENDIF
+    
+    IF ( ( NOT ( IS_ITEM_ONSCREEN(l_m_1_assassin_3_char) ) ) AND ( l_m_1_ass_3_on_screen = 1 ) )    //  If the asssassin 3 isn't on player screen and he has an arrow
+       REMOVE_ARROW (arrow4)                                         //  Remove their arrow
+	      SET l_m_1_ass_3_on_screen = 0                                               //  He isn't on the player screen
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  Player killed all the assassins
+ 
+ IF ( flag_failed_mission = 0 )                    //  If the player didn't failed this mission ( flag_failed_mission is always 0 in this mission )
+ 
+    CLEAR_ALL_BRIEFS ()
+	   DISPLAY_BRIEF_NOW (1467)                  //  "Maybe you ain't so crazy, Jumbo, 'cos those hitmen are all history. Here's $40,000."
+	   DISPLAY_MESSAGE (1124)                    //  JOB COMPLETE!
+	   ADD_SCORE (p1, 40000)
+	   ADD_MULTIPLIER (p1, 1)
+	   CLEAR_WANTED_LEVEL (p1)
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (looniegang, p1, 1)    //  RESPECT +
+    
+	   SET flag_passed_loon_med_phone1_m1 = 1                       //  The player passed this mission
+    
+    IF ( ( flag_passed_loon_med_phone1_m1 = 1 ) AND ( flag_passed_loon_med_phone1_2_m3 = 1 ) )       //  If the player passed this mission and Loonies Medium Mission 3
+       SET_PHONE_DEAD (ph_loon_med_phone1)                                //  Kill the Medium Phone 1
+	      SET flag_kill_loon_med_phone1 = 1                                  //  Store that kill
+    ENDIF
+    
+ ENDIF
+ 
+RETURN
+
+
+
+clean_up_loon_med_phone1_m1:               //  Clean up
+
+ // Removing any arrow
+	REMOVE_ARROW (arrow1)
+	REMOVE_ARROW (arrow2)
+	REMOVE_ARROW (arrow3)
+	REMOVE_ARROW (arrow4)
+ 
+	SET flag_failed_mission = 0           //  Reset "failed_mission" flag
+ 
+	CLEAR_WANTED_LEVEL (p1)
+ 
+ IF ( l_m_1_ass_1_died = 0 )                 //  If the assassin 1 is alive (probably the player failed the mission)
+    MAKE_CHAR_DO_NOTHING (l_m_1_assassin_1_char)
+ ENDIF
+ 
+ IF ( l_m_1_ass_1_died = 0 )                 //  If the assassin 2 is alive (probably the player failed the mission)
+    MAKE_CHAR_DO_NOTHING (l_m_1_assassin_2_char)
+ ENDIF
+ 
+ IF ( l_m_1_ass_1_died = 0 )                 //  If the assassin 3 is alive (probably the player failed the mission)
+    MAKE_CHAR_DO_NOTHING (l_m_1_assassin_3_char)
+ ENDIF
+ 
+	MISSION_HAS_FINISHED ()
+ 
+ IF ( flag_passed_loon_med_phone1_m1 = 1 )             //  If the player passed this mission
+	   ++flag_all_missions_passed                  //  Count +1 mission passed
+	   ++flag_loon_missions_passed                  //  Count +1 loonies mission passed
+	ENDIF
+ 
+ IF ( ( flag_failed_loon_med_phone1_m1 = 1 ) OR ( CHECK_DEATHARREST_EXECUTED() ) )    //  If the player failed the mission  (There is no way to the player fail this mission but getting killed or arrested, so flag_failed_loon_med_phone1_m1 is useless here)
+	   ++flag_loon_missions_failed                  //  Count +1 loonies mission failed
+    ++flag_all_missions_failed                  //  Count +1 mission failed
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (looniegang, p1, -1)     //  Lose respect
+	   CLEAR_WANTED_LEVEL (p1)
+	ENDIF
+ 
+	SET flag_on_mission = 0              // Player isn't playing a mission anymore
+	SET flag_on_loon_mission = 0              // Player isn't playing a loonies mission anymore
+ 
+RETURN
+
+MISSIONSTART
+GOSUB loon_med_phone1_m1:
+GOSUB clean_up_loon_med_phone1_m1:
+MISSIONEND

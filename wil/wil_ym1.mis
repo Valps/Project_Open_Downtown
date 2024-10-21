@@ -1,0 +1,833 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX HAPPY GAS SMASH! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_ym1.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD yaku_med_phone1_m1:
+//FORWARD clean_up_yaku_med_phone1_m1:
+
+CAR_DATA y_m_1_loony_car
+CAR_DATA y_m_1_loony_van
+CAR_DATA y_m_1_ice_cream_van
+
+CHAR_DATA y_m_1_loonie_1_char
+CHAR_DATA y_m_1_loonie_2_char
+
+COUNTER y_m_1_right_place_exp = 0
+COUNTER y_m_1_player_fit_conditions = 0
+COUNTER y_m_1_player_out_horn_zone = 0
+COUNTER y_m_1_player_out_of_car = 1
+COUNTER y_m_1_player_out2_horn_zone = 0
+
+yaku_med_phone1_m1:
+
+	SET flag_on_mission = 1                                  //  Player is playing a mission
+	SET flag_on_yaku_mission = 1                                  //  Player is playing a yakuza mission
+	SET flag_failed_yaku_med_phone1_m1 = 0                              //  flag_failed_yaku_med_phone1_m1
+ 
+	SET_DEATHARREST_STATE (p1, OFF)                 //  Handle deaths and arrests manually
+ 
+	DISPLAY_MESSAGE (1977)                          //  "Hi, Kosai, it's Johnny Zoo. The Loonies still owe me money for merchandise [...]"
+	DISPLAY_BRIEF (1281)                            //  HAPPY GAS SMASH!
+ 
+	POINT_ARROW_AT (arrow1, 41.50, 91.50, 2.00)
+ 
+	y_m_1_loony_car = CREATE_GANG_CAR (40.50, 93.50, 2.00) 2 180 ISETTA END
+	y_m_1_loony_van = CREATE_CAR (42.50, 93.50, 2.00) 2 180 VAN END
+ 
+	CHANGE_CAR_LOCK (y_m_1_loony_car, LOCKOUT_PLAYER)
+	CHANGE_CAR_LOCK (y_m_1_loony_van, LOCKOUT_PLAYER)
+ 
+	y_m_1_loonie_1_char = CREATE_CHAR (43.50, 93.50, 2.00) 11 0 CRIMINAL END
+	y_m_1_loonie_2_char = CREATE_CHAR_INSIDE_CAR (y_m_1_loony_car) 11 CRIMINAL END
+ 
+	GIVE_WEAPON (y_m_1_loonie_1_char, MOLOTOV)
+	SET_CHAR_THREAT_REACTION (y_m_1_loonie_1_char, NO_REACTION)
+	SET_CHAR_THREAT_SEARCH (y_m_1_loonie_1_char, NO_THREATS)
+	ADD_GROUP_TO_CHARACTER (y_m_1_loonie_1_char, 3)
+ 
+	ADD_CHAR_TO_GANG (y_m_1_loonie_1_char, looniegang)
+	ADD_CHAR_TO_GANG (y_m_1_loonie_2_char, looniegang)
+ 
+	SET_CHAR_THREAT_SEARCH (y_m_1_loonie_2_char, NO_THREATS)
+	SET_CHAR_THREAT_REACTION (y_m_1_loonie_2_char, NO_REACTION)
+ 
+	SET_CHAR_OBJECTIVE (y_m_1_loonie_2_char, WAIT_IN_CAR)
+	SET_CHAR_OBJECTIVE (y_m_1_loonie_1_char, ENTER_CAR_AS_PASSENGER, y_m_1_loony_van)
+ 
+	SET_CAR_NO_COLLIDE (y_m_1_loony_car)
+	SET_CAR_NO_COLLIDE (y_m_1_loony_van)
+ 
+ WHILE ( NOT ( IS_CHAR_OBJECTIVE_PASSED(y_m_1_loonie_1_char) ) )
+    DO_NOWT
+ ENDWHILE
+ 
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 41.50, 91.50, 2.00, 3.00, 1.00) ) )        //  While player not reached the meeting location
+ 
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (7095)                   //  "You lack discipline, Kosai. The Yakuza do not get caught!"
+	      DISPLAY_MESSAGE (1125)
+	      SET flag_failed_mission = 1
+	      SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7092)                   //  "Your behaviour deserves the honour of a goat, Kosai!"
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(y_m_1_loony_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1309)                       //  "You will find it difficult to do business now that he is dead, Kosai."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(y_m_1_loony_van) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1309)                       //  "You will find it difficult to do business now that he is dead, Kosai."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+
+ REMOVE_ARROW (arrow1)           //  Remove arrow
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF (1283)            //  "Sound your horn, Kosai, the Loonies are expecting you."
+ 
+ WHILE_EXEC ( ( NOT ( IS_CHAR_PRESSING_HORN(p1) ) ) OR ( y_m_1_player_fit_conditions = 0 ) )         //                                 
+ 
+    IF ( ( IS_CHARACTER_IN_ANY_CAR(p1) ) AND ( LOCATE_CHARACTER_BY_CAR(p1, 41.50, 91.50, 2.00, 3.00, 1.00) ) )
+       SET y_m_1_player_fit_conditions = 1
+    ELSE
+       SET y_m_1_player_fit_conditions = 0
+    ENDIF
+    
+    IF ( ( y_m_1_player_fit_conditions = 0 ) AND ( IS_CHARACTER_IN_ANY_CAR(p1) ) )             // If the player has a car, but he isn't at the meeting point
+    
+       // Player get away from the point, but he stay in the car
+       
+       IF ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 41.50, 91.50, 2.00, 3.00, 1.00) ) )    //  Insure check
+       IF ( y_m_1_player_out2_horn_zone = 0 )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF (7000)                               //  "Get back and do the deal!"
+          POINT_ARROW_AT (arrow1, 41.50, 91.50, 2.00)        //  Point the arrow back to the meeting point
+          SET y_m_1_player_out2_horn_zone = 1                                    //  Lock this IF
+       ENDIF
+       ENDIF
+       
+    ENDIF
+    
+    IF ( ( y_m_1_player_out_of_car = 0 ) AND ( NOT ( IS_CHARACTER_IN_ANY_CAR(p1) ) ) )       //  Player isn't inside a car
+       CLEAR_ALL_BRIEFS ()                                   //  Clear all briefs
+       DISPLAY_BRIEF_NOW (1287)                              //  "Hey, dreamer, get back in the car and sound the horn."
+       SET y_m_1_player_out_of_car = 1                                       //  Lock this IF
+       SET y_m_1_player_out2_horn_zone = 0                                       //  Unlock the previous IF
+    ELSE
+       IF ( IS_CHARACTER_IN_ANY_CAR(p1) )
+          SET y_m_1_player_out_of_car = 0                                    //  Unlock this IF
+       ENDIF
+    ENDIF
+    
+    IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 41.50, 91.50, 2.00, 3.00, 1.00) ) AND ( IS_CHARACTER_IN_ANY_CAR(p1) ) )
+       //  Player returned to the meeting point
+       IF ( y_m_1_player_out2_horn_zone = 1 )
+          REMOVE_ARROW (arrow1)                  
+          SET y_m_1_player_out2_horn_zone = 0                                       //  Lock this IF
+       ENDIF
+    ENDIF
+    
+    //  Checking...
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1306)                 //  "I do not tolerate your close contact with the Cops, Kosai. In future keep your distance."
+	      DISPLAY_MESSAGE (1125)
+	      SET flag_failed_mission = 1
+	      SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7092)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(y_m_1_loony_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1309)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(y_m_1_loony_van) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1309)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  Check the loonies status
+    
+    IF ( HAS_CHARACTER_DIED(y_m_1_loonie_2_char) )
+       DISPLAY_BRIEF_NOW (1284)       //  "We can't deal with dead Loonies, Kosai. Consider this job terminated."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  Player stayed at the marked point and pressed horn
+
+ SET_CHAR_OBJECTIVE (y_m_1_loonie_2_char, LEAVE_CAR, y_m_1_loony_car)
+ SET_CHAR_THREAT_REACTION (y_m_1_loonie_2_char, NO_REACTION)
+ 
+ WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(y_m_1_loonie_2_char) ) )
+ 
+    //  Checking...
+    
+    IF ( HAS_CHARACTER_DIED(y_m_1_loonie_2_char) )   //   Loony died
+       DISPLAY_BRIEF_NOW (1284)       //  "We can't deal with dead Loonies, Kosai. Consider this job terminated."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1306)                 //  "I do not tolerate your close contact with the Cops, Kosai. In future keep your distance."
+	      DISPLAY_MESSAGE (1125)
+	      SET flag_failed_mission = 1
+	      SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7092)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(y_m_1_loony_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1309)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 41.50, 91.50, 2.00, 3.00, 1.00) ) )
+       //  Player get out of the meeting location
+       IF ( y_m_1_player_out_horn_zone = 0 )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF (7001)                            //  "Stop fooling around and meet those Loonies!"
+          POINT_ARROW_AT (arrow1, 41.50, 91.50, 2.00)     //  Point arrow to the meeting location
+          SET y_m_1_player_out_horn_zone = 1                                 //  Lock this IF
+       ENDIF
+    ENDIF
+    
+    IF ( ( y_m_1_player_out_horn_zone = 1 ) AND ( LOCATE_CHARACTER_BY_CAR(p1, 41.50, 91.50, 2.00, 3.00, 1.00) ) )
+       //  Player returned to the meeting location
+       REMOVE_ARROW (arrow1)                              //  Remove arrow
+       SET y_m_1_player_out_horn_zone = 0                                    //  Unlock the previous IF
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(y_m_1_loony_van) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1309)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(p1) )
+       DISPLAY_BRIEF_NOW (1305)   //  "Your foolishness has cost me dear, Kosai. I leave you to play with the Loonies."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  Loonie 1 get out of the car
+
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF_SOON (1285)                    //  "We ain't payin'! Die, Yakuza delivery boy!"
+ 
+ SET_CHAR_OBJECTIVE (y_m_1_loonie_1_char, LEAVE_CAR, y_m_1_loony_van)
+ SET_CHAR_THREAT_REACTION (y_m_1_loonie_1_char, REACT_AS_NORMAL)
+ 
+ WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(y_m_1_loonie_1_char) ) )
+ 
+    IF ( HAS_CHARACTER_DIED(y_m_1_loonie_1_char) )           //  Loony died
+       DISPLAY_BRIEF_NOW (1284)               //  "We can't deal with dead Loonies, Kosai. Consider this job terminated."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( ( y_m_1_player_out_horn_zone = 0 ) AND ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 41.50, 91.50, 2.00, 3.00, 1.00) ) ) )
+       //  Player get out of the meeting location
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (7001)                              //  "Stop fooling around and meet those Loonies!"
+       POINT_ARROW_AT (arrow1, 41.50, 91.50, 2.00)       //  Point arrow to the meeting location
+       SET y_m_1_player_out_horn_zone = 1                                   //  Lock this IF
+    ENDIF
+    
+    IF ( ( y_m_1_player_out_horn_zone = 1 ) AND ( LOCATE_CHARACTER_BY_CAR(p1, 41.50, 91.50, 2.00, 3.00, 1.00) ) )
+       //  Player returned to the meeting
+       REMOVE_ARROW (arrow1)
+       SET y_m_1_player_out_horn_zone = 0
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7095)          //  "You lack discipline, Kosai. The Yakuza do not get caught!"
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7092)             //  "Your behaviour deserves the honour of a goat, Kosai!"
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(y_m_1_loony_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1309)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(y_m_1_loony_van) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1309)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  Loonie 2 get out of the car
+
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF_NOW (1286)                                       //  "Kill the crazies, Kosai!"
+ POINT_ARROW_AT (arrow1, y_m_1_loonie_1_char)                                  //  Point arrow at Loonie 1
+ ADD_EXISTING_CHAR_TO_GROUP (y_m_1_loonie_1_char, y_m_1_loonie_2_char)                        //  Add Loonie 2 to the Loonie 1 group
+ SET_CHAR_THREAT_SEARCH (y_m_1_loonie_1_char, LINE_OF_SIGHT_PLAYER_ONLY)       //  Player is now a threat
+ SET_CHAR_THREAT_REACTION (y_m_1_loonie_1_char, REACT_AS_NORMAL)               //  Do not flee from the threat
+ SET_CHAR_OBJECTIVE (y_m_1_loonie_1_char, KILL_CHAR_ON_FOOT, p1)               //  Go kill the player
+ 
+ WHILE_EXEC ( CHECK_NUMBER_ALIVE_IN_GROUP(y_m_1_loonie_1_char, 1) )          //  While at least 1 loonie is alive
+ 
+    // (OBSERVATION: killing the leader transfer their ID to another member of the group, so the last member alive will be the CHAR y_m_1_loonie_1_char )
+ 
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7095)                          //  "You lack discipline, Kosai. The Yakuza do not get caught!"
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7092)                          //  "Your behaviour deserves the honour of a goat, Kosai!"
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ WHILE_EXEC ( NOT ( HAS_CHARACTER_DIED(y_m_1_loonie_1_char) ) )              //  While the last loonie is alive
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7095)                          //  "You lack discipline, Kosai. The Yakuza do not get caught!"
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7092)                          //  "Your behaviour deserves the honour of a goat, Kosai!"
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+
+ //  All loonies died
+
+ REMOVE_ARROW (arrow1)                     //  Remove arrow
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF_SOON (1289)                 //  "The Loonies are crazy for Mary Jane's Ice Cream. Get an Ice-Cream Van so you [...]"
+ SET_RECYCLE_MODEL_WANTED (ICECREAM)       //  PSX command to insure that the ICECREAM car will be spawned on the streets
+ 
+ WHILE_EXEC ( NOT ( IS_CHARACTER_IN_MODEL(p1, ICECREAM) ) )       //  While the player didn't get a Ice Cream Truck
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7095)                          //  "You lack discipline, Kosai. The Yakuza do not get caught!"
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7092)                          //  "Your behaviour deserves the honour of a goat, Kosai!"
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  The player managed to get a Ice Cream Truck
+ 
+ STORE_CAR_CHARACTER_IS_IN (p1, y_m_1_ice_cream_van)
+ SET_RECYCLE_MODEL_WANTED (NONE)                         //  Reset the PSX command
+ 
+ // Check if the player has money enough to buy a bomb
+ 
+ IF ( NOT ( CHECK_SCORE_GREATER(p1, 4999) ) )            //  Player didn't has money to buy a bomb
+ 
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF (1290)                                 //  "You need $5,000 to rig the Ice-Cream Van with explosives."
+    DISPLAY_BRIEF (1291)                                 //  "You need more dollars to rig the Van. Might I humbly suggest a killing spree?"
+    
+    WHILE_EXEC ( NOT ( CHECK_SCORE_GREATER(p1, 4999) ) )      //  While the player didn't get enough money yet
+       
+       IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (7095)                       //  "You lack discipline, Kosai. The Yakuza do not get caught!"
+          DISPLAY_MESSAGE (1125)
+          SET flag_failed_mission = 1
+          SET flag_failed_yaku_med_phone1_m1 = 1
+          RETURN
+       ENDIF
+       
+       IF ( HAS_CHARACTER_DIED(p1) )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (7092)                       //  "Your behaviour deserves the honour of a goat, Kosai!"
+          DISPLAY_MESSAGE (1125)
+          SET flag_failed_mission = 1
+          SET flag_failed_yaku_med_phone1_m1 = 1
+          RETURN
+       ENDIF
+       
+       IF ( IS_CAR_WRECKED(y_m_1_ice_cream_van) )                     //  Ice Cream Van has been destroyed
+          DISPLAY_BRIEF_NOW (1292)                       //  "You wasted the Ice-Cream Van and my time. The job's off, Kosai."
+          DISPLAY_MESSAGE (1125)
+          SET flag_failed_mission = 1
+          SET flag_failed_yaku_med_phone1_m1 = 1
+          RETURN
+       ENDIF
+       
+    ENDWHILE
+    
+    //  Player finally get money enough to buy a bomb
+    
+    DISPLAY_BRIEF_NOW (1293)                        //  "Good, you have enough dollars to arm the Ice-Cream Van. Get to it!"
+    
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, y_m_1_ice_cream_van) ) )
+       POINT_ARROW_AT (arrow1, y_m_1_ice_cream_van)              //  Point arrow to the Ice Cream Truck
+    ELSE
+       POINT_ARROW_AT (arrow1, 84.50, 160.50, 2.00)
+    ENDIF
+ 
+ ELSE                 //  Player had the money beforehand
+    
+    DISPLAY_BRIEF_NOW (1293)                        //  "Good, you have enough dollars to arm the Ice-Cream Van. Get to it!"
+    POINT_ARROW_AT (arrow1, 84.50, 160.50, 2.00)
+    
+ ENDIF
+ 
+ 
+ // Player has money enough to buy a bomb
+ 
+ 
+ WHILE ( NOT ( HAS_CAR_GOT_WEAPON(y_m_1_ice_cream_van, CAR_BOMB) ) )     //  While the Ice Cream Truck hasn't rigged with the bomb
+ 
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, y_m_1_ice_cream_van) ) )          //  Player get out of the Ice Cream Truck
+    
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1299)                             //  "Get back in the Ice-Cream Van before my patience melts, Kosai."
+       POINT_ARROW_AT (arrow1, y_m_1_ice_cream_van)
+       
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, y_m_1_ice_cream_van) ) )    //  While Player didn't get back to the Ice Cream Van
+       
+          //  Checking again...
+          
+          IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (7095)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_yaku_med_phone1_m1 = 1
+             RETURN
+          ENDIF
+          
+          IF ( HAS_CHARACTER_DIED(p1) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (7092)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_yaku_med_phone1_m1 = 1
+             RETURN
+          ENDIF
+          
+          IF ( IS_CAR_WRECKED(y_m_1_ice_cream_van) )
+             DISPLAY_BRIEF_NOW (1292)               //  "You wasted the Ice-Cream Van and my time. The job's off, Kosai."
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_yaku_med_phone1_m1 = 1
+             RETURN
+          ENDIF
+          
+       ENDWHILE
+       
+       //  Player returned to the Ice Cream Van
+       
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1293)                          //  "Good, you have enough dollars to arm the Ice-Cream Van. Get to it!"
+       POINT_ARROW_AT (arrow1, 84.50, 160.50, 2.00)      //  Point at the Red Army Surplus
+       
+    ENDIF
+    
+    EXEC
+    
+    // Checking...
+    
+    IF ( IS_CAR_WRECKED(y_m_1_ice_cream_van) )
+       DISPLAY_BRIEF_NOW (1292)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       ENDEXEC
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7095)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       ENDEXEC
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7092)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       ENDEXEC
+       RETURN
+    ENDIF
+    
+    ENDEXEC
+    
+ ENDWHILE
+
+ //  Player armed the bomb
+
+ REMOVE_ARROW (arrow1)                                   //  Remove arrow
+ DISPLAY_BRIEF_NOW (1298)                                //  "Drive the Ice-Cream Van to the Loony Asylum. Once you get inside destroy their Happy Gas tanks."
+ POINT_ARROW_AT (arrow1, 59.50, 9.50, 2.00)              //  Point arrow to the Loony Asylum
+ 
+ WHILE ( NOT ( IS_CAR_IN_BLOCK(y_m_1_ice_cream_van, 59.50, 9.50, 2.00) ) )         //  While the player didn't parked the Ice Cream Van at the Loony Asylum
+    
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, y_m_1_ice_cream_van) ) )       //  Player get out of the Ice-Cream Van
+    
+       DISPLAY_BRIEF_NOW (1299)                          //  "Get back in the Ice-Cream Van before my patience melts, Kosai."
+       POINT_ARROW_AT (arrow1, y_m_1_ice_cream_van)                   //  Point arrow to the Ice-Cream Van
+       
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, y_m_1_ice_cream_van) ) ) //  While player didn't enter the Ice-Cream Van
+       
+          //  Checking...
+          
+          IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (7095)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_yaku_med_phone1_m1 = 1
+             RETURN
+          ENDIF
+          
+          IF ( HAS_CHARACTER_DIED(p1) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (7092)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_yaku_med_phone1_m1 = 1
+             RETURN
+          ENDIF
+          
+          IF ( IS_CAR_WRECKED(y_m_1_ice_cream_van) )
+             DISPLAY_BRIEF_NOW (1300)               //  "No more Mary Jane for you, Kosai. I refuse to work with amateurs."
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_yaku_med_phone1_m1 = 1
+             RETURN
+          ENDIF
+          
+       ENDWHILE
+       
+       //  Player returned to the Ice-Cream Van
+       
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1304)                      //  "Clearly you are too weak to complete even the simplest of tasks, Kosai. A pity."
+       POINT_ARROW_AT (arrow1, 59.50, 9.50, 2.00)    //  Point at the Loony Asylum
+       
+    ENDIF
+    
+    EXEC
+    
+    // Checking...
+    
+    IF ( IS_CAR_WRECKED(y_m_1_ice_cream_van) )
+       DISPLAY_BRIEF_NOW (1300)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       ENDEXEC
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7095)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       ENDEXEC
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7092)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       ENDEXEC
+       RETURN
+    ENDIF
+    
+    ENDEXEC
+    
+ ENDWHILE
+ 
+ //  Player arrived at the Loony Asylum
+
+ REMOVE_ARROW (arrow1)
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF (1302)
+ 
+ WHILE_EXEC ( NOT ( IS_CAR_WRECKED(y_m_1_ice_cream_van) ) )
+       
+    //  Checking again...
+ 
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7095)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       SET savecount136 = 1              //  ???
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7092)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_m1 = 1
+       SET savecount136 = 1              //  ???
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ 
+ 
+ //  The Ice-Cream Van has (somehow) been destroyed
+ 
+ //  yes, as is it coded, the game will not distinguish a van destroyed by a bomb or directly by the player, such as using Rocket Launcher
+ 
+ //  You can test it in the original wil.SCR
+ 
+ //  There is a easy way to fix it using the command HAS_CAR_GOT_WEAPON(y_m_1_ice_cream_van, CAR_BOMB) , but I will preserve the original behaviour.
+ 
+ 
+ 
+ IF ( NOT ( IS_CAR_IN_BLOCK(y_m_1_ice_cream_van, 59.50, 9.50, 2.00, 1.00, 3.00) ) )            //  Ice-Cream Van didn't exploded at the correct place
+    DISPLAY_BRIEF_NOW (1304)                                                      //  "Clearly you are too weak to complete even the simplest of tasks, Kosai. A pity."
+    DISPLAY_MESSAGE (1125)
+    SET flag_failed_mission = 1
+    SET flag_failed_yaku_med_phone1_m1 = 1
+    SET y_m_1_right_place_exp = 1                                                               //  "Exploded at correct place" flag
+    RETURN
+ ENDIF
+ 
+ IF ( y_m_1_right_place_exp = 0 )                                                               //  Ice-Cream Van exploded correctly
+ 
+    EXPLODE_LARGE (59.50, 7.50, 3.00)                                             //  Create another great explosion
+    EXPLODE_LARGE (59.50, 6.50, 3.00)                                             //  Explode it again
+    
+    DELETE_ITEM (sound14)                                                         //  Delete the INDUSTRIAL_LOW sound
+    
+    //  Destroy building blocks
+    
+    REMOVE_BLOCK (58, 6, 2, DONT_DROP)
+    REMOVE_BLOCK (59, 6, 2, DONT_DROP)
+    REMOVE_BLOCK (60, 6, 2, DONT_DROP)
+    REMOVE_BLOCK (58, 7, 2, DONT_DROP)
+    REMOVE_BLOCK (59, 7, 2, DONT_DROP)
+    REMOVE_BLOCK (60, 7, 2, DONT_DROP)
+    REMOVE_BLOCK (58, 8, 2, DONT_DROP)
+    REMOVE_BLOCK (59, 8, 2, DONT_DROP)
+    REMOVE_BLOCK (60, 8, 2, DONT_DROP)
+    REMOVE_BLOCK (61, 7, 2, DONT_DROP)
+    REMOVE_BLOCK (57, 7, 2, DONT_DROP)
+    
+    //  Change the ground tiles
+    
+    CHANGE_BLOCK LID (59, 7, 1) NOT_FLAT NOT_FLIP 0 0 474
+    CHANGE_BLOCK LID (59, 8, 1) NOT_FLAT NOT_FLIP 0 180 476
+    CHANGE_BLOCK LID (58, 8, 1) NOT_FLAT NOT_FLIP 0 270 475
+    CHANGE_BLOCK LID (58, 7, 1) NOT_FLAT NOT_FLIP 0 270 476
+    CHANGE_BLOCK LID (58, 6, 1) NOT_FLAT NOT_FLIP 0 0 475
+    CHANGE_BLOCK LID (59, 6, 1) NOT_FLAT NOT_FLIP 0 0 476
+    CHANGE_BLOCK LID (60, 6, 1) NOT_FLAT NOT_FLIP 0 90 475
+    CHANGE_BLOCK LID (60, 7, 1) NOT_FLAT NOT_FLIP 0 90 476
+    CHANGE_BLOCK LID (60, 8, 1) NOT_FLAT NOT_FLIP 0 180 475
+    
+    //  Change the ground type
+    
+    CHANGE_BLOCK TYPE (59, 7, 1) FIELD 0
+    CHANGE_BLOCK TYPE (59, 8, 1) FIELD 0
+    CHANGE_BLOCK TYPE (58, 8, 1) FIELD 0
+    CHANGE_BLOCK TYPE (58, 7, 1) FIELD 0
+    CHANGE_BLOCK TYPE (58, 6, 1) FIELD 0
+    CHANGE_BLOCK TYPE (59, 6, 1) FIELD 0
+    CHANGE_BLOCK TYPE (60, 6, 1) FIELD 0
+    CHANGE_BLOCK TYPE (60, 7, 1) FIELD 0
+    CHANGE_BLOCK TYPE (60, 8, 1) FIELD 0
+    
+ ENDIF
+
+ 
+ IF ( flag_failed_mission = 0 )         //  If the player didn't failed the mission
+ 
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF (1303)                   //  "Super-fantastic, Kosai! The Loonies are lost without their Happy Gas. Have $40,000 for your hard work."
+    DISPLAY_MESSAGE (1124)                 //  JOB COMPLETE!
+    ADD_SCORE (p1, 40000)
+    ADD_MULTIPLIER (p1, 1)
+    CLEAR_WANTED_LEVEL (p1)
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (yakuzagang, p1, 1)
+    
+    SET flag_passed_yaku_med_phone1_m1 = 1                    //  Player passed the Yakuza Medium Phone 1 Mission 1
+    
+    IF ( flag_passed_yaku_med_phone1_m1 = 1 )                 //  If the player passed the Yakuza Medium Phone 1 Mission 1
+       IF (flag_passed_yaku_med_phone1_2_m3 = 1 )               //  If the player has already finished Yakuza Medium Phone 2 Mission 3
+	         SET_PHONE_DEAD (ph_yaku_med_phone1)           //  Kill the phone
+          SET flag_kill_yaku_med_phone1 = 1             //  Store that kill
+       ENDIF
+    ENDIF
+    
+ ENDIF
+
+RETURN                     //  Go to clean up
+
+
+clean_up_yaku_med_phone1_m1:                //  Clean up
+
+	DESTROY_GROUP (y_m_1_loonie_1_char)
+	REMOVE_ARROW (arrow1)
+	SET flag_failed_mission = 0
+	CLEAR_WANTED_LEVEL (p1)
+	SET_DEATHARREST_STATE (p1, ON)
+ 
+	MISSION_HAS_FINISHED ()
+ 
+ IF ( flag_passed_yaku_med_phone1_m1 = 1 )     //  If the player passed the mission
+	   ++flag_all_missions_passed          //  Count +1 mission passed
+	   ++flag_yaku_missions_passed          //  Count +1 yakuza mission passed
+	ENDIF
+ 
+ IF ( flag_failed_yaku_med_phone1_m1 = 1 )      //  If the player failed the mission
+	   ++flag_all_missions_failed          //  Count +1 mission failed
+	   ++flag_yaku_missions_failed          //  Count +1 yakuza mission failed
+	   CLEAR_WANTED_LEVEL (p1)
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (yakuzagang, p1, -1)  //  Losing respect with yakuza
+	ENDIF
+ 
+	SET flag_on_mission = 0             //  Player isn't playing a mission anymore
+	SET flag_on_yaku_mission = 0             //  Player isn't playing a yakuza mission anymore
+ 
+RETURN
+
+MISSIONSTART
+GOSUB yaku_med_phone1_m1:
+GOSUB clean_up_yaku_med_phone1_m1:
+MISSIONEND

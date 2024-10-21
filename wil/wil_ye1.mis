@@ -1,0 +1,453 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Get ZitZaki! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_ye1.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD yaku_easy_phone1_m1:
+//FORWARD clean_up_yaku_easy_phone1_m1:
+
+COUNTER y_e_1_zitzaki_onscreen = 0
+COUNTER y_e_1_player_out_horn_zone = 0
+COUNTER y_e_1_player_fit_conditions = 0
+COUNTER y_e_1_player_out_of_car = 0
+COUNTER y_e_1_player_out2_horn_zone = 0
+
+CHAR_DATA y_e_1_zitzaki_char	
+
+CAR_DATA y_e_1_yakuza_car
+
+yaku_easy_phone1_m1:
+
+   SET flag_on_mission = 1                   //  Player is playing a mission
+	  SET flag_on_yaku_mission = 1                   //  Player is playing a yakuza mission
+   
+	  SET flag_failed_loon_easy_phone1_m1 = 0
+   
+	  DISPLAY_MESSAGE (1975)           //  GET ZITZAKI!
+   
+	  y_e_1_yakuza_car = CREATE_GANG_CAR (74.50, 163.50, 2.00) 15 0 MIURA END
+   
+	  DISPLAY_BRIEF (1631)             //  "Kosai! Johnny Zoo here. The Zaibatsu have discovered our experiments with Doctor ZitZaki [...]"
+   
+	  POINT_ARROW_AT   (arrow1, y_e_1_yakuza_car)
+   
+   //  While the player does not enter the car
+   WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, y_e_1_yakuza_car) ) )
+   
+      IF ( IS_CAR_WRECKED(y_e_1_yakuza_car) )
+         CLEAR_ALL_BRIEFS ()
+	        DISPLAY_BRIEF_NOW (1633)             //  "Young and reckless, Kosai... I should have guessed you would wreck the car."
+	        DISPLAY_MESSAGE (1125)               //  JOB FAILED!
+	        SET flag_failed_mission = 1
+	        SET flag_failed_yaku_easy_phone1_m1 = 1
+         RETURN
+      ENDIF
+      
+      IF ( HAS_CAR_JUST_SUNK(y_e_1_yakuza_car) )
+         CLEAR_ALL_BRIEFS ()
+	        DISPLAY_BRIEF_NOW (1635)             //  "Gone fishing, Kosai? Consider this job over."
+	        DISPLAY_MESSAGE (1125)               //  JOB FAILED!
+	        SET flag_failed_mission = 1
+	        SET flag_failed_yaku_easy_phone1_m1 = 1
+         RETURN
+      ENDIF
+      
+   ENDWHILE
+   
+   //  The player entered the car
+
+   REMOVE_ARROW (arrow1)
+   DISPLAY_BRIEF (1636)    // "Doctor ZitZaki is waiting in the District Hospital. Don't keep him waiting."
+   POINT_ARROW_AT (arrow1, 50.50, 178.50, 2.00)
+   
+   //  While the player does not reach at the Hospital
+   WHILE ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 50.50, 178.50, 2.00, 3.00, 3.00) ) )
+      
+      //  If the player leaves the car
+      IF ( NOT ( IS_CHARACTER_IN_CAR(p1, y_e_1_yakuza_car) ) )
+      
+         CLEAR_ALL_BRIEFS ()
+         DISPLAY_BRIEF_NOW (1640)                //  "ZitZaki is important to us! Get back in the car!"
+         POINT_ARROW_AT (arrow1, y_e_1_yakuza_car)
+         
+         //  While the player does not get back to the car
+         WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, y_e_1_yakuza_car) ) )
+         
+            IF ( IS_CAR_WRECKED(y_e_1_yakuza_car) )
+               CLEAR_ALL_BRIEFS ()
+               DISPLAY_BRIEF_NOW (1633)             //  "Young and reckless, Kosai... I should have guessed you would wreck the car."
+               DISPLAY_MESSAGE (1125)
+               SET flag_failed_mission = 1
+               SET flag_failed_yaku_easy_phone1_m1 = 1
+               RETURN
+            ENDIF
+            
+            IF ( HAS_CAR_JUST_SUNK(y_e_1_yakuza_car) )
+               CLEAR_ALL_BRIEFS ()
+               DISPLAY_BRIEF_NOW (1635)             //  "Gone fishing, Kosai? Consider this job over."
+               DISPLAY_MESSAGE (1125)
+               SET flag_failed_mission = 1
+               SET flag_failed_yaku_easy_phone1_m1 = 1
+               RETURN
+            ENDIF
+            
+         ENDWHILE
+         
+         //  The player returned to the car
+         
+         CLEAR_ALL_BRIEFS ()
+         DISPLAY_BRIEF_NOW (1641) // "Stop this stupidity, Kosai. Doctor ZitZaki is waiting at the District Hospital."
+         POINT_ARROW_AT (arrow1, 50.50, 178.50, 2.00)
+         
+      ENDIF
+      
+      //  Checking...
+      
+      EXEC
+      
+      IF ( IS_CAR_WRECKED(y_e_1_yakuza_car) )
+         CLEAR_ALL_BRIEFS ()
+         DISPLAY_BRIEF_NOW (1633)             //  "Young and reckless, Kosai... I should have guessed you would wreck the car."
+         DISPLAY_MESSAGE (1125)
+         SET flag_failed_mission = 1
+         SET flag_failed_yaku_easy_phone1_m1 = 1
+         ENDEXEC
+         RETURN
+      ENDIF
+      
+      IF ( HAS_CAR_JUST_SUNK(y_e_1_yakuza_car) )
+         CLEAR_ALL_BRIEFS ()
+         DISPLAY_BRIEF_NOW (1635)             //  "Gone fishing, Kosai? Consider this job over."
+         DISPLAY_MESSAGE (1125)
+         SET flag_failed_mission = 1
+         SET flag_failed_yaku_easy_phone1_m1 = 1
+         ENDEXEC
+         RETURN
+      ENDIF
+      
+      ENDEXEC
+      
+   ENDWHILE
+   
+   //  The player arrived at the Hospital
+   
+   REMOVE_ARROW (arrow1)
+   DISPLAY_BRIEF (1638)        //  "Doctor ZitZaki is wary of strangers, Kosai. Sound the horn so he knows it is safe."
+   
+   //  While the player does not press horn on the correct position and using the miara car
+   WHILE_EXEC ( ( NOT ( IS_CHAR_PRESSING_HORN(p1) ) ) OR ( y_e_1_player_fit_conditions = 0 ) )
+      
+      //  Checking if the player fit all conditions to press horn and then call ZitZaki
+      IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 50.50, 178.50, 2.00, 3.00, 1.00) ) AND ( IS_CHARACTER_IN_CAR(p1, y_e_1_yakuza_car) ) )
+         SET y_e_1_player_fit_conditions = 1
+      ELSE
+         SET y_e_1_player_fit_conditions = 0
+      ENDIF
+      
+      // Player get away from the point, but he stay in the car
+      IF ( ( y_e_1_player_fit_conditions = 0 ) AND ( IS_CHARACTER_IN_CAR(p1, y_e_1_yakuza_car) ) )
+         
+         IF ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 50.50, 178.50, 2.00, 3.00, 1.00) ) )      // (Fixing a issue)
+         IF ( y_e_1_player_out2_horn_zone = 0 )
+            CLEAR_ALL_BRIEFS ()
+            DISPLAY_BRIEF (1648)           //  "Kosai! Get back there and sound the horn!"
+            POINT_ARROW_AT (arrow1, 50.50, 178.50, 2.00)
+            SET y_e_1_player_out2_horn_zone = 1                // Lock this IF
+         ENDIF
+         ENDIF
+            
+      ENDIF
+      
+      // Player get out of the car
+      IF ( ( y_e_1_player_out_of_car = 0 ) AND ( NOT ( IS_CHARACTER_IN_CAR(p1, y_e_1_yakuza_car) ) ) )    
+         CLEAR_ALL_BRIEFS ()
+         DISPLAY_BRIEF_NOW (1640)       //  "ZitZaki is important to us! Get back in the car!"
+         POINT_ARROW_AT (arrow1, y_e_1_yakuza_car)
+         SET y_e_1_player_out_of_car = 1                // Lock this IF
+         SET y_e_1_player_out2_horn_zone = 0                // Reset and unlock the previous IF
+      ENDIF
+      
+      // Player entered the car again
+      IF ( ( y_e_1_player_out_of_car = 1 ) AND ( IS_CHARACTER_IN_CAR(p1, y_e_1_yakuza_car) ) )      
+         SET y_e_1_player_out_of_car = 0             // Unlock the previous IF
+      ENDIF
+      
+      //  If the player is on the right place with the correct car, remove the arrow
+      IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 50.50, 178.50, 2.00, 3.00, 1.00) ) AND ( IS_CHARACTER_IN_CAR(p1, y_e_1_yakuza_car) ) )
+         IF ( y_e_1_player_out2_horn_zone = 1 )
+            REMOVE_ARROW (arrow1)        // Player returned to the point
+            SET y_e_1_player_out2_horn_zone = 0
+         ENDIF
+      ENDIF
+      
+      
+      //  Checking...
+      
+      IF ( HAS_CAR_JUST_SUNK(y_e_1_yakuza_car) )
+         CLEAR_ALL_BRIEFS ()
+         DISPLAY_BRIEF_NOW (1635)             //  "Gone fishing, Kosai? Consider this job over."
+         DISPLAY_MESSAGE (1125)
+         SET flag_failed_mission = 1
+         SET flag_failed_yaku_easy_phone1_m1 = 1
+         RETURN
+      ENDIF
+      
+      IF ( IS_CAR_WRECKED(y_e_1_yakuza_car) )
+         CLEAR_ALL_BRIEFS ()
+         DISPLAY_BRIEF_NOW (1633)             //  "Young and reckless, Kosai... I should have guessed you would wreck the car."
+         DISPLAY_MESSAGE (1125)
+         SET flag_failed_mission = 1
+         SET flag_failed_yaku_easy_phone1_m1 = 1
+         RETURN
+      ENDIF
+      
+      
+   ENDWHILE
+   
+   
+   //  Player in car in position and pressed the horn
+   
+   //  Create ZitZaki
+   y_e_1_zitzaki_char	 = CREATE_CHAR (47.50, 178.50, 2.00) 13 90 CRIMINAL END
+   SET_CHAR_THREAT_SEARCH (y_e_1_zitzaki_char	, NO_THREATS)
+   SET_CHAR_THREAT_REACTION (y_e_1_zitzaki_char	, NO_REACTION)
+   ADD_CHAR_TO_GANG (y_e_1_zitzaki_char	, yakuzagang)
+   
+   UPDATE_DOOR_TARGET (door15, y_e_1_zitzaki_char	)      //  Update door to ZitZaki
+   
+   //  Set him to get out of the building
+   SET_CHAR_OBJECTIVE (y_e_1_zitzaki_char	, GOTO_AREA_ON_FOOT, 48.50, 178.50, 2.00)
+   
+   //  While he does not exit the Hospital
+   WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(y_e_1_zitzaki_char	) ) )    //  ZitZaki not reached at the point yet
+   
+      IF ( IS_CAR_WRECKED(y_e_1_yakuza_car) )
+         CLEAR_ALL_BRIEFS ()
+         DISPLAY_BRIEF_NOW (1633)             //  "Young and reckless, Kosai... I should have guessed you would wreck the car."
+         DISPLAY_MESSAGE (1125)
+         SET flag_failed_mission = 1
+         SET flag_failed_yaku_easy_phone1_m1 = 1
+         RETURN
+      ENDIF
+      
+      IF ( HAS_CAR_JUST_SUNK(y_e_1_yakuza_car) )
+         CLEAR_ALL_BRIEFS ()
+         DISPLAY_BRIEF_NOW (1635)             //  "Gone fishing, Kosai? Consider this job over."
+         DISPLAY_MESSAGE (1125)
+         SET flag_failed_mission = 1
+         SET flag_failed_yaku_easy_phone1_m1 = 1
+         RETURN
+      ENDIF
+      
+      IF ( HAS_CHARACTER_DIED(y_e_1_zitzaki_char	) )
+         CLEAR_ALL_BRIEFS ()
+         DISPLAY_BRIEF_NOW (1637)       //  "Your incompetence killed ZitZaki! This puts strain on your Yakuza ties, Kosai."
+         DISPLAY_MESSAGE (1125)         //  JOB FAILED!
+         SET flag_failed_mission = 1
+         SET flag_failed_yaku_easy_phone1_m1 = 1
+         RETURN
+      ENDIF
+      
+      IF ( ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 50.50, 178.50, 2.00, 3.00, 1.00) ) ) AND ( y_e_1_player_out_horn_zone = 0 ) )
+         CLEAR_ALL_BRIEFS ()
+         DISPLAY_BRIEF (1648)                                     //  "Kosai! Get back there and sound the horn!"
+         POINT_ARROW_AT (arrow1, 50.50, 178.50, 2.00)
+         SET y_e_1_player_out_horn_zone = 1
+      ENDIF
+      
+      IF ( ( y_e_1_player_out_horn_zone = 1 ) AND ( LOCATE_CHARACTER_BY_CAR(p1, 50.50, 178.50, 2.00, 3.00, 1.00) ) )
+         REMOVE_ARROW (arrow1)
+         SET y_e_1_player_out_horn_zone = 0
+      ENDIF
+      
+   ENDWHILE
+   
+   //  He left the Hospital building
+
+   REMOVE_ARROW (arrow1)
+   SET_CHAR_OBJECTIVE (y_e_1_zitzaki_char	, ENTER_CAR_AS_PASSENGER, y_e_1_yakuza_car)  //  Make him enter the player's car
+   
+   //  While he does not enter
+   WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(y_e_1_zitzaki_char	) ) )
+      
+      // Player doesn't see ZitZaki
+      IF ( ( y_e_1_zitzaki_onscreen = 0 ) AND ( NOT ( IS_ITEM_ONSCREEN(y_e_1_zitzaki_char	) ) ) )      
+         CLEAR_ALL_BRIEFS ()
+         DISPLAY_BRIEF (1647)                     //  "Hey, wait for me!"
+         POINT_ARROW_AT (arrow1, y_e_1_zitzaki_char	)            // Point an arrow at ZitZaki
+         SET y_e_1_zitzaki_onscreen = 1                          // Lock this IF
+      ENDIF
+      
+      // Player now see ZitZaki again
+      IF ( ( y_e_1_zitzaki_onscreen = 1 ) AND ( IS_ITEM_ONSCREEN(y_e_1_zitzaki_char	) ) )        
+         REMOVE_ARROW (arrow1)                                     // Remove the arrow from him
+         SET y_e_1_zitzaki_onscreen = 0                                           // Unlock previous IF
+      ENDIF
+      
+      //  Checking...
+      
+      IF ( IS_CAR_WRECKED(y_e_1_yakuza_car) )
+         CLEAR_ALL_BRIEFS ()
+         DISPLAY_BRIEF_NOW (1633)             //  "Young and reckless, Kosai... I should have guessed you would wreck the car."
+         DISPLAY_MESSAGE (1125)
+         SET flag_failed_mission = 1
+         SET flag_failed_yaku_easy_phone1_m1 = 1
+         RETURN
+      ENDIF
+      
+      IF ( HAS_CAR_JUST_SUNK(y_e_1_yakuza_car) )        
+         CLEAR_ALL_BRIEFS ()
+         DISPLAY_BRIEF_NOW (1635)             //  "Gone fishing, Kosai? Consider this job over."
+         DISPLAY_MESSAGE (1125)
+         SET flag_failed_mission = 1
+         SET flag_failed_yaku_easy_phone1_m1 = 1
+         RETURN
+      ENDIF
+      
+      //  If ZitZaki died
+      IF ( HAS_CHARACTER_DIED(y_e_1_zitzaki_char	) )         
+         CLEAR_ALL_BRIEFS ()
+         DISPLAY_BRIEF_NOW (1637)             //  "Your incompetence killed ZitZaki! This puts strain on your Yakuza ties, Kosai."
+         DISPLAY_MESSAGE (1125)
+         SET flag_failed_mission = 1
+         SET flag_failed_yaku_easy_phone1_m1 = 1
+         RETURN
+      ENDIF
+      
+   ENDWHILE
+   
+   // ZitZaki entered player's vehicle
+
+   UPDATE_DOOR_TARGET (door11, y_e_1_yakuza_car)
+   DISPLAY_BRIEF (1639)                           //  "Good. Bring Doctor ZitZaki directly to the new J-Lab."
+   POINT_ARROW_AT (arrow1, 44.50, 203.50, 2.00)
+   SET y_e_1_player_out_of_car = 0          // reset variable (and reusing that)
+   
+   //  While the player isn't in front of the J-Lab garage door
+   WHILE_EXEC ( NOT ( IS_CAR_IN_BLOCK(y_e_1_yakuza_car, 44.50, 203.50, 2.00, 3.00, 0.80) ) )
+      
+      //  If the player left the car
+      IF ( ( NOT ( IS_CHARACTER_IN_CAR(p1, y_e_1_yakuza_car) ) ) AND ( y_e_1_player_out_of_car = 0 ) )
+         CLEAR_ALL_BRIEFS ()
+         DISPLAY_BRIEF_NOW (1642)               //  "You are intolerable, Kosai. Get back in the car and deliver ZitZaki. NOW."
+         POINT_ARROW_AT (arrow1, y_e_1_yakuza_car)
+         SET y_e_1_player_out_of_car = 1                        // Lock this IF
+      ENDIF
+      
+      // Player entered the car again
+      IF ( ( y_e_1_player_out_of_car = 1 ) AND ( IS_CHARACTER_IN_CAR(p1, y_e_1_yakuza_car) ) )
+         REMOVE_ARROW (arrow1)
+         POINT_ARROW_AT (arrow1, 44.50, 203.50, 2.00)
+         SET y_e_1_player_out_of_car = 0                        // Unlock the previous IF
+      ENDIF
+      
+      //  Checking...
+      
+      IF ( IS_CAR_WRECKED(y_e_1_yakuza_car) )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1633)
+          DISPLAY_MESSAGE (1125)
+          SET flag_failed_mission = 1
+          SET flag_failed_yaku_easy_phone1_m1 = 1
+          RETURN
+      ENDIF
+            
+      IF ( HAS_CAR_JUST_SUNK(y_e_1_yakuza_car) )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1635)
+          DISPLAY_MESSAGE (1125)
+          SET flag_failed_mission = 1
+          SET flag_failed_yaku_easy_phone1_m1 = 1
+          RETURN
+      ENDIF
+            
+      IF ( HAS_CHARACTER_DIED(y_e_1_zitzaki_char	) )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1637)
+          DISPLAY_MESSAGE (1125)
+          SET flag_failed_mission = 1
+          SET flag_failed_yaku_easy_phone1_m1 = 1
+          RETURN
+      ENDIF
+      
+      
+   ENDWHILE
+   
+   //  Park the car
+   
+   EXEC
+       REMOVE_ARROW (arrow1)   // Remove arrow from J-LAB park
+       PARK (y_e_1_yakuza_car, door11)   // Park the car
+   ENDEXEC
+   
+   //  While the park does not finish
+   WHILE_EXEC ( NOT ( HAS_PARK_FINISHED() ) )
+      IF ( IS_CAR_WRECKED(y_e_1_yakuza_car) )
+         CLEAR_ALL_BRIEFS ()
+         DISPLAY_BRIEF_NOW (1633)               //  "Young and reckless, Kosai... I should have guessed you would wreck the car."
+         DISPLAY_MESSAGE (1125)
+         SET flag_failed_mission = 1
+         SET flag_failed_yaku_easy_phone1_m1 = 1
+         RETURN
+      ENDIF
+   ENDWHILE
+   
+   //  The car has been parked
+
+   IF ( flag_failed_mission = 0 )       // Ensure that the player didn't fail the mission
+      CLEAR_ALL_BRIEFS ()
+      DISPLAY_BRIEF (1634)
+      DISPLAY_MESSAGE (1124)
+      ADD_SCORE (p1, 20000)
+      ADD_MULTIPLIER (p1, 1)
+      CLEAR_WANTED_LEVEL (p1)
+      CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (yakuzagang, p1, 1)
+      
+      SET flag_passed_yaku_easy_phone1_m1 = 1                 //  The player passed this mission
+      
+      IF ( flag_passed_yaku_easy_phone1_m1 = 1 )              
+         SET_PHONE_DEAD (ph_yaku_easy_phone1)           //  Kill the yakuza easy 1 phone
+         SET flag_kill_yaku_easy_phone1 = 1             //  Store that kill status
+      ENDIF
+   ENDIF
+
+RETURN
+
+
+clean_up_yaku_easy_phone1_m1:             //  Clean up
+
+	REMOVE_ARROW (arrow1)
+	SET flag_failed_mission = 0
+	CLEAR_WANTED_LEVEL (p1)
+	MISSION_HAS_FINISHED ()
+ 
+ //  Player completed the mission
+ IF ( flag_passed_yaku_easy_phone1_m1 = 1 )     
+	   ++flag_all_missions_passed               // Count +1 mission passed
+	   ++flag_yaku_missions_passed               // Count +1 yakuza mission passed
+	   MAKE_DOOR_MANUAL (door11)    // Keep it shutted
+	   MAKE_DOOR_MANUAL (door15)    // Keep it shutted
+	ENDIF
+ 
+ //  Player failed the mission
+ IF ( ( flag_failed_yaku_easy_phone1_m1 = 1 ) OR ( CHECK_DEATHARREST_EXECUTED() ) )
+	   ++flag_all_missions_failed
+	   ++flag_yaku_missions_failed
+	   CLEAR_WANTED_LEVEL (p1)
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (yakuzagang, p1, -1)
+	   MAKE_DOOR_AUTOMATIC (door11)                            //  Remove "Update door" status
+	   MAKE_DOOR_AUTOMATIC (door15)                            //  Remove "Update door" status
+	ENDIF
+ 
+	SET flag_on_mission = 0                 // Player isn't inside a mission anymore
+	SET flag_on_yaku_mission = 0                 // Player isn't inside a yakuza mission anymore
+ 
+RETURN
+
+MISSIONSTART
+GOSUB yaku_easy_phone1_m1:
+GOSUB clean_up_yaku_easy_phone1_m1:
+MISSIONEND

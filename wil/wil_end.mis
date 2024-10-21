@@ -1,0 +1,213 @@
+// Decompiled from "wil_end.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD function43:
+//FORWARD function44:
+
+CHAR_DATA loonies_leader_fm            //  Elmo          (fm = final mission)
+CHAR_DATA yakuza_leader_fm            //  Johnny Zoo
+CHAR_DATA zaibatsu_leader_fm            //  Trey Welsh
+
+CAR_DATA zaib_car_fm           //  Trey Welsh's Zaibatsu car
+CAR_DATA loon_car_fm           //  Elmo's Loony car
+CAR_DATA yaku_car_fm           //  Johnny Zoo's Yakuza car
+
+COUNTER number_bosses_died_fm = 0       // Number of bosses killed
+
+COUNTER flag_zaibatsu_leader_fm_died = 0       // Lock-IF counter for killing Trey Welsh
+COUNTER flag_loonies_leader_fm_died = 0       // Lock-IF counter for killing Elmo
+COUNTER flag_yakuza_leader_fm_died = 0       // Lock-IF counter for killing Johnny Zoo
+
+COUNTER flag_off_arrow_2_fm = 0       // Lock-IF counter for putting an arrow at Trey Welsh
+COUNTER flag_off_arrow_3_fm = 0       // Lock-IF counter for putting an arrow at Elmo
+COUNTER flag_off_arrow_4_fm = 0       // Lock-IF counter for putting an arrow at Johnny Zoo
+
+COUNTER flag_arrow_2_fm_on = 0       // Lock-IF counter for removing an arrow from Trey Welsh
+COUNTER flag_arrow_3_fm_on = 0       // Lock-IF counter for removing an arrow from Elmo
+COUNTER flag_arrow_4_fm_on = 0       // Lock-IF counter for removing an arrow from Johnny Zoo
+
+start_final_mission:
+
+	SET flag_failed_final_mission = 0
+	DISPLAY_MESSAGE (1953)     //   THE FINAL JOB!
+ 
+	SET flag_on_mission = 1             //   Player is now playing a mission
+	SET flag_on_zaib_mission = 1             //   For some reason, they choose Zaibatsu to tag this end mission
+ 
+ ///////    Spawning Trey Welsh
+ 
+	zaib_car_fm = CREATE_GANG_CAR (229.50, 86.50, 3.00) 2 0 VTYPE END
+	zaibatsu_leader_fm = CREATE_CHAR_INSIDE_CAR (zaib_car_fm) 8 CRIMINAL END
+	SET_CHAR_THREAT_REACTION (zaibatsu_leader_fm, REACT_AS_NORMAL)
+	SET_CHAR_THREAT_SEARCH (zaibatsu_leader_fm, AREA_PLAYER_ONLY)
+	GIVE_WEAPON (zaibatsu_leader_fm, MACHINE_GUN)
+	SET_CHAR_OBJECTIVE (zaibatsu_leader_fm, KILL_CHAR_ANY_MEANS, p1)
+	ADD_CHAR_TO_GANG (zaibatsu_leader_fm, zaibatsugang)
+ 
+ ///////    Spawning Elmo
+ 
+	loon_car_fm = CREATE_GANG_CAR (39.50, 35.50, 2.00) 2 0 ISETTA END
+	loonies_leader_fm = CREATE_CHAR_INSIDE_CAR (loon_car_fm) 11 CRIMINAL END
+	SET_CHAR_THREAT_REACTION (loonies_leader_fm, REACT_AS_NORMAL)
+	SET_CHAR_THREAT_SEARCH (loonies_leader_fm, AREA_PLAYER_ONLY)
+	GIVE_WEAPON (loonies_leader_fm, FLAME_THROWER)
+	SET_CHAR_OBJECTIVE (loonies_leader_fm, KILL_CHAR_ANY_MEANS, p1)
+	ADD_CHAR_TO_GANG (loonies_leader_fm, looniegang)
+ 
+ ///////    Spawning Johnny Zoo
+ 
+	yaku_car_fm = CREATE_GANG_CAR (16.50, 203.50, 2.00) 2 0 MIURA END
+	yakuza_leader_fm = CREATE_CHAR_INSIDE_CAR (yaku_car_fm) 13 CRIMINAL END
+	SET_CHAR_THREAT_REACTION (yakuza_leader_fm, REACT_AS_NORMAL)
+	SET_CHAR_THREAT_SEARCH (yakuza_leader_fm, AREA_PLAYER_ONLY)
+	GIVE_WEAPON (yakuza_leader_fm, MACHINE_GUN)
+	SET_CHAR_OBJECTIVE (yakuza_leader_fm, KILL_CHAR_ANY_MEANS, p1)
+	ADD_CHAR_TO_GANG (yakuza_leader_fm, yakuzagang)
+ 
+	DISPLAY_BRIEF (1800)         // "Well done, kid, you managed to piss off the Yakuza, Zaibatsu AND Loony Bosses and now they all want you dead."
+	DISPLAY_BRIEF (1801)         // "The Gang Bosses have taken this personally and are out to screw you - unless you screw them first!"
+ 
+ 
+ WHILE_EXEC ( NOT ( number_bosses_died_fm = 3 ) )             // While all bosses not died yet
+ 
+    IF ( ( flag_zaibatsu_leader_fm_died = 0 ) AND ( HAS_CHARACTER_DIED(zaibatsu_leader_fm) ) )         // Trey Welsh died
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF (1805)    // "NICE! That takes care of the Zaibatsu Corporation!"
+	      ++number_bosses_died_fm               // Count +1 boss killed
+	      SET flag_zaibatsu_leader_fm_died = 1         // Lock this IF
+	      REMOVE_ARROW (arrow2)   // Remove arrow from Trey Welsh      (The arrow code is below)
+    ENDIF
+    
+    IF ( ( flag_loonies_leader_fm_died = 0 ) AND ( HAS_CHARACTER_DIED(loonies_leader_fm) ) )         // Elmo died
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF (1806)    // "OOH! That's lights out for the bonkers mad Loonies!"
+	      ++number_bosses_died_fm               // Count +1 boss killed
+	      SET flag_loonies_leader_fm_died = 1         // Lock this IF
+	      REMOVE_ARROW (arrow3)   // Remove arrow from Elmo
+    ENDIF
+    
+    IF ( ( flag_yakuza_leader_fm_died = 0 ) AND ( HAS_CHARACTER_DIED(yakuza_leader_fm) ) )         // Johnny Zoo died
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF (1807)    // "HA! The Yakuza Brotherhood are orphans!"
+	      ++number_bosses_died_fm               // Count +1 boss killed
+	      SET flag_yakuza_leader_fm_died = 1         // Lock this IF
+	      REMOVE_ARROW (arrow4)   // Remove arrow from Elmo
+    ENDIF
+    
+    ///////         Trey Welsh's arrow mechanics
+    
+    IF ( ( flag_off_arrow_2_fm = 0 ) AND ( flag_zaibatsu_leader_fm_died = 0 ) )      //  Do Trey Welsh hasn't an arrow?  And is he alive?
+       IF ( IS_ITEM_ONSCREEN(zaibatsu_leader_fm) )                //  Trey Welsh is on player screen?
+          POINT_ARROW_AT (arrow2, zaibatsu_leader_fm)             //  Now Trey Welsh has an arrow
+	         DISPLAY_BRIEF (1808)                      //  "That's the Zaibatsu Boss, Trey Welsh! WASTE HIM!"
+	         SET flag_off_arrow_2_fm = 1                           //  Lock the first IF
+	         SET flag_arrow_2_fm_on = 1                           //  Counter to store if Trey Welsh has an arrow
+          
+          IF ( IS_CHARACTER_IN_ANY_CAR(p1) )        // Is Player in a car?
+             SET_CHAR_MAX_DRIVESPEED (zaibatsu_leader_fm, 0.40)   // Drive fast to pursue the player
+          ELSE
+             SET_CHAR_MAX_DRIVESPEED (zaibatsu_leader_fm, 0.00)   // Why zero? Is to forcing Trey Welsh to stop his car and battle on foot?
+          ENDIF
+          
+       ENDIF
+    ENDIF
+    
+    IF ( ( flag_arrow_2_fm_on = 1 ) AND ( flag_zaibatsu_leader_fm_died = 0 ) )      //  Do Trey Welsh has an arrow?  And is he alive?
+       IF ( NOT ( IS_ITEM_ONSCREEN(zaibatsu_leader_fm) ) )        //  But he isn't on player screen?
+          REMOVE_ARROW (arrow2)                     //  Remove his arrow from him.
+	         SET flag_arrow_2_fm_on = 0                           //  Lock this IF
+	         SET flag_off_arrow_2_fm = 0                           //  Unlock the previous IF
+       ENDIF
+    ENDIF
+    
+    ///////         Elmo's arrow mechanics       (It's completely analogous to Trey Welsh; I'm lazy so I will not make any comment here)
+    
+    IF ( ( flag_off_arrow_3_fm = 0 ) AND ( flag_loonies_leader_fm_died = 0 ) )
+       IF ( IS_ITEM_ONSCREEN(loonies_leader_fm) )
+          POINT_ARROW_AT (arrow3, loonies_leader_fm)
+	         DISPLAY_BRIEF (1809)
+	         SET flag_off_arrow_3_fm = 1
+	         SET flag_arrow_3_fm_on = 1
+          IF ( IS_CHARACTER_IN_ANY_CAR(p1) )
+             SET_CHAR_MAX_DRIVESPEED (loonies_leader_fm, 0.40)
+          ELSE
+             SET_CHAR_MAX_DRIVESPEED (loonies_leader_fm, 0.00)
+          ENDIF
+       ENDIF
+    ENDIF
+    
+    IF ( ( flag_arrow_3_fm_on = 1 ) AND ( flag_loonies_leader_fm_died = 0 ) )
+       IF ( NOT (	IS_ITEM_ONSCREEN(loonies_leader_fm) ) )
+          REMOVE_ARROW (arrow3)
+	         SET flag_arrow_3_fm_on = 0
+	         SET flag_off_arrow_3_fm = 0
+       ENDIF
+    ENDIF
+    
+    ///////         Johnny Zoo's arrow mechanics       (I'm Lazy, sorry)
+    
+    IF ( ( flag_off_arrow_4_fm = 0 ) AND ( flag_yakuza_leader_fm_died = 0 ) )
+       IF ( IS_ITEM_ONSCREEN(yakuza_leader_fm) )
+          POINT_ARROW_AT (arrow4, yakuza_leader_fm)
+	         DISPLAY_BRIEF (1810)
+	         SET flag_off_arrow_4_fm = 1
+	         SET flag_arrow_4_fm_on = 1
+          
+          IF ( IS_CHARACTER_IN_ANY_CAR(p1) )
+             SET_CHAR_MAX_DRIVESPEED (yakuza_leader_fm, 0.40)
+          ELSE
+             SET_CHAR_MAX_DRIVESPEED (yakuza_leader_fm, 0.00)
+          ENDIF
+       ENDIF
+    ENDIF
+    
+    IF ( (	flag_arrow_4_fm_on = 1 ) AND ( flag_yakuza_leader_fm_died = 0 ) )
+       IF ( NOT ( IS_ITEM_ONSCREEN(yakuza_leader_fm) ) )
+          REMOVE_ARROW (arrow4)
+	         SET flag_arrow_4_fm_on = 0
+	         SET flag_off_arrow_4_fm = 0
+       ENDIF
+    ENDIF
+    
+ ENDWHILE
+ 
+ ///////// Player killed all bosses
+ 
+ IF ( flag_failed_mission = 0 )
+	   CLEAR_ALL_BRIEFS ()
+	   DISPLAY_BRIEF (1802)           // "Shit, kid, you beat them all! Here's some advice - move on to the Residential District before the shit really hits the fan"
+	   DISPLAY_MESSAGE (1124)         // JOB COMPLETE!
+	   ADD_SCORE (p1, 60000)
+	   ADD_MULTIPLIER (p1, 1)
+	   CLEAR_WANTED_LEVEL (p1)
+	   SET flag_passed_final_mission = 1            // Counter to save "END Mission complete"
+	ENDIF
+RETURN
+
+
+clean_up_final_mission:
+
+	REMOVE_ARROW (arrow1)
+	SET flag_failed_mission = 0                 // (Player not failed the mission?)
+	CLEAR_WANTED_LEVEL (p1)
+	MISSION_HAS_FINISHED ()
+ 
+ IF ( flag_passed_final_mission = 1 )         // Player successfully finished the end mission?
+	   ++flag_all_missions_passed              // Count +1 mission passed
+ ENDIF
+	
+ IF ( ( flag_failed_final_mission = 1 ) OR ( CHECK_DEATHARREST_EXECUTED() ) )   // Player failed a mission   (Is this necessary?)
+	   ++flag_all_missions_failed              // Count +1 mission failed
+	   CLEAR_WANTED_LEVEL (p1)
+	ENDIF
+ 
+	SET flag_on_mission = 0         // Player isn't playing a mission anymore
+	SET flag_on_zaib_mission = 0         // Player isn't playing a Zaibatsu mission anymore (lol)
+ 
+RETURN
+
+MISSIONSTART
+GOSUB start_final_mission:
+GOSUB clean_up_final_mission:
+MISSIONEND

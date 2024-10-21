@@ -1,0 +1,709 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Bank Van Theft! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_zh2.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD zaib_hard_phone_m2:
+//FORWARD clean_up_zaib_hard_phone_m2:
+
+CHAR_DATA z_h_2_van_driver
+
+CHAR_DATA z_h_2_asssin_1_char
+CHAR_DATA z_h_2_asssin_2_char
+CHAR_DATA z_h_2_asssin_3_char
+
+CAR_DATA z_h_2_bank_van
+
+CAR_DATA z_h_2_assin_1_car
+CAR_DATA z_h_2_assin_2_car
+CAR_DATA z_h_2_assin_3_car
+
+COUNTER z_h_2_arrow_2_on_screen = 0
+COUNTER z_h_2_arrow_3_on_screen = 0
+COUNTER z_h_2_arrow_4_on_screen = 0
+COUNTER z_h_2_assassin_1_died = 0
+COUNTER z_h_2_assassin_2_died = 0
+COUNTER z_h_2_assassin_3_died = 0
+COUNTER z_h_2_assassin_1_brief = 0
+COUNTER z_h_2_assassin_2_brief = 0
+COUNTER z_h_2_assassin_3_brief = 0
+
+COUNTER z_h_2_van_out_of_screen = 0
+
+zaib_hard_phone_m2:
+
+	SET flag_on_mission = 1
+	SET flag_on_zaib_mission = 1
+ 
+	SET flag_failed_zaib_hard_phone_m2 = 0
+ 
+	DISPLAY_MESSAGE (1988)               //  BANK VAN THEFT!
+ 
+	z_h_2_bank_van = CREATE_CAR (13.50, 204.50, 2.00) 1 90 BANKVAN END
+	CHANGE_CAR_LOCK (z_h_2_bank_van, LOCKOUT_PLAYER)                          //  Lock the Van for the player
+ 
+ //  "Hey, Gecko! Trey Welsh here. I need used bank notes for my contraband drug operation. 
+ //  Once the Guard makes his pick-up, steal the bank van, but don't get seen or the job's screwed."
+	DISPLAY_BRIEF (1715)     
+ 
+	POINT_ARROW_AT (arrow1, 10.50, 204.50, 2.00)
+ 
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ANY_MEANS(p1, 10.50, 204.50, 2.00, 1.00, 1.00) ) )
+ 
+    IF ( HAS_CAR_JUST_SUNK(z_h_2_bank_van) )          //  G4 just sunk
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1719)               //  "Is this your idea of clean cash, Gecko? And I thought you had experience."
+       DISPLAY_MESSAGE (1125)                 //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+ 
+    IF ( IS_CAR_WRECKED(z_h_2_bank_van) )             //  G4 bank van has been destroyed
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1718)               //  "The Bank Van is screwed - much like your Zaibatsu reputation, Gecko."
+	      DISPLAY_MESSAGE (1125)                 //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_zaib_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player reached at the G4 Van location in Yakuza territory
+	
+ REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF (1721)       //  "Steal the Bank Van, Gecko, as soon as the Guard climbs on board."
+ 
+ //  Creating the bank van driver
+ z_h_2_van_driver = CREATE_CHAR (17.50, 207.50, 2.00) 13 0 CRIMINAL END
+ SET_CHAR_THREAT_SEARCH (z_h_2_van_driver, NO_THREATS)
+ SET_CHAR_THREAT_REACTION (z_h_2_van_driver, NO_REACTION)
+ SET_CHAR_OBJECTIVE (z_h_2_van_driver, ENTER_CAR_AS_DRIVER, z_h_2_bank_van)
+ SET_CHAR_DRIVE_AGGRESSION (z_h_2_van_driver, ON)
+ 
+ //  While the driver does not enter the van
+ WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(z_h_2_van_driver) ) )
+    
+    //  Bank van isn't on player screen
+    IF ( ( NOT ( IS_ITEM_ONSCREEN(z_h_2_bank_van) ) ) AND ( z_h_2_van_out_of_screen = 0 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (7009)               //  "Hey, Gecko, how can you steal the Bank Van from there?"
+       POINT_ARROW_AT (arrow1, z_h_2_bank_van)    //  Point arrow at the Bank Van
+       SET z_h_2_van_out_of_screen = 1            //  Lock this IF
+    ENDIF
+    
+    //  Bank van returned to the player screen
+    IF ( IS_ITEM_ONSCREEN(z_h_2_bank_van) )
+       REMOVE_ARROW (arrow1)
+       SET z_h_2_van_out_of_screen = 0
+    ENDIF
+    
+    IF ( HAS_CAR_JUST_SUNK(z_h_2_bank_van) )          //  G4 just sunk
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1719)               //  "Is this your idea of clean cash, Gecko? And I thought you had experience."
+       DISPLAY_MESSAGE (1125)                 //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+ 
+    IF ( IS_CAR_WRECKED(z_h_2_bank_van) )             //  G4 bank van has been destroyed
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1718)               //  "The Bank Van is screwed - much like your Zaibatsu reputation, Gecko."
+	      DISPLAY_MESSAGE (1125)                 //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_zaib_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(z_h_2_van_driver) )           //  If the van driver has died before enter the van
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1720)               //  "Killing the Guard was not in the plan, Gecko. Consider yourself off the job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The driver entered the bank van
+
+ CHANGE_CAR_LOCK (z_h_2_bank_van, LOCKOUT_THIEF)      //  Now the player can steal the van, while no other thief can steal it
+ DISPLAY_BRIEF (1722)                         //  "Grab the Van NOW!"
+ POINT_ARROW_AT (arrow1, z_h_2_bank_van)              //  Point arrow at the van
+ 
+ //  While the player does not steal the bank van
+ WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_h_2_bank_van) ) )
+ 
+    IF ( HAS_CAR_JUST_SUNK(z_h_2_bank_van) )          //  G4 just sunk
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1719)               //  "Is this your idea of clean cash, Gecko? And I thought you had experience."
+       DISPLAY_MESSAGE (1125)                 //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+ 
+    IF ( IS_CAR_WRECKED(z_h_2_bank_van) )             //  G4 bank van has been destroyed
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1718)               //  "The Bank Van is screwed - much like your Zaibatsu reputation, Gecko."
+	      DISPLAY_MESSAGE (1125)                 //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_zaib_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player entered the Bank Van
+ 
+ UPDATE_DOOR_TARGET (door13, z_h_2_bank_van)
+ REMOVE_ARROW (arrow1)
+ 
+ EXEC
+     
+     //  Creating the yakuza assassins
+     z_h_2_assin_1_car = CREATE_GANG_CAR (43.50, 214.50, 2.00) 15 0 MIURA END
+     z_h_2_assin_2_car = CREATE_GANG_CAR (53.50, 180.50, 2.00) 15 0 MIURA END
+     z_h_2_assin_3_car = CREATE_GANG_CAR (19.50, 182.50, 2.00) 15 0 MIURA END
+     
+     z_h_2_asssin_1_char = CREATE_CHAR_INSIDE_CAR (z_h_2_assin_1_car) 13 CRIMINAL END
+     SET_CHAR_THREAT_SEARCH (z_h_2_asssin_1_char, LINE_OF_SIGHT_PLAYER_ONLY)
+     SET_CHAR_THREAT_REACTION (z_h_2_asssin_1_char, REACT_AS_NORMAL)
+     GIVE_WEAPON (z_h_2_asssin_1_char, MACHINE_GUN)
+     ADD_CHAR_TO_GANG (z_h_2_asssin_1_char, yakuzagang)
+     
+     z_h_2_asssin_2_char = CREATE_CHAR_INSIDE_CAR (z_h_2_assin_2_car) 13 CRIMINAL END
+     SET_CHAR_THREAT_SEARCH (z_h_2_asssin_2_char, LINE_OF_SIGHT_PLAYER_ONLY)
+     SET_CHAR_THREAT_REACTION (z_h_2_asssin_2_char, REACT_AS_NORMAL)
+     GIVE_WEAPON (z_h_2_asssin_2_char, MACHINE_GUN)
+     ADD_CHAR_TO_GANG (z_h_2_asssin_2_char, yakuzagang)
+     
+     z_h_2_asssin_3_char = CREATE_CHAR_INSIDE_CAR (z_h_2_assin_3_car) 13 CRIMINAL END
+     SET_CHAR_THREAT_SEARCH (z_h_2_asssin_3_char, LINE_OF_SIGHT_PLAYER_ONLY)
+     SET_CHAR_THREAT_REACTION (z_h_2_asssin_3_char, REACT_AS_NORMAL)
+     GIVE_WEAPON (z_h_2_asssin_3_char, ROCKET_LAUNCHER)                       //   :x
+     ADD_CHAR_TO_GANG (z_h_2_asssin_3_char, yakuzagang)
+     
+     CHANGE_CAR_LOCK (z_h_2_assin_1_car, LOCKED)
+     CHANGE_CAR_LOCK (z_h_2_assin_2_car, LOCKED)
+     CHANGE_CAR_LOCK (z_h_2_assin_3_car, LOCKED)
+     
+     SET_CHAR_OBJECTIVE (z_h_2_asssin_1_char, KILL_CHAR_ANY_MEANS, p1)
+     SET_CHAR_OBJECTIVE (z_h_2_asssin_2_char, KILL_CHAR_ANY_MEANS, p1)
+     SET_CHAR_OBJECTIVE (z_h_2_asssin_3_char, KILL_CHAR_ANY_MEANS, p1)
+     
+     SET_FAVOURITE_MODEL (z_h_2_asssin_1_char, MIURA)
+     SET_FAVOURITE_MODEL (z_h_2_asssin_2_char, MIURA)
+     SET_FAVOURITE_MODEL (z_h_2_asssin_3_char, MIURA)
+     
+ ENDEXEC
+ 
+ DISPLAY_BRIEF_NOW (1723)                              //  "Big problem, Gecko - you have Yakuza on your tail. Shake them before you reach the Safehouse."
+ POINT_ARROW_AT (arrow1, 191.50, 63.50, 2.00)          //  Point at the garage
+ 
+ //  While the Bank Van isn't in front of the garage door
+ WHILE ( NOT ( IS_CAR_IN_BLOCK(z_h_2_bank_van, 191.50, 63.50, 2.00, 3.00, 2.00) ) )
+    
+    //  If the player leaves the bank van
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, z_h_2_bank_van) ) )
+    
+       DISPLAY_BRIEF_NOW (1727)                        //  "Back in the Van, Gecko, and get that cash to the Safehouse."
+       POINT_ARROW_AT (arrow1, z_h_2_bank_van)
+       
+       //  While the player does not return to the bank van
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_h_2_bank_van) ) )
+       
+          IF ( HAS_CAR_JUST_SUNK(z_h_2_bank_van) )          //  G4 just sunk
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1719)               //  "Is this your idea of clean cash, Gecko? And I thought you had experience."
+             DISPLAY_MESSAGE (1125)                 //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_hard_phone_m2 = 1
+             RETURN
+          ENDIF
+ 
+          IF ( IS_CAR_WRECKED(z_h_2_bank_van) )             //  G4 bank van has been destroyed
+             CLEAR_ALL_BRIEFS ()
+	            DISPLAY_BRIEF_NOW (1718)               //  "The Bank Van is screwed - much like your Zaibatsu reputation, Gecko."
+	            DISPLAY_MESSAGE (1125)                 //  JOB FAILED!
+	            SET flag_failed_mission = 1
+	            SET flag_failed_zaib_hard_phone_m2 = 1
+             RETURN
+          ENDIF
+          
+          //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          //XXXXXXX   YAKUZA ASSASSIN 1   XXXXXXX
+          //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          
+          //  Yakuza 1 is on player screen
+          IF ( ( z_h_2_assassin_1_died = 0 ) AND ( IS_ITEM_ONSCREEN(z_h_2_asssin_1_char) ) )
+             IF ( z_h_2_assassin_1_brief = 0 )
+                DISPLAY_BRIEF_SOON (1725)           //  "The Yakuza are closing in, Gecko. Shift your ass!"
+                SET z_h_2_assassin_1_brief = 1
+             ENDIF
+          ENDIF
+          
+          //  Yakuza 1 is on player screen
+          IF ( ( z_h_2_assassin_1_died = 0 ) AND ( IS_ITEM_ONSCREEN(z_h_2_asssin_1_char) ) )
+             IF ( z_h_2_arrow_2_on_screen = 0 )
+             
+                POINT_ARROW_AT (arrow2, z_h_2_asssin_1_char)               //  Point arrow at him
+                SET z_h_2_arrow_2_on_screen = 1                             //  Lock this IF; there is an arrow at Yakuza 1
+                
+                IF ( IS_CHARACTER_IN_ANY_CAR(p1) )
+                   SET_CHAR_MAX_DRIVESPEED (z_h_2_asssin_1_char, 0.40)
+                ELSE
+                   SET_CHAR_MAX_DRIVESPEED (z_h_2_asssin_1_char, 0.00)
+                ENDIF
+                
+             ENDIF
+          ENDIF
+          
+          //  Yakuza 1 is alive and isn't on player screen
+          IF ( ( z_h_2_assassin_1_died = 0 ) AND ( NOT ( IS_ITEM_ONSCREEN(z_h_2_asssin_1_char) ) ) )
+             IF ( z_h_2_arrow_2_on_screen = 1 )
+                REMOVE_ARROW (arrow2)
+                SET z_h_2_arrow_2_on_screen = 0
+                SET z_h_2_assassin_1_brief = 0
+             ENDIF
+          ENDIF
+          
+          //  Yakuza 1 died
+          IF ( ( z_h_2_assassin_1_died = 0 ) AND ( HAS_CHARACTER_DIED(z_h_2_asssin_1_char) ) )
+             DISPLAY_BRIEF_NOW (1726)               //  "Yes, Gecko! That's one less piece of Yakuza shit!"
+             REMOVE_ARROW (arrow2)
+             SET z_h_2_assassin_1_died = 1
+          ENDIF
+          
+          //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          //XXXXXXX   YAKUZA ASSASSIN 2   XXXXXXX
+          //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          
+          //  Yakuza 2 is on player screen
+          IF ( ( z_h_2_assassin_2_died = 0 ) AND ( IS_ITEM_ONSCREEN(z_h_2_asssin_2_char) ) )
+             IF ( z_h_2_assassin_2_brief = 0 )
+                DISPLAY_BRIEF_SOON (1725)           //  "The Yakuza are closing in, Gecko. Shift your ass!"
+                SET z_h_2_assassin_2_brief = 1
+             ENDIF
+          ENDIF
+          
+          //  Yakuza 2 is on player screen
+          IF ( ( z_h_2_assassin_2_died = 0 ) AND ( IS_ITEM_ONSCREEN(z_h_2_asssin_2_char) ) )
+             IF ( z_h_2_arrow_3_on_screen = 0 )
+             
+                POINT_ARROW_AT (arrow3, z_h_2_asssin_2_char)               //  Point arrow at him
+                SET z_h_2_arrow_3_on_screen = 1                             //  Lock this IF; there is an arrow at Yakuza 2
+                
+                IF ( IS_CHARACTER_IN_ANY_CAR(p1) )
+                   SET_CHAR_MAX_DRIVESPEED (z_h_2_asssin_2_char, 0.40)
+                ELSE
+                   SET_CHAR_MAX_DRIVESPEED (z_h_2_asssin_2_char, 0.00)
+                ENDIF
+                
+             ENDIF
+          ENDIF
+          
+          //  Yakuza 2 is alive and isn't on player screen
+          IF ( ( z_h_2_assassin_2_died = 0 ) AND ( NOT ( IS_ITEM_ONSCREEN(z_h_2_asssin_2_char) ) ) )
+             IF ( z_h_2_arrow_3_on_screen = 1 )
+                REMOVE_ARROW (arrow3)
+                SET z_h_2_arrow_3_on_screen = 0
+                //SET z_h_2_assassin_2_brief = 0
+             ENDIF
+          ENDIF
+          
+          //  Yakuza 2 died
+          IF ( ( z_h_2_assassin_2_died = 0 ) AND ( HAS_CHARACTER_DIED(z_h_2_asssin_2_char) ) )
+             DISPLAY_BRIEF_NOW (1726)               //  "Yes, Gecko! That's one less piece of Yakuza shit!"
+             REMOVE_ARROW (arrow3)
+             SET z_h_2_assassin_2_died = 1
+          ENDIF
+          
+          //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          //XXXXXXX   YAKUZA ASSASSIN 3   XXXXXXX
+          //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          
+          //  Yakuza 3 is on player screen
+          IF ( ( z_h_2_assassin_3_died = 0 ) AND ( IS_ITEM_ONSCREEN(z_h_2_asssin_3_char) ) )
+             IF ( z_h_2_assassin_3_brief = 0 )
+                DISPLAY_BRIEF_SOON (1725)           //  "The Yakuza are closing in, Gecko. Shift your ass!"
+                SET z_h_2_assassin_3_brief = 1
+             ENDIF
+          ENDIF
+          
+          //  Yakuza 3 is on player screen
+          IF ( ( z_h_2_assassin_3_died = 0 ) AND ( IS_ITEM_ONSCREEN(z_h_2_asssin_3_char) ) )
+             IF ( z_h_2_arrow_4_on_screen = 0 )
+             
+                POINT_ARROW_AT (arrow4, z_h_2_asssin_3_char)               //  Point arrow at him
+                SET z_h_2_arrow_4_on_screen = 1                             //  Lock this IF; there is an arrow at Yakuza 3
+                
+                IF ( IS_CHARACTER_IN_ANY_CAR(p1) )
+                   SET_CHAR_MAX_DRIVESPEED (z_h_2_asssin_3_char, 0.40)
+                ELSE
+                   SET_CHAR_MAX_DRIVESPEED (z_h_2_asssin_3_char, 0.00)
+                ENDIF
+                
+             ENDIF
+          ENDIF
+          
+          //  Yakuza 3 is alive and isn't on player screen
+          IF ( ( z_h_2_assassin_3_died = 0 ) AND ( NOT ( IS_ITEM_ONSCREEN(z_h_2_asssin_3_char) ) ) )
+             IF ( z_h_2_arrow_4_on_screen = 1 )
+                REMOVE_ARROW (arrow4)
+                SET z_h_2_arrow_4_on_screen = 0
+                //SET z_h_2_assassin_3_brief = 0
+             ENDIF
+          ENDIF
+          
+          //  Yakuza 3 died
+          IF ( ( z_h_2_assassin_3_died = 0 ) AND ( HAS_CHARACTER_DIED(z_h_2_asssin_3_char) ) )
+             DISPLAY_BRIEF_NOW (1726)               //  "Yes, Gecko! That's one less piece of Yakuza shit!"
+             REMOVE_ARROW (arrow4)
+             SET z_h_2_assassin_3_died = 1
+          ENDIF
+       
+       ENDWHILE
+       
+       //  The player returned to the Bank Van
+       
+       DISPLAY_BRIEF (1728)                           //  "I'm sick of Yakuza interference. Kill the tattooed scum!"
+       POINT_ARROW_AT (arrow1, 191.50, 63.50, 2.00)   //  Point arrow to the garage again
+       
+    ENDIF
+    
+    //                                    
+    //  Repeating all those stuff again...
+    //                                    
+    
+    EXEC
+    
+    IF ( HAS_CAR_JUST_SUNK(z_h_2_bank_van) )          //  G4 just sunk
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1719)               //  "Is this your idea of clean cash, Gecko? And I thought you had experience."
+       DISPLAY_MESSAGE (1125)                 //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_hard_phone_m2 = 1
+       ENDEXEC
+       RETURN
+    ENDIF
+ 
+    IF ( IS_CAR_WRECKED(z_h_2_bank_van) )             //  G4 bank van has been destroyed
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1718)               //  "The Bank Van is screwed - much like your Zaibatsu reputation, Gecko."
+	      DISPLAY_MESSAGE (1125)                 //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_zaib_hard_phone_m2 = 1
+       ENDEXEC
+       RETURN
+    ENDIF
+    
+    //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    //XXXXXXX   YAKUZA ASSASSIN 1   XXXXXXX
+    //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          
+    //  Yakuza 1 is on player screen
+    IF ( ( z_h_2_assassin_1_died = 0 ) AND ( IS_ITEM_ONSCREEN(z_h_2_asssin_1_char) ) )
+       IF ( z_h_2_assassin_1_brief = 0 )
+          DISPLAY_BRIEF_SOON (1725)           //  "The Yakuza are closing in, Gecko. Shift your ass!"
+          SET z_h_2_assassin_1_brief = 1
+       ENDIF
+    ENDIF
+          
+    //  Yakuza 1 is on player screen
+    IF ( ( z_h_2_assassin_1_died = 0 ) AND ( IS_ITEM_ONSCREEN(z_h_2_asssin_1_char) ) )
+       IF ( z_h_2_arrow_2_on_screen = 0 )
+             
+          POINT_ARROW_AT (arrow2, z_h_2_asssin_1_char)               //  Point arrow at him
+          SET z_h_2_arrow_2_on_screen = 1                             //  Lock this IF; there is an arrow at Yakuza 1
+                
+          IF ( IS_CHARACTER_IN_ANY_CAR(p1) )
+             SET_CHAR_MAX_DRIVESPEED (z_h_2_asssin_1_char, 0.40)
+          ELSE
+             SET_CHAR_MAX_DRIVESPEED (z_h_2_asssin_1_char, 0.00)
+          ENDIF
+                
+       ENDIF
+    ENDIF
+          
+    //  Yakuza 1 is alive and isn't on player screen
+    IF ( ( z_h_2_assassin_1_died = 0 ) AND ( NOT ( IS_ITEM_ONSCREEN(z_h_2_asssin_1_char) ) ) )
+       IF ( z_h_2_arrow_2_on_screen = 1 )
+          REMOVE_ARROW (arrow2)
+          SET z_h_2_arrow_2_on_screen = 0
+          SET z_h_2_assassin_1_brief = 0
+       ENDIF
+    ENDIF
+          
+    //  Yakuza 1 died
+    IF ( ( z_h_2_assassin_1_died = 0 ) AND ( HAS_CHARACTER_DIED(z_h_2_asssin_1_char) ) )
+       DISPLAY_BRIEF_NOW (1726)               //  "Yes, Gecko! That's one less piece of Yakuza shit!"
+       REMOVE_ARROW (arrow2)
+       SET z_h_2_assassin_1_died = 1
+    ENDIF
+          
+    //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    //XXXXXXX   YAKUZA ASSASSIN 2   XXXXXXX
+    //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          
+    //  Yakuza 2 is on player screen
+    IF ( ( z_h_2_assassin_2_died = 0 ) AND ( IS_ITEM_ONSCREEN(z_h_2_asssin_2_char) ) )
+       IF ( z_h_2_assassin_2_brief = 0 )
+          DISPLAY_BRIEF_SOON (1725)           //  "The Yakuza are closing in, Gecko. Shift your ass!"
+          SET z_h_2_assassin_2_brief = 1
+       ENDIF
+    ENDIF
+          
+    //  Yakuza 2 is on player screen
+    IF ( ( z_h_2_assassin_2_died = 0 ) AND ( IS_ITEM_ONSCREEN(z_h_2_asssin_2_char) ) )
+       IF ( z_h_2_arrow_3_on_screen = 0 )
+             
+          POINT_ARROW_AT (arrow3, z_h_2_asssin_2_char)               //  Point arrow at him
+          SET z_h_2_arrow_3_on_screen = 1                             //  Lock this IF; there is an arrow at Yakuza 2
+                
+          IF ( IS_CHARACTER_IN_ANY_CAR(p1) )
+             SET_CHAR_MAX_DRIVESPEED (z_h_2_asssin_2_char, 0.40)
+          ELSE
+             SET_CHAR_MAX_DRIVESPEED (z_h_2_asssin_2_char, 0.00)
+          ENDIF
+                
+       ENDIF
+    ENDIF
+          
+    //  Yakuza 2 is alive and isn't on player screen
+    IF ( ( z_h_2_assassin_2_died = 0 ) AND ( NOT ( IS_ITEM_ONSCREEN(z_h_2_asssin_2_char) ) ) )
+       IF ( z_h_2_arrow_3_on_screen = 1 )
+          REMOVE_ARROW (arrow3)
+          SET z_h_2_arrow_3_on_screen = 0
+          //SET z_h_2_assassin_2_brief = 0
+       ENDIF
+    ENDIF
+          
+    //  Yakuza 2 died
+    IF ( ( z_h_2_assassin_2_died = 0 ) AND ( HAS_CHARACTER_DIED(z_h_2_asssin_2_char) ) )
+       DISPLAY_BRIEF_NOW (1726)               //  "Yes, Gecko! That's one less piece of Yakuza shit!"
+       REMOVE_ARROW (arrow3)
+       SET z_h_2_assassin_2_died = 1
+    ENDIF
+          
+    //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    //XXXXXXX   YAKUZA ASSASSIN 3   XXXXXXX
+    //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          
+    //  Yakuza 3 is on player screen
+    IF ( ( z_h_2_assassin_3_died = 0 ) AND ( IS_ITEM_ONSCREEN(z_h_2_asssin_3_char) ) )
+       IF ( z_h_2_assassin_3_brief = 0 )
+          DISPLAY_BRIEF_SOON (1725)           //  "The Yakuza are closing in, Gecko. Shift your ass!"
+          SET z_h_2_assassin_3_brief = 1
+       ENDIF
+    ENDIF
+          
+    //  Yakuza 3 is on player screen
+    IF ( ( z_h_2_assassin_3_died = 0 ) AND ( IS_ITEM_ONSCREEN(z_h_2_asssin_3_char) ) )
+       IF ( z_h_2_arrow_4_on_screen = 0 )
+             
+          POINT_ARROW_AT (arrow4, z_h_2_asssin_3_char)               //  Point arrow at him
+          SET z_h_2_arrow_4_on_screen = 1                             //  Lock this IF; there is an arrow at Yakuza 3
+                
+          IF ( IS_CHARACTER_IN_ANY_CAR(p1) )
+             SET_CHAR_MAX_DRIVESPEED (z_h_2_asssin_3_char, 0.40)
+          ELSE
+             SET_CHAR_MAX_DRIVESPEED (z_h_2_asssin_3_char, 0.00)
+          ENDIF
+                
+       ENDIF
+    ENDIF
+          
+    //  Yakuza 3 is alive and isn't on player screen
+    IF ( ( z_h_2_assassin_3_died = 0 ) AND ( NOT ( IS_ITEM_ONSCREEN(z_h_2_asssin_3_char) ) ) )
+       IF ( z_h_2_arrow_4_on_screen = 1 )
+          REMOVE_ARROW (arrow4)
+          SET z_h_2_arrow_4_on_screen = 0
+          //SET z_h_2_assassin_3_brief = 0
+       ENDIF
+    ENDIF
+          
+    //  Yakuza 3 died
+    IF ( ( z_h_2_assassin_3_died = 0 ) AND ( HAS_CHARACTER_DIED(z_h_2_asssin_3_char) ) )
+       DISPLAY_BRIEF_NOW (1726)               //  "Yes, Gecko! That's one less piece of Yakuza shit!"
+       REMOVE_ARROW (arrow4)
+       SET z_h_2_assassin_3_died = 1
+    ENDIF
+    
+    ENDEXEC
+ 
+ ENDWHILE
+ 
+ //  Finally....
+ 
+ //  The G4 Bank Van is at the entrance of the garage
+
+ REMOVE_ARROW (arrow1)
+ 
+ EXEC
+ 
+     IF ( IS_CHARACTER_IN_CAR(p1, z_h_2_bank_van) )
+        PARK (z_h_2_bank_van, door13)                  //  Park it
+     ENDIF
+     
+ ENDEXEC
+ 
+ //  Wait the park to be finished
+ WHILE_EXEC ( NOT ( HAS_PARK_FINISHED() ) )
+ 
+    DO_NOWT
+ 
+ ENDWHILE
+ 
+ //  The bank van was parked
+ 
+ //  Yakuza assassin 1 is yet alive?
+ IF ( z_h_2_assassin_1_died = 0 )
+    DISPLAY_BRIEF (1728)                //  "I'm sick of Yakuza interference. Kill the tattooed scum!"
+    POINT_ARROW_AT (arrow2, z_h_2_asssin_1_char)
+ ENDIF
+ 
+ //  Yakuza assassin 2 is yet alive?
+ IF ( z_h_2_assassin_2_died = 0 )
+    DISPLAY_BRIEF (1728)                //  "I'm sick of Yakuza interference. Kill the tattooed scum!"
+    POINT_ARROW_AT (arrow3, z_h_2_asssin_2_char)
+ ENDIF
+
+ //  Yakuza assassin 3 is yet alive?
+ IF ( z_h_2_assassin_3_died = 0 )
+    DISPLAY_BRIEF (1728)                //  "I'm sick of Yakuza interference. Kill the tattooed scum!"
+    POINT_ARROW_AT (arrow4, z_h_2_asssin_3_char)
+ ENDIF
+
+ WHILE ( ( ( z_h_2_assassin_2_died = 0 ) OR ( z_h_2_assassin_1_died = 0 ) ) OR ( z_h_2_assassin_3_died = 0 ) )     //  Two OR's in the same statement works?   seems to be affirmative   
+    
+    //  Yakuza 1 died
+    IF ( ( z_h_2_assassin_1_died = 0 ) AND ( HAS_CHARACTER_DIED(z_h_2_asssin_1_char) ) )
+       DISPLAY_BRIEF_NOW (1726)         //  "Yes, Gecko! That's one less piece of Yakuza shit!"
+       SET z_h_2_assassin_1_died = 1
+       REMOVE_ARROW (arrow2)
+    ENDIF
+    
+    //  Yakuza 2 died
+    IF ( ( z_h_2_assassin_2_died = 0 ) AND ( HAS_CHARACTER_DIED(z_h_2_asssin_2_char) ) )
+       DISPLAY_BRIEF_NOW (1726)         //  "Yes, Gecko! That's one less piece of Yakuza shit!"
+       SET z_h_2_assassin_2_died = 1
+       REMOVE_ARROW (arrow3)
+    ENDIF
+    
+    //  Yakuza 3 died
+    IF ( ( z_h_2_assassin_3_died = 0 ) AND ( HAS_CHARACTER_DIED(z_h_2_asssin_3_char) ) )
+       DISPLAY_BRIEF_NOW (1726)         //  "Yes, Gecko! That's one less piece of Yakuza shit!"
+       SET z_h_2_assassin_3_died = 1
+       REMOVE_ARROW (arrow4)
+    ENDIF
+    
+    //  Control assassin 1 drive speed
+    IF ( z_h_2_assassin_1_died = 0 )
+       IF ( IS_CHARACTER_IN_ANY_CAR(p1) )
+          SET_CHAR_MAX_DRIVESPEED (z_h_2_asssin_1_char, 0.40)
+       ELSE
+          SET_CHAR_MAX_DRIVESPEED (z_h_2_asssin_1_char, 0.00)
+       ENDIF
+    ENDIF
+    
+    //  Control assassin 2 drive speed
+    IF ( z_h_2_assassin_2_died = 0 )
+       IF ( IS_CHARACTER_IN_ANY_CAR(p1) )
+          SET_CHAR_MAX_DRIVESPEED (z_h_2_asssin_2_char, 0.40)
+       ELSE
+          SET_CHAR_MAX_DRIVESPEED (z_h_2_asssin_2_char, 0.00)
+       ENDIF
+    ENDIF
+    
+    //  Control assassin 3 drive speed
+    IF ( z_h_2_assassin_3_died = 0 )
+       IF ( IS_CHARACTER_IN_ANY_CAR(p1) )
+          SET_CHAR_MAX_DRIVESPEED (z_h_2_asssin_3_char, 0.40)
+       ELSE
+          SET_CHAR_MAX_DRIVESPEED (z_h_2_asssin_3_char, 0.00)
+       ENDIF
+    ENDIF
+ 
+ ENDWHILE
+ 
+ IF ( flag_failed_mission = 0 )                //  If the player didn't fail the mission
+ 
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF (1716)
+    DISPLAY_MESSAGE (1124)               //  JOB COMPLETE!
+    ADD_SCORE (p1, 60000)
+    ADD_MULTIPLIER (p1, 1)
+    CLEAR_WANTED_LEVEL (p1)
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (zaibatsugang, p1, 1)   //  RESPECT +
+    
+    SET flag_passed_zaib_hard_phone_m2 = 1                 //  The player passed this mission
+    
+    IF ( flag_passed_zaib_hard_phone_m2 = 1 )              //  If the player passed this mission
+       SET_PHONE_DEAD (ph_zaib_hard_phone)           //  Kill Zaibatsu Hard Phone
+       SET flag_kill_zaib_hard_phone = 1             //  Store that kill
+    ENDIF
+    
+ ENDIF
+
+RETURN
+
+
+
+
+clean_up_zaib_hard_phone_m2:
+ 
+ //  If yakuza assassin 1 is alive
+ IF ( z_h_2_assassin_1_died = 0 )
+	   MAKE_CHAR_DO_NOTHING (z_h_2_asssin_1_char)
+	ENDIF
+ 
+ //  If yakuza assassin 2 is alive
+ IF ( z_h_2_assassin_2_died = 0 )
+	   MAKE_CHAR_DO_NOTHING (z_h_2_asssin_2_char)
+	ENDIF
+ 
+ //  If yakuza assassin 3 is alive
+ IF ( z_h_2_assassin_3_died = 0 )
+	   MAKE_CHAR_DO_NOTHING (z_h_2_asssin_3_char)
+	ENDIF
+ 
+	SET flag_failed_mission = 0
+ 
+	REMOVE_ARROW (arrow1)
+	REMOVE_ARROW (arrow2)
+	REMOVE_ARROW (arrow3)
+	REMOVE_ARROW (arrow4)
+ 
+	CLEAR_WANTED_LEVEL (p1)
+	MISSION_HAS_FINISHED ()
+ 
+ IF ( flag_passed_zaib_hard_phone_m2 = 1 )
+	   ++flag_all_missions_passed
+	   ++flag_zaib_missions_passed
+	   MAKE_DOOR_MANUAL (door13)
+	ENDIF
+ 
+ IF ( ( flag_failed_zaib_hard_phone_m2 = 1 ) OR ( CHECK_DEATHARREST_EXECUTED() ) )
+	   ++flag_all_missions_failed
+	   ++flag_zaib_missions_failed
+	   MAKE_DOOR_AUTOMATIC (door13)
+	   CLEAR_WANTED_LEVEL (p1)
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (zaibatsugang, p1, -1)
+	ENDIF
+ 
+	SET flag_on_mission = 0
+	SET flag_on_zaib_mission = 0
+ 
+RETURN
+
+MISSIONSTART
+GOSUB zaib_hard_phone_m2:
+GOSUB clean_up_zaib_hard_phone_m2:
+MISSIONEND

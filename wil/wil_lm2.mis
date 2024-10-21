@@ -1,0 +1,410 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Destroy J-Lab! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_lm2.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD loon_med_phone2_m1:
+//FORWARD clean_up_loon_med_phone2_m1:
+
+CHAR_DATA l_m_2_last_guard_char
+CHAR_DATA l_m_2_patrol_1_char
+CHAR_DATA l_m_2_patrol_2_char
+CHAR_DATA l_m_2_patrol_3_char
+CHAR_DATA l_m_2_patrol_4_char
+CHAR_DATA l_m_2_patrol_5_char
+
+OBJ_DATA l_m_2_silenced_mg
+OBJ_DATA l_m_2_briefcase
+
+COUNTER l_m_2_lg_player_spotted = 0        //  "lg" = last guard
+COUNTER l_m_2_patr_1_player_spotted = 0
+COUNTER l_m_2_patr_2_player_spotted = 0
+COUNTER l_m_2_patr_3_player_spotted = 0
+COUNTER l_m_2_patr_4_player_spotted = 0
+COUNTER l_m_2_patr_5_player_spotted = 0
+COUNTER l_m_2_lg_died = 0
+COUNTER l_m_2_bomb_armed = 0
+COUNTER l_m_2_counter_1_useless = 0        //  It is useless
+COUNTER l_m_2_bomb_site_on_screen = 0
+COUNTER l_m_2_bomb_brief = 0
+COUNTER l_m_2_player_in_jlab = 0
+COUNTER l_m_2_while_loop = 0
+COUNTER l_m_2_counter_2_useless = 0        //  It is useless
+
+loon_med_phone2_m1:
+
+	SET flag_on_mission = 1
+	SET flag_on_loon_mission = 1
+ 
+	SET flag_failed_loon_med_phone2_m1 = 0
+ 
+	SET_DEATHARREST_STATE (p1, OFF)            //  Handle deaths and arrests manually
+ 
+	DISPLAY_MESSAGE (1971)                     //   DESTROY J-LAB!
+	DISPLAY_BRIEF (1500)                       //   "Yo, Jumbo, it's Elmo. New Yakuza drugs are [...] Pick up explosives from the University and use them to wreak havoc at J-Lab."
+ 
+ 
+ //  Creating the last guard
+	l_m_2_last_guard_char = CREATE_CHAR (44.50, 197.50, 4.00) 13 0 CRIMINAL END
+ 
+ //  Creating the patrol guards
+	l_m_2_patrol_1_char = CREATE_CHAR (41.50, 195.50, 4.00) 13 90 CRIMINAL END
+	l_m_2_patrol_2_char = CREATE_CHAR (46.50, 201.50, 4.00) 13 90 CRIMINAL END
+	l_m_2_patrol_3_char = CREATE_CHAR (33.50, 196.50, 2.00) 13 0 CRIMINAL END
+	l_m_2_patrol_4_char = CREATE_CHAR (30.50, 197.50, 2.00) 13 0 CRIMINAL END
+	l_m_2_patrol_5_char = CREATE_CHAR (32.50, 196.50, 2.00) 13 0 CRIMINAL END
+ 
+	l_m_2_silenced_mg = CREATE_OBJ (30.50, 122.50, 3.00) 0 COLLECT_09 60 END    //  Silenced machine gun
+	l_m_2_briefcase = CREATE_OBJ (30.50, 121.50, 3.00) 0 BRIEFCASE END        //  Briefcase, the bomb
+ 
+	POINT_ARROW_AT (arrow1, l_m_2_briefcase)           //  Point arrow at the briefcase
+ 
+ //  Creating the patrol path of the guards
+	ADD_PATROL_POINT (l_m_2_patrol_1_char, 41.50, 199.50, 4.00)
+	ADD_PATROL_POINT (l_m_2_patrol_1_char, 41.50, 195.50, 4.00)
+	ADD_PATROL_POINT (l_m_2_patrol_2_char, 43.50, 201.50, 4.00)
+	ADD_PATROL_POINT (l_m_2_patrol_2_char, 46.50, 201.50, 4.00)
+	ADD_PATROL_POINT (l_m_2_patrol_3_char, 38.50, 196.50, 2.00)
+	ADD_PATROL_POINT (l_m_2_patrol_3_char, 33.50, 196.50, 2.00)
+	ADD_PATROL_POINT (l_m_2_patrol_4_char, 30.50, 204.50, 4.00)
+	ADD_PATROL_POINT (l_m_2_patrol_4_char, 30.50, 197.50, 4.00)
+	ADD_PATROL_POINT (l_m_2_patrol_5_char, 38.50, 196.50, 2.00)
+	ADD_PATROL_POINT (l_m_2_patrol_5_char, 32.50, 196.50, 2.00)
+ 
+ //  The last guard will react as normal
+	SET_CHAR_THREAT_REACTION (l_m_2_last_guard_char, REACT_AS_NORMAL)
+ 
+ //  Do not react to threats
+	SET_CHAR_THREAT_REACTION (l_m_2_patrol_1_char, NO_REACTION)
+	SET_CHAR_THREAT_REACTION (l_m_2_patrol_2_char, NO_REACTION)
+	SET_CHAR_THREAT_REACTION (l_m_2_patrol_3_char, NO_REACTION)
+	SET_CHAR_THREAT_REACTION (l_m_2_patrol_4_char, NO_REACTION)
+	SET_CHAR_THREAT_REACTION (l_m_2_patrol_5_char, NO_REACTION)
+ 
+ //  Line of sight, look for player only
+	SET_CHAR_THREAT_SEARCH (l_m_2_last_guard_char, LINE_OF_SIGHT_PLAYER_ONLY)
+	SET_CHAR_THREAT_SEARCH (l_m_2_patrol_1_char, LINE_OF_SIGHT_PLAYER_ONLY)
+	SET_CHAR_THREAT_SEARCH (l_m_2_patrol_2_char, LINE_OF_SIGHT_PLAYER_ONLY)
+	SET_CHAR_THREAT_SEARCH (l_m_2_patrol_3_char, LINE_OF_SIGHT_PLAYER_ONLY)
+	SET_CHAR_THREAT_SEARCH (l_m_2_patrol_4_char, LINE_OF_SIGHT_PLAYER_ONLY)
+	SET_CHAR_THREAT_SEARCH (l_m_2_patrol_5_char, LINE_OF_SIGHT_PLAYER_ONLY)
+ 
+	GIVE_WEAPON (l_m_2_last_guard_char, PISTOL)
+	GIVE_WEAPON (l_m_2_patrol_1_char, PISTOL)
+	GIVE_WEAPON (l_m_2_patrol_2_char, PISTOL)
+	GIVE_WEAPON (l_m_2_patrol_3_char, PISTOL)
+	GIVE_WEAPON (l_m_2_patrol_4_char, PISTOL)
+	GIVE_WEAPON (l_m_2_patrol_5_char, PISTOL)
+ 
+	ADD_CHAR_TO_GANG (l_m_2_last_guard_char, yakuzagang)
+	ADD_CHAR_TO_GANG (l_m_2_patrol_1_char, yakuzagang)
+	ADD_CHAR_TO_GANG (l_m_2_patrol_2_char, yakuzagang)
+	ADD_CHAR_TO_GANG (l_m_2_patrol_3_char, yakuzagang)
+	ADD_CHAR_TO_GANG (l_m_2_patrol_4_char, yakuzagang)
+	ADD_CHAR_TO_GANG (l_m_2_patrol_5_char, yakuzagang)
+ 
+	SET_CHAR_OBJECTIVE (l_m_2_last_guard_char, GUARD_SPOT, 44.50, 197.50, 4.00)       //  The last guard will stay in his position
+ 
+ WHILE ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 30.50, 121.50, 3.00, 1.00, 1.00) ) )     //  While the player didn't reach the briefcase
+ 
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1512)
+	      DISPLAY_MESSAGE (1125)
+	      SET flag_failed_mission = 1
+	      SET flag_failed_loon_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1513)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+
+ //  The player arrived at the briefcase
+
+ DELETE_ITEM (l_m_2_briefcase)          //  Delete the briefcase
+ REMOVE_ARROW (arrow1)         //  Remove its arrow
+ POINT_ARROW_AT (arrow1, 44.50, 208.50, 2.00)      //  Point at the J-Lab entrance
+ 
+ //  (There is no brief here)
+ 
+ WHILE_EXEC ( NOT ( l_m_2_while_loop = 1 ) )    //  This mission was poorly coded by the original author, so not wonder if you find a bug in this mission
+    
+    //  ???????????????         Why is this here?
+    IF ( ( l_m_2_counter_2_useless = 0 ) AND ( LOCATE_CHARACTER_ON_FOOT(p1, 10.50, 47.50, 2.00, 0.40, 0.40) ) )
+       DELETE_ITEM (l_m_2_briefcase)
+       SET l_m_2_counter_2_useless = 1
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1512)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1513)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( ( l_m_2_player_in_jlab = 0 ) AND ( IS_CHAR_IN_ZONE(p1, w02) ) )        //  Player entered the J-Lab perimeter
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1501)           //  "Take out the short-ass Yakuza guard and plant explosives in his place. FAST!"
+       REMOVE_ARROW (arrow1)              //  Remove the arrow from the J-Lab entrance
+       SET l_m_2_player_in_jlab = 1                    //  Lock this IF
+       
+       //  Restore the arrow
+       IF ( l_m_2_lg_died = 0 )
+          POINT_ARROW_AT (arrow2, l_m_2_last_guard_char)
+       ELSE
+          POINT_ARROW_AT (arrow1, 44.50, 197.50, 4.00)
+          SET l_m_2_bomb_brief = 0
+       ENDIF
+       
+    ENDIF
+    
+    IF ( ( l_m_2_player_in_jlab = 1 ) AND ( NOT ( IS_CHAR_IN_ZONE(p1, w02) ) ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1502)      //  "Get back inside the J-Lab."
+       POINT_ARROW_AT (arrow1, 45.50, 206.50, 2.00)       //  Point arrow to J-Lab entrance
+       SET l_m_2_player_in_jlab = 0               //  Lock this IF
+       REMOVE_ARROW (arrow2)         //  Remove arrow 2
+    ENDIF
+    
+    IF ( ( HAS_CHAR_SPOTTED_PLAYER(l_m_2_last_guard_char) ) AND ( IS_CHAR_IN_ZONE(p1, w02) ) )    //  The last guard saw the player
+       IF ( l_m_2_lg_player_spotted = 0 )
+          SET l_m_2_lg_player_spotted = 1                //  Lock this IF
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1503)       //  "No-one trespasses in J-Lab!"
+       ENDIF
+    ENDIF
+    
+    IF ( ( HAS_CHAR_SPOTTED_PLAYER(l_m_2_patrol_1_char) ) AND ( IS_CHAR_IN_ZONE(p1, w02) ) )    //  Some patrol guard saw the player
+       IF ( l_m_2_patr_1_player_spotted = 0 )
+          SET l_m_2_patr_1_player_spotted = 1                //  Lock this IF
+          SET_CHAR_OBJECTIVE (l_m_2_patrol_1_char, KILL_CHAR_ON_FOOT, p1)      //  Kill the player
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1504)       //  "You will die in J-Lab, Loony!"
+       ENDIF
+    ENDIF
+    
+    IF ( ( HAS_CHAR_SPOTTED_PLAYER(l_m_2_patrol_2_char) ) AND ( IS_CHAR_IN_ZONE(p1, w02) ) )    //  Some patrol guard saw the player
+       IF ( l_m_2_patr_2_player_spotted = 0 )
+          SET l_m_2_patr_2_player_spotted = 1                //  Lock this IF
+          SET_CHAR_OBJECTIVE (l_m_2_patrol_2_char, KILL_CHAR_ON_FOOT, p1)      //  Kill the player
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1503)       //  "No-one trespasses in J-Lab!"
+       ENDIF
+    ENDIF
+    
+    IF ( ( HAS_CHAR_SPOTTED_PLAYER(l_m_2_patrol_3_char) ) AND ( IS_CHAR_IN_ZONE(p1, w02) ) )    //  Some patrol guard saw the player
+       IF ( l_m_2_patr_3_player_spotted = 0 )
+          SET l_m_2_patr_3_player_spotted = 1                //  Lock this IF
+          SET_CHAR_OBJECTIVE (l_m_2_patrol_3_char, KILL_CHAR_ON_FOOT, p1)      //  Kill the player
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1503)       //  "No-one trespasses in J-Lab!"
+       ENDIF
+    ENDIF
+    
+    IF ( ( HAS_CHAR_SPOTTED_PLAYER(l_m_2_patrol_4_char) ) AND ( IS_CHAR_IN_ZONE(p1, w02) ) )    //  Some patrol guard saw the player
+       IF ( l_m_2_patr_4_player_spotted = 0 )
+          SET l_m_2_patr_4_player_spotted = 1                //  Lock this IF
+          SET_CHAR_OBJECTIVE (l_m_2_patrol_4_char, KILL_CHAR_ON_FOOT, p1)      //  Kill the player
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1503)       //  "No-one trespasses in J-Lab!"
+       ENDIF
+    ENDIF
+    
+    IF ( ( HAS_CHAR_SPOTTED_PLAYER(l_m_2_patrol_5_char) ) AND ( IS_CHAR_IN_ZONE(p1, w02) ) )    //  Some patrol guard saw the player
+       IF ( l_m_2_patr_5_player_spotted = 0 )
+          SET l_m_2_patr_5_player_spotted = 1                //  Lock this IF
+          SET_CHAR_OBJECTIVE (l_m_2_patrol_5_char, KILL_CHAR_ON_FOOT, p1)      //  Kill the player
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1503)       //  "No-one trespasses in J-Lab!"
+       ENDIF
+    ENDIF
+    
+    IF ( ( l_m_2_lg_died = 0 ) AND ( HAS_CHARACTER_DIED(l_m_2_last_guard_char) ) )     //  The last guard died
+       REMOVE_ARROW (arrow2)             //  Remove the arrow from him
+       SET l_m_2_lg_died = 1                   //  Lock this IF
+       ++l_m_2_bomb_brief                         //  ??
+    ENDIF
+    
+    IF ( l_m_2_bomb_brief = 1 )
+       DISPLAY_BRIEF_NOW (1505)          //  "Cool shootin', Jumbo! Plant the explosives in his place."
+       SET l_m_2_bomb_brief = 0
+    ENDIF
+    
+    IF ( ( l_m_2_player_in_jlab = 1 ) AND ( l_m_2_lg_died = 1 ) )
+       //POINT_ARROW_AT (arrow2, l_m_2_last_guard_char)
+       DO_NOWT
+    ENDIF
+    
+    IF ( ( IS_POINT_ONSCREEN(44.50, 197.50, 4.00) ) AND ( l_m_2_lg_died = 1 ) )
+       IF ( l_m_2_bomb_site_on_screen = 0 )
+          IF ( l_m_2_bomb_armed = 0 )
+             SET l_m_2_bomb_site_on_screen = 1
+             POINT_ARROW_AT (arrow1, 44.50, 197.50, 4.00)         //  Point arrow at the bomb plant position
+             SET l_m_2_counter_1_useless = 1
+          ENDIF
+       ENDIF
+    ENDIF
+    
+    IF ( NOT ( IS_POINT_ONSCREEN(44.50, 197.50, 4.00) ) )
+       IF ( l_m_2_bomb_site_on_screen = 1 )
+          SET l_m_2_bomb_site_on_screen = 0
+          REMOVE_ARROW (arrow1)
+       ENDIF
+    ENDIF
+    
+    IF ( ( l_m_2_lg_died = 1 ) AND ( LOCATE_CHARACTER_ON_FOOT(p1, 44.50, 197.50, 4.00, 1.00, 1.00) ) )
+       IF ( l_m_2_bomb_armed = 0 )
+          SET l_m_2_bomb_armed = 1             //  Lock this IF
+          l_m_2_briefcase = CREATE_OBJ (44.50, 197.50, 4.00) 0 BRIEFCASE END    //  Plant the bomb
+          REMOVE_ARROW (arrow1)       //  Remove 
+          SET l_m_2_while_loop = 1             //  Finish this WHILE loop
+       ENDIF
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  Bomb has been planted
+
+ POINT_ARROW_AT (arrow1, 44.50, 198.50, 6.00)    //  Point the arrow to the top of J-Lab
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF_NOW (1507)       //  "Climb the stairs and watch the fun, Jumbo. J-Lab is about to close permanently!"
+ 
+ WHILE ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 44.50, 198.50, 6.00, 1.00, 1.00) ) )   //  While the player didn't reach the top of J-Lab
+    DO_NOWT
+    
+    //  There is just a "DO_NOWT" inside a WHILE loop while SET_DEATHARREST_STATE was set to OFF, without the customary death and arrest checking
+    //  Yes, you can die and get busted and this mission will NOT fail at this point.
+    //  You can test this fact on the original wil.SCR
+    
+    //  I will leave as it is.
+    
+ ENDWHILE
+
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF_NOW (1508)     //  "Oh yes, baby, watch it blow! Flaming narcotics are my favorite firework."
+ REMOVE_ARROW (arrow1)
+ 
+ EXPLODE_LARGE (l_m_2_briefcase)       //  Great explosion
+ 
+ DELETE_ITEM (l_m_2_briefcase)         //  Delete the briefcase / bomb
+ DELETE_ITEM (sound11)        //  Delete the FAN_NOISE sound
+ 
+ EXPLODE_LARGE (43.00, 197.00, 5.00)     //  More explosions
+ EXPLODE_LARGE (45.00, 197.00, 5.00)
+ 
+ //  Changing the J-Lab structure
+ 
+ REMOVE_BLOCK (45, 198, 4, DONT_DROP)
+ REMOVE_BLOCK (43, 198, 4, DONT_DROP)
+ REMOVE_BLOCK (45, 197, 4, DONT_DROP)
+ REMOVE_BLOCK (43, 197, 4, DONT_DROP)
+ REMOVE_BLOCK (43, 196, 4, DONT_DROP)
+ REMOVE_BLOCK (45, 196, 4, DONT_DROP)
+ REMOVE_BLOCK (46, 197, 4, DONT_DROP)
+ 
+ CHANGE_BLOCK LID (43, 197, 3) NOT_FLAT NOT_FLIP 0 0 370
+ CHANGE_BLOCK LID (45, 197, 3) NOT_FLAT NOT_FLIP 0 180 370
+ CHANGE_BLOCK LID (44, 197, 3) NOT_FLAT NOT_FLIP 0 0 371
+ CHANGE_BLOCK LID (43, 198, 3) NOT_FLAT NOT_FLIP 0 90 372
+ CHANGE_BLOCK LID (44, 198, 3) NOT_FLAT NOT_FLIP 0 90 372
+ CHANGE_BLOCK LID (45, 198, 3) NOT_FLAT NOT_FLIP 0 90 372
+ CHANGE_BLOCK LID (43, 196, 3) NOT_FLAT NOT_FLIP 0 270 372
+ CHANGE_BLOCK LID (44, 196, 3) NOT_FLAT NOT_FLIP 0 270 372
+ CHANGE_BLOCK LID (45, 196, 3) NOT_FLAT NOT_FLIP 0 270 372
+ CHANGE_BLOCK LID (46, 197, 3) NOT_FLAT NOT_FLIP 0 0 372
+ CHANGE_BLOCK LID (42, 197, 3) NOT_FLAT NOT_FLIP 0 180 372
+ CHANGE_BLOCK LID (42, 198, 3) NOT_FLAT NOT_FLIP 0 270 380
+ CHANGE_BLOCK LID (42, 196, 3) NOT_FLAT NOT_FLIP 0 0 380
+ CHANGE_BLOCK LID (46, 196, 3) NOT_FLAT NOT_FLIP 0 90 380
+ CHANGE_BLOCK LID (46, 198, 3) NOT_FLAT NOT_FLIP 0 180 380
+ 
+ CHANGE_BLOCK TYPE (43, 197, 3) FIELD 0
+ CHANGE_BLOCK TYPE (45, 197, 3) FIELD 0
+ CHANGE_BLOCK TYPE (44, 197, 3) FIELD 0
+ CHANGE_BLOCK TYPE (43, 198, 3) FIELD 0
+ CHANGE_BLOCK TYPE (44, 198, 3) FIELD 0
+ CHANGE_BLOCK TYPE (45, 198, 3) FIELD 0
+ CHANGE_BLOCK TYPE (43, 196, 3) FIELD 0
+ CHANGE_BLOCK TYPE (44, 196, 3) FIELD 0
+ CHANGE_BLOCK TYPE (45, 196, 3) FIELD 0
+ CHANGE_BLOCK TYPE (46, 197, 3) FIELD 0
+ CHANGE_BLOCK TYPE (42, 197, 3) FIELD 0
+ CHANGE_BLOCK TYPE (42, 198, 3) FIELD 0
+ CHANGE_BLOCK TYPE (42, 196, 3) FIELD 0
+ CHANGE_BLOCK TYPE (46, 196, 3) FIELD 0
+ CHANGE_BLOCK TYPE (46, 198, 3) FIELD 0
+ 
+ IF ( flag_failed_mission = 0 )      //  If the player not failed the mission
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF_NOW (1509)  //  "The J-Lab is history and the Loonies are safe in insanity. You are one real cool cat, Jumbo. Maybe we do business some other day. For now, here's $40,000."
+    DISPLAY_MESSAGE (1124)    //  JOB COMPLETE!
+    ADD_SCORE (p1, 40000)
+    ADD_MULTIPLIER (p1, 1)
+    CLEAR_WANTED_LEVEL (p1)
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (looniegang, p1, 1)   //  RESPECT +
+    
+    SET flag_passed_loon_med_phone2_m1 = 1       //  The player passed this mission
+    
+    IF ( ( flag_passed_loon_med_phone2_m1 = 1 ) AND ( flag_passed_loon_med_phone1_2_m3 = 1 ) )   //  If the player passed this mission and has already passed the mission 3 of Loonies Medium
+       SET_PHONE_DEAD (ph_loon_med_phone2)    //  Kill the medium phone 2
+       SET flag_kill_loon_med_phone2 = 1      //  Store that kill
+    ENDIF
+    
+ ENDIF
+
+RETURN
+
+
+
+clean_up_loon_med_phone2_m1:             //   Clean up
+
+	SET flag_failed_mission = 0
+	REMOVE_ARROW (arrow1)
+	CLEAR_WANTED_LEVEL (p1)
+	SET_DEATHARREST_STATE (p1, ON)    //  Reset the automatic death arrest checking status
+ 
+	MISSION_HAS_FINISHED ()
+ 
+ IF ( flag_passed_loon_med_phone2_m1 = 1 )    //  If the player completed this mission, count +1 (loonies) mission passed
+    ++flag_all_missions_passed
+	   ++flag_loon_missions_passed
+ ENDIF
+	
+	IF ( flag_failed_loon_med_phone2_m1 = 1 )    //  If the player failed this mission, count +1 (loonies) mission failed
+	   ++flag_loon_missions_failed
+	   ++flag_all_missions_failed
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (looniegang, p1, -1)
+	   CLEAR_WANTED_LEVEL (p1)
+	ENDIF
+ 
+	SET flag_on_mission = 0            //  The player isn't playing a mission anymore
+	SET flag_on_loon_mission = 0            //  The player isn't playing a loonies mission anymore
+ 
+RETURN
+
+MISSIONSTART
+GOSUB loon_med_phone2_m1:
+GOSUB clean_up_loon_med_phone2_m1:
+MISSIONEND
