@@ -1,0 +1,605 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX GANG WAR A-GO-GO! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_lh2.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD loon_hard_phone_m2:
+//FORWARD clean_up_loon_hard_phone_m2:
+
+CHAR_DATA l_h_2_yaku_1_char
+CHAR_DATA l_h_2_yaku_2_char
+CHAR_DATA l_h_2_yaku_3_char
+
+CHAR_DATA l_h_2_zaib_1_char
+CHAR_DATA l_h_2_zaib_2_char
+CHAR_DATA l_h_2_zaib_3_char
+
+COUNTER l_h_2_in_z_type = 0
+COUNTER l_h_2_in_miara = 0
+
+COUNTER l_h_2_yak_lieutenants_died = 0
+COUNTER l_h_2_zai_lieutenants_died = 0
+
+COUNTER l_h_2_plyr_zai_territory = 0
+COUNTER l_h_2_plyr_yak_territory = 0
+
+COUNTER l_h_2_yak_1_died = 0
+COUNTER l_h_2_yak_2_died = 0
+COUNTER l_h_2_yak_3_died = 0
+
+COUNTER l_h_2_zai_1_died = 0
+COUNTER l_h_2_zai_2_died = 0
+COUNTER l_h_2_zai_3_died = 0
+
+COUNTER l_h_2_hunting_yak = 0
+COUNTER l_h_2_hunting_zai = 0
+
+
+COUNTER l_h_2_arrow_2_on_screen = 0
+COUNTER l_h_2_arrow_3_on_screen = 0
+COUNTER l_h_2_arrow_4_on_screen = 0
+
+COUNTER l_h_2_out_z_type = 0
+COUNTER l_h_2_out_miara = 0
+
+COUNTER l_h_2_in_z_type_2 = 0
+COUNTER l_h_2_in_miara_2 = 0
+
+
+COUNTER l_h_2_not_hunt_yak = 0       //  The inverse of "l_h_2_hunting_yak"
+COUNTER l_h_2_not_hunt_zai = 0       //  The inverse of "l_h_2_hunting_zai"
+
+loon_hard_phone_m2:
+
+	SET flag_on_mission = 1
+	SET flag_on_loon_mission = 1
+ 
+	SET flag_failed_loon_hard_phone_m2 = 0
+ 
+	DISPLAY_MESSAGE (1974)           //  GANG WAR A-GO-GO!
+ 
+ //  Creating the three top yakuza lieutenants
+ 
+	l_h_2_yaku_1_char = CREATE_CHAR (69.50, 195.50, 2.00) 13 0 CRIMINAL END
+	l_h_2_yaku_2_char = CREATE_CHAR (39.50, 140.50, 2.00) 13 0 CRIMINAL END
+	l_h_2_yaku_3_char = CREATE_CHAR (11.50, 182.50, 2.00) 13 0 CRIMINAL END
+ 
+	SET_CHAR_THREAT_REACTION (l_h_2_yaku_1_char, REACT_AS_NORMAL)
+	SET_CHAR_THREAT_SEARCH (l_h_2_yaku_1_char, LINE_OF_SIGHT_PLAYER_ONLY)
+	ADD_CHAR_TO_GANG (l_h_2_yaku_1_char, yakuzagang)
+ 
+	SET_CHAR_THREAT_REACTION (l_h_2_yaku_2_char, REACT_AS_NORMAL)
+	SET_CHAR_THREAT_SEARCH (l_h_2_yaku_2_char, LINE_OF_SIGHT_PLAYER_ONLY)
+	ADD_CHAR_TO_GANG (l_h_2_yaku_2_char, yakuzagang)
+ 
+	SET_CHAR_THREAT_REACTION (l_h_2_yaku_3_char, REACT_AS_NORMAL)
+	SET_CHAR_THREAT_SEARCH (l_h_2_yaku_3_char, LINE_OF_SIGHT_PLAYER_ONLY)
+	ADD_CHAR_TO_GANG (l_h_2_yaku_3_char, yakuzagang)
+ 
+	DISPLAY_BRIEF (1432) //  "Hey, Jumbo! Elmo here. I'm bored so I'm starting a gang war. First, I want you to steal a Zaibatsu Z-Type and run down Johnny Zoo's three top Yakuza."
+ 
+ WHILE_EXEC ( NOT ( l_h_2_yak_lieutenants_died = 3 ) )
+ 
+    //  If the yakuza 1 is alive and on player screen, flee to ( 17.5, 200.5, 2.0 )
+    IF ( ( l_h_2_yak_1_died = 0 ) AND ( IS_ITEM_ONSCREEN(l_h_2_yaku_1_char) ) )
+       SET_CHAR_OBJECTIVE (l_h_2_yaku_1_char, GOTO_AREA_ON_FOOT, 17.50, 200.50, 2.00)
+    ENDIF
+    
+    //  If the yakuza 2 is alive and on player screen, flee to ( 16.5, 200.5, 2.0 )
+    IF ( ( l_h_2_yak_2_died = 0 ) AND ( IS_ITEM_ONSCREEN(l_h_2_yaku_2_char) ) )
+       SET_CHAR_OBJECTIVE (l_h_2_yaku_2_char, GOTO_AREA_ON_FOOT, 16.50, 200.50, 2.00)
+    ENDIF
+    
+    //  If the yakuza 3 is alive and on player screen, flee to ( 16.5, 199.5, 2.0 )
+    IF ( ( l_h_2_yak_3_died = 0 ) AND ( IS_ITEM_ONSCREEN(l_h_2_yaku_3_char) ) )
+       SET_CHAR_OBJECTIVE (l_h_2_yaku_3_char, GOTO_AREA_ON_FOOT, 16.50, 199.50, 2.00)
+    ENDIF
+    
+    
+    
+    //  If the yakuza 1 is alive and managed to escape
+    IF ( ( l_h_2_yak_1_died = 0 ) AND ( LOCATE_CHARACTER_ON_FOOT(l_h_2_yaku_1_char, 17.50, 200.50, 2.00, 1.00, 1.00) ) )
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF (1450)             //  "A Yakuza got away, Jumbo! That's no good! It's back to cleaning toilets for you."
+	      DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_loon_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+    
+    //  If the yakuza 2 is alive and managed to escape
+    IF ( ( l_h_2_yak_2_died = 0 ) AND ( LOCATE_CHARACTER_ON_FOOT(l_h_2_yaku_2_char, 16.50, 200.50, 2.00, 1.00, 1.00) ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1451)             //  "A Yakuza escaped, Jumbo, so you be the bitch with no job."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+    
+    //  If the yakuza 3 is alive and managed to escape
+    IF ( ( l_h_2_yak_3_died = 0 ) AND ( LOCATE_CHARACTER_ON_FOOT(l_h_2_yaku_3_char, 16.50, 199.50, 2.00, 1.00, 1.00) ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1452)             //  "A Yakuza escaped, Jumbo - and I thought I was the stupid one."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+    
+    
+    //  If the player entered a Zaibatsu Z-Type
+    IF ( ( l_h_2_in_z_type_2 = 0 ) AND ( IS_CHARACTER_IN_MODEL(p1, VTYPE) ) )
+       IF ( l_h_2_in_z_type = 0 )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1434)                              //  "Ooh, the Z-Type is cool, Jumbo. Now get hunting those Yakuza!"
+          POINT_ARROW_AT (arrow1, 68.50, 198.50, 2.00)          //  Point arrow at Yakuza's Turf
+          SET l_h_2_in_z_type = 1                     //  Lock this IF and Unlock the next IF
+          SET l_h_2_out_z_type = 0                     //  Unlock the next IF
+          SET l_h_2_in_z_type_2 = 1                     //  Lock this IF
+       ENDIF
+    ENDIF
+    
+    //  If the player left a Zaibatsu Z-Type
+    IF ( ( l_h_2_out_z_type = 0 ) AND ( NOT ( IS_CHARACTER_IN_MODEL(p1, VTYPE) ) ) )
+       IF ( l_h_2_in_z_type = 1 )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1435)            //  "Look, Jumbo, you HAVE to use a Zaibatsu Z-Type for my plan to work."
+          REMOVE_ARROW (arrow1)               //  Remove arrow from Yakuza's Turf
+          SET l_h_2_in_z_type = 0                     //  Lock this IF and Unlock the previous IF
+          SET l_h_2_out_z_type = 1                     //  Lock this IF
+          SET l_h_2_in_z_type_2 = 0                     //  Unlock the previous IF
+       ENDIF
+    ENDIF
+    
+    //  If the player entered into Yakuza's turf
+    IF ( ( IS_CHAR_IN_GANGZONE(p1, yakuzagang) ) AND ( l_h_2_hunting_yak = 0 ) )
+       IF ( l_h_2_in_z_type = 1 )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1437)            //  "Welcome to Yakuza Town, Jumbo! Happy hunting!"
+          REMOVE_ARROW (arrow1)               //  Remove arrow from Yakuza's Turf
+          SET l_h_2_plyr_yak_territory = 1
+          SET l_h_2_hunting_yak = 1                     //  Lock this IF
+          SET l_h_2_not_hunt_yak = 0
+       ENDIF
+    ENDIF
+    
+    //  If the player left the Yakuza's turf
+    IF ( ( NOT ( IS_CHAR_IN_GANGZONE(p1, yakuzagang) ) ) AND ( l_h_2_hunting_yak = 1 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1438)               //  "Get back on the Yakuza turf, Jumbo."
+       POINT_ARROW_AT (arrow1, 68.50, 198.50, 2.00)    //  Point arrow to Yakuza turf
+       SET l_h_2_plyr_yak_territory = 0
+       SET l_h_2_hunting_yak = 0                        //  Lock this IF and unlocks the previous IF
+       SET l_h_2_in_z_type = 1
+    ENDIF
+    
+    //  If the player is on Yakuza's turf but isn't using a Z-type
+    IF ( ( l_h_2_not_hunt_yak = 0 ) AND ( IS_CHAR_IN_GANGZONE(p1, yakuzagang) ) )
+       IF ( l_h_2_in_z_type = 0 )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1435)           //  "Look, Jumbo, you HAVE to use a Zaibatsu Z-Type for my plan to work."
+          REMOVE_ARROW (arrow1)
+          SET l_h_2_in_z_type = 0
+          SET l_h_2_not_hunt_yak = 1
+          SET l_h_2_hunting_yak = 0
+       ENDIF
+    ENDIF
+    
+    //  If the player isn't on yakuza's turf
+    IF ( NOT ( IS_CHAR_IN_GANGZONE(p1, yakuzagang) ) )
+       REMOVE_ARROW (arrow2)
+       SET l_h_2_arrow_2_on_screen = 0
+       REMOVE_ARROW (arrow3)
+       SET l_h_2_arrow_3_on_screen = 0
+       REMOVE_ARROW (arrow4)
+       SET l_h_2_arrow_4_on_screen = 0
+       SET l_h_2_plyr_yak_territory = 0
+       SET l_h_2_hunting_yak = 0
+    ENDIF
+    
+    //  If the player is in yakuza's turf but isn't in a Z-type car
+    IF ( ( IS_CHAR_IN_GANGZONE(p1, yakuzagang) ) AND ( l_h_2_in_z_type = 0 ) )
+       REMOVE_ARROW (arrow2)
+       SET l_h_2_arrow_2_on_screen = 0
+       REMOVE_ARROW (arrow3)
+       SET l_h_2_arrow_3_on_screen = 0
+       REMOVE_ARROW (arrow4)
+       SET l_h_2_arrow_4_on_screen = 0
+    ENDIF
+    
+    
+    //  Set the Yakuza 1 arrow if all requisites are satisfied
+    IF ( ( l_h_2_yak_1_died = 0 ) AND ( NOT ( HAS_CHARACTER_DIED(l_h_2_yaku_1_char) ) ) )
+       IF ( l_h_2_plyr_yak_territory = 1 )
+          IF ( l_h_2_in_z_type = 1 )
+             POINT_ARROW_AT (arrow2, l_h_2_yaku_1_char)
+             SET l_h_2_arrow_2_on_screen = 1
+          ENDIF
+       ENDIF
+    ENDIF
+    
+    //  Set the Yakuza 2 arrow if all requisites are satisfied
+    IF ( ( l_h_2_yak_2_died = 0 ) AND ( NOT ( HAS_CHARACTER_DIED(l_h_2_yaku_2_char) ) ) )
+       IF ( l_h_2_plyr_yak_territory = 1 )
+          IF ( l_h_2_in_z_type = 1 )
+             POINT_ARROW_AT (arrow3, l_h_2_yaku_2_char)
+             SET l_h_2_arrow_3_on_screen = 1
+          ENDIF
+       ENDIF
+    ENDIF
+    
+    //  Set the Yakuza 3 arrow if all requisites are satisfied
+    IF ( ( l_h_2_yak_3_died = 0 ) AND ( NOT ( HAS_CHARACTER_DIED(l_h_2_yaku_3_char) ) ) )
+       IF ( l_h_2_plyr_yak_territory = 1 )
+          IF ( l_h_2_in_z_type = 1 )
+             POINT_ARROW_AT (arrow4, l_h_2_yaku_3_char)
+             SET l_h_2_arrow_4_on_screen = 1
+          ENDIF
+       ENDIF
+    ENDIF
+    
+    //  If yakuza 1 died
+    IF ( ( HAS_CHARACTER_DIED(l_h_2_yaku_1_char) ) AND ( l_h_2_yak_1_died = 0 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1439)      //  "Hoo-hoo! I bet that hurts!"
+       REMOVE_ARROW (arrow2)         //  Remove arrow from him
+       SET l_h_2_arrow_2_on_screen = 0               //  There is no longer an arrow at him anymore
+       ++l_h_2_yak_lieutenants_died                     //  Count +1 yakuza lieutenant died
+       SET l_h_2_yak_1_died = 1               //  Lock this IF
+    ENDIF
+    
+    //  If yakuza 2 died
+    IF ( ( HAS_CHARACTER_DIED(l_h_2_yaku_2_char) ) AND ( l_h_2_yak_2_died = 0 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1440)      //  "I say! That's the style!"
+       REMOVE_ARROW (arrow3)         //  Remove arrow from him
+       SET l_h_2_arrow_3_on_screen = 0               //  There is no longer an arrow at him anymore
+       ++l_h_2_yak_lieutenants_died                     //  Count +1 yakuza lieutenant died
+       SET l_h_2_yak_2_died = 1               //  Lock this IF
+    ENDIF
+    
+    //  If yakuza 3 died
+    IF ( ( HAS_CHARACTER_DIED(l_h_2_yaku_3_char) ) AND ( l_h_2_yak_3_died = 0 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1441)      //  "Hey! Them bones, them bones, them broken bones!"
+       REMOVE_ARROW (arrow4)         //  Remove arrow from him
+       SET l_h_2_arrow_4_on_screen = 0               //  There is no longer an arrow at him anymore
+       ++l_h_2_yak_lieutenants_died                     //  Count +1 yakuza lieutenant died
+       SET l_h_2_yak_3_died = 1               //  Lock this IF
+    ENDIF
+    
+    
+    //  If yakuza 1 died but the player isn't using a Z-type
+    IF ( ( l_h_2_yak_1_died = 1 ) AND ( l_h_2_in_z_type = 0 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1012)          //  "I told you to use a Z-Type."
+       DISPLAY_MESSAGE (1125)        //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+    
+    //  If yakuza 2 died but the player isn't using a Z-type
+    IF ( ( l_h_2_yak_2_died = 1 ) AND ( l_h_2_in_z_type = 0 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1012)          //  "I told you to use a Z-Type."
+       DISPLAY_MESSAGE (1125)        //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+    
+    //  If yakuza 3 died but the player isn't using a Z-type
+    IF ( ( l_h_2_yak_3_died = 1 ) AND ( l_h_2_in_z_type = 0 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1012)          //  "I told you to use a Z-Type."
+       DISPLAY_MESSAGE (1125)        //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+
+ //  The player killed all yakuza lieutenants exactly as Elmo wanted
+
+ 
+ //  Creating the three Zaibatsu lieutenants
+ l_h_2_zaib_1_char = CREATE_CHAR (250.50, 100.50, 4.00) 8 0 CRIMINAL END
+ l_h_2_zaib_2_char = CREATE_CHAR (183.50, 34.50, 2.00) 8 0 CRIMINAL END
+ l_h_2_zaib_3_char = CREATE_CHAR (214.50, 94.50, 3.00) 8 0 CRIMINAL END
+ 
+ SET_CHAR_THREAT_REACTION (l_h_2_zaib_1_char, REACT_AS_NORMAL)
+ SET_CHAR_THREAT_SEARCH (l_h_2_zaib_1_char, LINE_OF_SIGHT_PLAYER_ONLY)
+ ADD_CHAR_TO_GANG (l_h_2_zaib_1_char, zaibatsugang)
+ 
+ SET_CHAR_THREAT_REACTION (l_h_2_zaib_2_char, REACT_AS_NORMAL)
+ SET_CHAR_THREAT_SEARCH (l_h_2_zaib_2_char, LINE_OF_SIGHT_PLAYER_ONLY)
+ ADD_CHAR_TO_GANG (l_h_2_zaib_2_char, zaibatsugang)
+ 
+ SET_CHAR_THREAT_REACTION (l_h_2_zaib_3_char, REACT_AS_NORMAL)
+ SET_CHAR_THREAT_SEARCH (l_h_2_zaib_3_char, LINE_OF_SIGHT_PLAYER_ONLY)
+ ADD_CHAR_TO_GANG (l_h_2_zaib_3_char, zaibatsugang)
+ 
+ DISPLAY_BRIEF (1442)    //  "Steal a Yakuza Miara and drive over to the Zaibatsu quarter - then run over Trey Welsh's top three Z-Lieutenants. Ha ha ha!"
+ 
+ //  I will leave only the most important comments, since this Zaibatsu part is totally analogous to yakuza part
+ 
+ WHILE_EXEC ( NOT ( l_h_2_zai_lieutenants_died = 3 ) )
+    
+    //  If the zaibatsu 1 is alive and on player screen, flee to ( 236.5, 73.5, 4.0 )
+    IF ( ( l_h_2_zai_1_died = 0 ) AND ( IS_ITEM_ONSCREEN(l_h_2_zaib_1_char) ) )
+       SET_CHAR_OBJECTIVE (l_h_2_zaib_1_char, GOTO_AREA_ON_FOOT, 236.50, 73.50, 4.00)
+    ENDIF
+    
+    //  If the zaibatsu 2 is alive and on player screen, flee to ( 236.5, 74.5, 4.0 )
+    IF ( ( l_h_2_zai_2_died = 0 ) AND ( IS_ITEM_ONSCREEN(l_h_2_zaib_2_char) ) )
+       SET_CHAR_OBJECTIVE (l_h_2_zaib_2_char, GOTO_AREA_ON_FOOT, 236.50, 74.50, 4.00)
+    ENDIF
+    
+    //  If the zaibatsu 3 is alive and on player screen, flee to ( 237.5, 73.5, 4.0 )
+    IF ( ( l_h_2_zai_3_died = 0 ) AND ( IS_ITEM_ONSCREEN(l_h_2_zaib_3_char) ) )
+       SET_CHAR_OBJECTIVE (l_h_2_zaib_3_char, GOTO_AREA_ON_FOOT, 237.50, 73.50, 4.00)
+    ENDIF
+    
+    
+    //  If the zaibatsu 1 is alive and managed to escape
+    IF ( ( l_h_2_zai_1_died = 0 ) AND ( LOCATE_CHARACTER_ON_FOOT(l_h_2_zaib_1_char, 236.50, 73.50, 4.00, 1.00, 1.00) ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1453)               //  "A Zaibatsu escaped, Jumbo. Get back to your mummy."
+       DISPLAY_MESSAGE (1125)             //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+    
+    //  If the zaibatsu 2 is alive and managed to escape
+    IF ( ( l_h_2_zai_2_died = 0 ) AND ( LOCATE_CHARACTER_ON_FOOT(l_h_2_zaib_2_char, 236.50, 74.50, 4.00, 1.00, 1.00) ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1454)               //  "A Zaibatsu got away! You screwed up, Jumbo. Get back behind the bar."
+       DISPLAY_MESSAGE (1125)             //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+    
+    //  If the zaibatsu 3 is alive and managed to escape
+    IF ( ( l_h_2_zai_3_died = 0 ) AND ( LOCATE_CHARACTER_ON_FOOT(l_h_2_zaib_3_char, 237.50, 73.50, 4.00, 1.00, 1.00) ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1455)               //  "A Zaibatsu escaped, Jumbo. You know - I don't like you any more."
+       DISPLAY_MESSAGE (1125)             //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+    
+    //  If the player entered a Yakuza Miara
+    IF ( ( l_h_2_in_miara_2 = 0 ) AND ( IS_CHARACTER_IN_MODEL(p1, MIURA) ) )
+       IF ( l_h_2_in_miara = 0 )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1444)
+          POINT_ARROW_AT (arrow1, 223.50, 82.50, 3.00)
+          SET l_h_2_in_miara = 1
+          SET l_h_2_out_miara = 0
+          SET l_h_2_in_miara_2 = 1
+       ENDIF
+    ENDIF
+    
+    //  If the player left a Yakuza Miara
+    IF ( ( l_h_2_out_miara = 0 ) AND ( NOT ( IS_CHARACTER_IN_MODEL(p1, MIURA) ) ) )			//  l_h_2_out_z_type or l_h_2_out_miara?
+       IF ( l_h_2_in_miara = 1 )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF (1443)
+          REMOVE_ARROW (arrow1)
+          SET l_h_2_in_miara = 0
+          SET l_h_2_out_miara = 1
+          SET l_h_2_in_miara_2 = 0
+       ENDIF
+    ENDIF
+    
+    //  If the player entered into Zaibatsu's turf
+    IF ( ( IS_CHAR_IN_GANGZONE(p1, zaibatsugang) ) AND ( l_h_2_hunting_zai = 0 ) )
+       IF ( l_h_2_in_miara = 1 )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1445)
+          REMOVE_ARROW (arrow1)
+          SET l_h_2_plyr_zai_territory = 1
+          SET l_h_2_hunting_zai = 1
+          SET l_h_2_not_hunt_zai = 0
+       ENDIF
+    ENDIF
+    
+    //  If the player left the Zaibatsu's turf
+    IF ( ( NOT ( IS_CHAR_IN_GANGZONE(p1, zaibatsugang) ) ) AND ( l_h_2_hunting_zai = 1 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1446)
+       POINT_ARROW_AT (arrow1, 223.50, 82.50, 3.00)
+       SET l_h_2_plyr_zai_territory = 0
+       SET l_h_2_hunting_zai = 0
+       SET l_h_2_in_miara = 1
+    ENDIF
+    
+    //  If the player is on Zaibatsu's turf but isn't using a Miara
+    IF ( ( l_h_2_not_hunt_zai = 0 ) AND ( IS_CHAR_IN_GANGZONE(p1, zaibatsugang) ) )
+       IF ( l_h_2_in_miara = 0 )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF (1443)
+          REMOVE_ARROW (arrow1)
+          SET l_h_2_in_miara = 0
+          SET l_h_2_not_hunt_zai = 1
+          SET l_h_2_hunting_zai = 0
+       ENDIF
+    ENDIF
+    
+    //  If the player isn't on Zaibatsu's turf
+    IF ( NOT ( IS_CHAR_IN_GANGZONE(p1, zaibatsugang) ) )
+       REMOVE_ARROW (arrow2)
+       SET l_h_2_arrow_2_on_screen = 0
+       REMOVE_ARROW (arrow3)
+       SET l_h_2_arrow_3_on_screen = 0
+       REMOVE_ARROW (arrow4)
+       SET l_h_2_arrow_4_on_screen = 0
+       SET l_h_2_plyr_zai_territory = 0
+    ENDIF
+    
+    //  If the player is in Zaibatsu's turf but isn't in a Miara car
+    IF ( ( IS_CHAR_IN_GANGZONE(p1, zaibatsugang) ) AND ( l_h_2_in_miara = 0 ) )
+       REMOVE_ARROW (arrow2)
+       SET l_h_2_arrow_2_on_screen = 0
+       REMOVE_ARROW (arrow3)
+       SET l_h_2_arrow_3_on_screen = 0
+       REMOVE_ARROW (arrow4)
+       SET l_h_2_arrow_4_on_screen = 0
+    ENDIF
+    
+    //  Set the Zaibatsu 1 arrow if all requisites are satisfied
+    IF ( ( l_h_2_zai_1_died = 0 ) AND ( NOT ( HAS_CHARACTER_DIED(l_h_2_zaib_1_char) ) ) )
+       IF ( l_h_2_plyr_zai_territory = 1 )
+          IF ( l_h_2_in_miara = 1 )
+             POINT_ARROW_AT (arrow2, l_h_2_zaib_1_char)
+             SET l_h_2_arrow_2_on_screen = 1
+          ENDIF
+       ENDIF
+    ENDIF
+    
+    //  Set the Zaibatsu 2 arrow if all requisites are satisfied
+    IF ( ( l_h_2_zai_2_died = 0 ) AND ( NOT ( HAS_CHARACTER_DIED(l_h_2_zaib_2_char) ) ) )
+       IF ( l_h_2_plyr_zai_territory = 1 )
+          IF ( l_h_2_in_miara = 1 )
+             POINT_ARROW_AT (arrow3, l_h_2_zaib_2_char)
+             SET l_h_2_arrow_3_on_screen = 1
+          ENDIF
+       ENDIF
+    ENDIF
+    
+    //  Set the Zaibatsu 3 arrow if all requisites are satisfied
+    IF ( ( l_h_2_zai_3_died = 0 ) AND ( NOT ( HAS_CHARACTER_DIED(l_h_2_zaib_3_char) ) ) )
+       IF ( l_h_2_plyr_zai_territory = 1 )
+          IF ( l_h_2_in_miara = 1 )
+             POINT_ARROW_AT (arrow4, l_h_2_zaib_3_char)
+             SET l_h_2_arrow_4_on_screen = 1
+          ENDIF
+       ENDIF
+    ENDIF
+    
+    //  If zaibatsu 1 died
+    IF ( ( HAS_CHARACTER_DIED(l_h_2_zaib_1_char) ) AND ( l_h_2_zai_1_died = 0 ) )
+       DISPLAY_BRIEF (1447)
+       REMOVE_ARROW (arrow2)
+       SET l_h_2_arrow_2_on_screen = 0
+       ++l_h_2_zai_lieutenants_died
+       SET l_h_2_zai_1_died = 1
+    ENDIF
+    
+    //  If zaibatsu 2 died
+    IF ( ( HAS_CHARACTER_DIED(l_h_2_zaib_2_char) ) AND ( l_h_2_zai_2_died = 0 ) )
+       DISPLAY_BRIEF (1448)
+       REMOVE_ARROW (arrow3)
+       SET l_h_2_arrow_3_on_screen = 0
+       ++l_h_2_zai_lieutenants_died
+       SET l_h_2_zai_2_died = 1
+    ENDIF
+    
+    //  If zaibatsu 3 died
+    IF ( ( HAS_CHARACTER_DIED(l_h_2_zaib_3_char) ) AND ( l_h_2_zai_3_died = 0 ) )
+       DISPLAY_BRIEF (1449)
+       REMOVE_ARROW (arrow4)
+       SET l_h_2_arrow_4_on_screen = 0
+       ++l_h_2_zai_lieutenants_died
+       SET l_h_2_zai_3_died = 1
+    ENDIF
+    
+    
+    //  If zaibatsu 1 died but the player isn't using a Miara
+    IF ( ( l_h_2_zai_1_died = 1 ) AND ( l_h_2_in_miara = 0 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1013)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+    
+    //  If zaibatsu 2 died but the player isn't using a Miara
+    IF ( ( l_h_2_zai_2_died = 1 ) AND ( l_h_2_in_miara = 0 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1013)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+    
+    //  If zaibatsu 3 died but the player isn't using a Miara
+    IF ( ( l_h_2_zai_3_died = 1 ) AND ( l_h_2_in_miara = 0 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1013)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+
+ //  The player killed all Zaibatsu lieutenants exactly as Elmo wanted
+ 
+ IF ( flag_failed_mission = 0 )         //  If the player do not failed the mission
+ 
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF_NOW (1433)      //  "Nice, Jumbo! Stick with the Loonies - we always have the most fun. Here's $60,000 for you to play with."
+    DISPLAY_MESSAGE (1124)        //  JOB COMPLETE!
+    ADD_SCORE (p1, 60000)
+    ADD_MULTIPLIER (p1, 1)
+    CLEAR_WANTED_LEVEL (p1)
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (looniegang, p1, 1)    //  RESPECT +
+    
+    SET flag_passed_loon_hard_phone_m2 = 1           //  The player passed this mission
+    
+    IF ( flag_passed_loon_hard_phone_m2 = 1 )        //  If the player passed this mission
+       SET_PHONE_DEAD (ph_loon_hard_phone)     //  Kill the Loonies Hard phone
+       SET flag_kill_loon_hard_phone = 1       //  Store that kill
+    ENDIF
+    
+ ENDIF
+
+RETURN
+
+clean_up_loon_hard_phone_m2:               //  Clean up
+
+	SET flag_failed_mission = 0
+ 
+	REMOVE_ARROW (arrow1)
+	REMOVE_ARROW (arrow2)
+	REMOVE_ARROW (arrow3)
+	REMOVE_ARROW (arrow4)
+ 
+	CLEAR_WANTED_LEVEL (p1)
+ 
+	MISSION_HAS_FINISHED ()
+ 
+ IF ( flag_passed_loon_hard_phone_m2 = 1 )   //  If the player completed this mission, count +1 (loonies) mission passed
+	   ++flag_all_missions_passed
+	   ++flag_loon_missions_passed
+	ENDIF
+ 
+ IF ( ( flag_failed_loon_hard_phone_m2 = 1 ) OR ( CHECK_DEATHARREST_EXECUTED() ) )  //  If the player failed this mission, count +1 (loonies) mission failed
+	   ++flag_loon_missions_failed
+	   ++flag_all_missions_failed
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (looniegang, p1, -1)   //  Lose Respect
+	   CLEAR_WANTED_LEVEL (p1)
+	ENDIF
+ 
+	SET flag_on_mission = 0
+	SET flag_on_loon_mission = 0
+ 
+RETURN
+
+MISSIONSTART
+GOSUB loon_hard_phone_m2:
+GOSUB clean_up_loon_hard_phone_m2:
+MISSIONEND

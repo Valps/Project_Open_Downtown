@@ -1,0 +1,259 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX STOP THE TANK! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_yh2.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD yaku_hard_phone_m2:
+//FORWARD clean_up_yaku_hard_phone_m2:
+
+CAR_DATA y_h_2_tank_car
+CAR_DATA y_h_2_exotic_car
+
+CHAR_DATA y_h_2_tank_driver
+CHAR_DATA y_h_2_north_row_leader
+CHAR_DATA y_h_2_south_row_leader
+
+COUNTER y_h_2_is_tank_driving = 0
+COUNTER y_h_2_tank_firing_flag = 0
+COUNTER y_h_2_tank_destroyed = 0
+
+OBJ_DATA y_h_2_rocket_launcher
+OBJ_DATA y_h_2_invisible_obj
+
+yaku_hard_phone_m2:
+
+	 SET flag_failed_yaku_hard_phone_m2 = 0                  // fail flag:  flag_failed_yaku_hard_phone_m2
+  
+	 EXEC
+     SET flag_on_mission = 1                   // Player is playing a mission
+	    SET flag_on_yaku_mission = 1                   // Player is playing a yakuza mission
+     
+	    SET_DEATHARREST_STATE (p1, OFF)  // Handle with death and arrest manually
+	    DISPLAY_MESSAGE (1981)           // STOP THE TANK!
+	    SET_CAR_DENSITY (road_yh2, 0)    // "road_yh2" is a zone map including only the avennue in which the military raid will take place; no NPC cars spawns in it
+     
+	    y_h_2_rocket_launcher = CREATE_OBJ (102.50, 244.50, 2.00) 0 COLLECT_02 10 END         // Spawn a Rocket Launcher to the player
+	    y_h_2_invisible_obj = CREATE_OBJ (47.50, 166.50, 2.00) 0 INVISIBLE_TARGET END       // Invisible barrier protecting Johnny Zoo's car
+     
+	    y_h_2_exotic_car = CREATE_CAR (46.50, 166.50, 2.00) 9 0 MIURA END                // Johnny Zoo's car
+     
+	    CHANGE_CAR_LOCK (y_h_2_exotic_car, LOCKED)                            //  Lock Johnny Zoo's car
+	    SET_CAR_BULLETPROOF (y_h_2_exotic_car, ON)                            //  Bulletproof it
+	    SET_CAR_FLAMEPROOF (y_h_2_exotic_car, ON)                             //  Flameproof it
+	    SET_CAR_NO_COLLIDE (y_h_2_exotic_car)                                 //  Nobody can push it, the car will stay in its place
+     
+	    DISPLAY_BRIEF (1401)   //  "Kosai! Johnny Zoo here! Military top brass are pissed with me and sending a Tank and Ground Troops to trash my exotic cars. I need your help."
+     
+	    y_h_2_tank_car = CREATE_CAR (102.50, 166.50, 2.00) -1 270 TANK END   //  Military tank
+     
+	    SET_CAR_BULLETPROOF (y_h_2_tank_car, ON)                             //  Is this necessary?
+	    SET_CAR_FLAMEPROOF (y_h_2_tank_car, ON)                              //  Is this necessary?
+	    CHANGE_CAR_LOCK (y_h_2_tank_car, LOCKED)                             //  Player cannot steal the tank
+     
+	    y_h_2_tank_driver = CREATE_CHAR_INSIDE_CAR (y_h_2_tank_car) 8 CRIMINAL END        //  Tank Driver
+	    SET_CHAR_THREAT_SEARCH (y_h_2_tank_driver, NO_THREATS)                    //  No threats
+	    SET_CHAR_THREAT_REACTION (y_h_2_tank_driver, NO_REACTION)                 //  Just keep driving
+	    ADD_CHAR_TO_GANG (y_h_2_tank_driver, zaibatsugang)                        //  Zaibatsu? Maybe it will make him hostile to another yakuza gang members
+	    SET_CHAR_DRIVE_AGGRESSION (y_h_2_tank_driver, ON)                         //  Ignore traffic lights
+	    SET_CHAR_MAX_DRIVESPEED (y_h_2_tank_driver, 0.02)                         //  He will not speed up
+     
+	    y_h_2_north_row_leader = CREATE_CHAR (99.50, 164.50, 2.00) 8 0 CRIMINAL_TYPE1 END   //  Leader of north row
+	    y_h_2_south_row_leader = CREATE_CHAR (99.50, 166.50, 2.00) 8 0 CRIMINAL_TYPE1 END   //  Leader of south row
+     
+	    SET_CHAR_THREAT_SEARCH (y_h_2_north_row_leader, AREA_PLAYER_ONLY)              //  Only attack player if he saw him
+	    SET_CHAR_THREAT_REACTION (y_h_2_north_row_leader, REACT_AS_NORMAL)             //  Not flee from combat
+	    SET_CHAR_THREAT_SEARCH (y_h_2_south_row_leader, AREA_PLAYER_ONLY)              //  Only attack player if he saw him
+	    SET_CHAR_THREAT_REACTION (y_h_2_south_row_leader, REACT_AS_NORMAL)             //  Not flee from combat
+     
+	    GIVE_WEAPON (y_h_2_north_row_leader, MACHINE_GUN)          //  Military weapon
+	    GIVE_WEAPON (y_h_2_south_row_leader, MACHINE_GUN)          //  Military weapon
+     
+	    ADD_GROUP_TO_CHARACTER (y_h_2_north_row_leader, 2)         //  Military back group
+	    ADD_GROUP_TO_CHARACTER (y_h_2_south_row_leader, 2)         //  Military back group
+     
+	    SET_GROUP_TYPE (y_h_2_north_row_leader, CHAIN)             //  Follow up in chain
+	    SET_GROUP_TYPE (y_h_2_south_row_leader, CHAIN)             //  Follow up in chain
+     
+	    SET_CHAR_OBJECTIVE (y_h_2_north_row_leader, FOLLOW_CAR_ON_FOOT_WITH_OFFSET, y_h_2_tank_car, 90, 1.00)    // Follow the tank
+	    SET_CHAR_OBJECTIVE (y_h_2_south_row_leader, FOLLOW_CAR_ON_FOOT_WITH_OFFSET, y_h_2_tank_car, 270, 1.00)   // Follow the tank
+	    SET_CHAR_OBJECTIVE (y_h_2_tank_driver, GOTO_AREA_IN_CAR, 53.50, 166.50, 2.00)               // Driver: go to the place the Johnny Zoo's cars be in
+     
+     POINT_ARROW_AT (arrow1, y_h_2_tank_car)          //  Point arrow at the tank
+	ENDEXEC
+ 
+ WHILE_EXEC ( y_h_2_is_tank_driving = 0 )                    //  Loop
+ 
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF (1404)               //  "Your failure to stop this military offensive has cost me dear, Kosai. Be thankful I cannot touch you from here."
+	      DISPLAY_MESSAGE (1125)             //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_yaku_hard_phone_m2 = 1
+	      MAKE_CHAR_DO_NOTHING (y_h_2_tank_driver)
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1409)               //  "The Tank is still rolling, Kosai. Don't get arrested again."
+       DISPLAY_MESSAGE (1125)             //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_hard_phone_m2 = 1
+       MAKE_CHAR_DO_NOTHING (y_h_2_tank_driver)
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(y_h_2_exotic_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1405)               //  "My beautiful cars are destroyed! Now I must take the bus, Kosai?"
+       DISPLAY_MESSAGE (1125)             //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_hard_phone_m2 = 1
+       RETURN
+    ENDIF
+    
+    IF ( ( y_h_2_tank_destroyed = 0 ) AND ( IS_CAR_WRECKED(y_h_2_tank_car) ) )     //  Tank destroyed
+       REMOVE_ARROW (arrow1)
+       SET y_h_2_tank_destroyed = 1                                        //  Lock this IF
+       SET y_h_2_is_tank_driving = 2                                        //  Halts the while loop (finish mission)
+    ENDIF
+    
+    IF ( IS_CAR_IN_BLOCK(y_h_2_tank_car, 53.50, 166.50, 2.00, 1.00, 2.00) )
+       SET y_h_2_is_tank_driving = 1                                        //  Halts the while loop (continue mission)
+    ENDIF
+    
+ ENDWHILE
+ 
+ 
+ IF ( y_h_2_is_tank_driving = 2 )                     //  If the player destroyed the tank
+    IF ( flag_failed_mission = 0 )                   //  If the player not failed the mission
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1403)
+       DISPLAY_MESSAGE (1124)
+       ADD_SCORE (p1, 60000)
+       ADD_MULTIPLIER (p1, 1)
+       CLEAR_WANTED_LEVEL (p1)
+       SET flag_passed_yaku_hard_phone_m2 = 1              //  Yakuza Hard Mission 2 finished
+       CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (yakuzagang, p1, 1)
+       
+       IF ( flag_passed_yaku_hard_phone_m2 = 1 )           //  If player finished this mission
+          SET_PHONE_DEAD (ph_yaku_hard_phone)        //  Kill Yakuza Hard Phone
+          SET flag_kill_yaku_hard_phone = 1          //  Store that kill
+       ENDIF
+       
+       RETURN                           //  Go to clean up
+       
+    ENDIF
+ ENDIF
+ 
+ //  The tank didn't have been destroyed yet, the tank arrived at the target
+ 
+ IF ( ( y_h_2_is_tank_driving = 1 ) AND ( y_h_2_tank_destroyed = 0 ) )
+    SET_CHAR_OBJECTIVE (y_h_2_tank_driver, WAIT_IN_CAR)      //  Stop the vehicle
+    SET_CHAR_OBJECTIVE (y_h_2_tank_driver, FIRE_AT_OBJECT_FROM_VEHICLE, y_h_2_invisible_obj)     // Start shooting at Johnny Zoo's cars
+ ENDIF 
+ 
+ WHILE_EXEC ( y_h_2_tank_firing_flag = 0 )
+ 
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1404)                //  "Your failure to stop this military offensive has cost me dear, Kosai. Be thankful I cannot touch you from here."
+       DISPLAY_MESSAGE (1125)              //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_hard_phone_m2 = 1
+       MAKE_CHAR_DO_NOTHING (y_h_2_tank_driver)
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1409)                //  "The Tank is still rolling, Kosai. Don't get arrested again."
+       DISPLAY_MESSAGE (1125)              //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_hard_phone_m2 = 1
+       MAKE_CHAR_DO_NOTHING (y_h_2_tank_driver)
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(y_h_2_exotic_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1405)                //  "My beautiful cars are destroyed! Now I must take the bus, Kosai?"
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_hard_phone_m2 = 1
+       SET y_h_2_tank_firing_flag = 1
+       MAKE_CHAR_DO_NOTHING (y_h_2_tank_driver)
+       RETURN
+    ENDIF
+    
+    IF ( y_h_2_tank_destroyed = 0 )
+       IF ( IS_CAR_WRECKED(y_h_2_tank_car) )
+          CLEAR_ALL_BRIEFS ()
+          //DISPLAY_BRIEF (1407)        //  "PLEASE REPORT DEAD BRIEF 1407 TO ALAN JACK AND WILLY MILLS!"   ??????????
+          REMOVE_ARROW (arrow1)       //  Remove arrow from the tank
+          SET y_h_2_tank_destroyed = 1             //  Lock this IF
+          SET y_h_2_tank_firing_flag = 2             //  Finished the mission successfully and halts the WHILE loop
+       ENDIF
+    ENDIF
+    
+ ENDWHILE
+
+ IF ( ( y_h_2_tank_firing_flag = 2 ) AND ( flag_failed_mission = 0 ) )       // Tank destroyed  AND  Player not failed the mission
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF (1403)              //  "Fantastic, Kosai! You are my first call if the Military strike. Here's $60,000."
+    DISPLAY_MESSAGE (1124)            //  JOB COMPLETE!
+    ADD_SCORE (p1, 60000)
+    ADD_MULTIPLIER (p1, 1)
+    CLEAR_WANTED_LEVEL (p1)
+    SET flag_passed_yaku_hard_phone_m2 = 1                  //  Yakuza Hard Mission 2 passed
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (yakuzagang, p1, 1)
+    
+    IF ( flag_passed_yaku_hard_phone_m2 = 1 )              //  If the player finished this mission successfully
+       SET_PHONE_DEAD (ph_yaku_hard_phone)           //  Kill the phone
+       SET flag_kill_yaku_hard_phone = 1             //  Store that kill
+    ENDIF
+ ENDIF
+
+RETURN                  // Go to clean up
+
+           
+
+clean_up_yaku_hard_phone_m2:
+
+	SET flag_failed_mission = 0                        //  Reset "Failed Mission" flag
+	REMOVE_ARROW (arrow1)                 //  Remove arrow
+	SET_CAR_DENSITY (road_yh2, 100)       //  NPC cars will respawn in this road again
+	CLEAR_WANTED_LEVEL (p1)               //  Remote wanted level from player
+	SET_DEATHARREST_STATE (p1, ON)        //  Reset the Death Arrest check state
+ 
+ IF ( y_h_2_tank_destroyed = 0 )                         //  Tank wasn't destroyed
+	   MAKE_CHAR_DO_NOTHING (y_h_2_tank_driver)             //  Do nothing
+	   SET_CHAR_OBJECTIVE (y_h_2_tank_driver, WAIT_IN_CAR)  //  Wait in car
+	ENDIF
+ 
+	MISSION_HAS_FINISHED ()
+ 
+ IF ( flag_passed_yaku_hard_phone_m2 = 1 )                // If the mission was passed
+	   ++flag_all_missions_passed                     // Count +1 mission passed
+	   ++flag_yaku_missions_passed                     // Count +1 yakuza mission passed
+	ENDIF
+ 
+ IF ( flag_failed_yaku_hard_phone_m2 = 1 )                 // IF the mission was failed
+	   ++flag_all_missions_failed                     // Count +1 mission failed
+	   ++flag_yaku_missions_failed                     // Count +1 yakuza mission failed
+    CLEAR_WANTED_LEVEL (p1)
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (yakuzagang, p1, -1)      // Reduce respect
+ ENDIF
+
+	SET flag_on_mission = 0              // Player isn't inside a mission anymore
+	SET flag_on_yaku_mission = 0              // Player isn't inside a yakuza mission anymore
+ 
+RETURN
+
+MISSIONSTART
+GOSUB yaku_hard_phone_m2:
+GOSUB clean_up_yaku_hard_phone_m2:
+MISSIONEND

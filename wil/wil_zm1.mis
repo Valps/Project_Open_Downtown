@@ -1,0 +1,993 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX LICK THOSE LOONIES! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_zm1.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD zaib_med_phone1_m1_part_1:
+//FORWARD zaib_med_phone1_m1_part_2:
+//FORWARD clean_up_zaib_med_phone1_m1:
+
+CAR_DATA z_m_1_dementia_car
+CAR_DATA z_m_1_black_van
+
+CHAR_DATA z_m_1_guard_1_char
+CHAR_DATA z_m_1_guard_2_char
+CHAR_DATA z_m_1_loony_group_leader
+CHAR_DATA z_m_1_zaib_man
+
+COUNTER z_m_1_surroundings_flag = 0
+COUNTER z_m_1_zmen_ofs = 0				    //  ofs = out of screen
+COUNTER z_m_1_player_fit_conditions = 0
+//COUNTER count27 = 0					not useful
+COUNTER z_m_1_player_ofp_flag = 0		    //  ofp = out of position; a brief flag
+COUNTER z_m_1_player_ofc = 0			    //  ofc = out of car
+//COUNTER count30 = 0			   not useful after the brief fix
+
+OBJ_DATA z_m_1_armour
+
+zaib_med_phone1_m1_part_1:
+
+	SET flag_on_mission = 1
+	SET flag_on_zaib_mission = 1
+ 
+	SET flag_failed_zaib_med_phone1_m1 = 0
+ 
+	SET_DEATHARREST_STATE (p1, OFF)     //  Handle deaths and arrests manually
+ 
+	DISPLAY_MESSAGE (1984)              //  LICK THOSE LOONIES!
+	DISPLAY_BRIEF (1221)            
+ 
+ //  "Trey Welsh here. The Loonies have slipped narcotics in the water supply and hit my drugs business. Revenge will be simple. First, you need a special Loony Dementia."
+ 
+ //  Create the 'special' Loony dementia
+	z_m_1_dementia_car = CREATE_GANG_CAR (16.50, 32.50, 255.00) 16 0 ISETTA END
+ 
+ //  Create the guards and their patrol path
+	z_m_1_guard_1_char = CREATE_CHAR (18.50, 36.50, 3.00) 11 0 CRIMINAL END
+	z_m_1_guard_2_char = CREATE_CHAR (18.50, 33.50, 3.00) 11 0 CRIMINAL END
+ 
+	ADD_PATROL_POINT (z_m_1_guard_1_char, 14.50, 36.50, 3.00)
+	ADD_PATROL_POINT (z_m_1_guard_1_char, 18.50, 36.50, 3.00)
+	ADD_PATROL_POINT (z_m_1_guard_2_char, 14.50, 33.50, 3.00)
+	ADD_PATROL_POINT (z_m_1_guard_2_char, 18.50, 33.50, 3.00)
+ 
+	SET_CHAR_THREAT_REACTION (z_m_1_guard_1_char, REACT_AS_NORMAL)
+	SET_CHAR_THREAT_REACTION (z_m_1_guard_2_char, REACT_AS_NORMAL)
+ 
+	SET_CHAR_THREAT_SEARCH (z_m_1_guard_1_char, LINE_OF_SIGHT_PLAYER_ONLY)
+	SET_CHAR_THREAT_SEARCH (z_m_1_guard_2_char, LINE_OF_SIGHT_PLAYER_ONLY)
+ 
+	GIVE_WEAPON (z_m_1_guard_1_char, PISTOL)
+	GIVE_WEAPON (z_m_1_guard_2_char, PISTOL)
+ 
+	POINT_ARROW_AT (arrow1, z_m_1_dementia_car)       //  Point arrow at the Loony dementia
+ 
+	ADD_CHAR_TO_GANG (z_m_1_guard_1_char, looniegang)
+	ADD_CHAR_TO_GANG (z_m_1_guard_2_char, looniegang)
+ 
+ WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_1_dementia_car) ) )
+    
+    //  If the player reached at the Loony car surroundings
+    IF ( ( z_m_1_surroundings_flag = 0 ) AND ( LOCATE_CHARACTER_ANY_MEANS(p1, 16.00, 36.00, 3.00, 6.00, 2.00) ) )
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1222)         //  "The Loony guards seem a bit twitchy. Make sure they don't spot you."
+	      SET z_m_1_surroundings_flag = 1                  //  Lock this IF
+    ENDIF
+    
+    //  If the player died
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF (1236)             //  "Shit like you is only fit for the sidewalk, Gecko."
+	      DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_zaib_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  If the player has been arrested
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (7085)             //  "Remember, Gecko - a Zaibatsu in custody never talks."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  If the Loony car has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_1_dementia_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1223)         //  "I didn't ask for a flaming Dementia, Gecko. Find yourself a new employer."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player entered the Loony dementia
+
+ REMOVE_ARROW (arrow1)
+ 
+ //  Check if the player hasn't cash enough to buy and rig a bomb
+ IF ( NOT ( CHECK_SCORE_GREATER(p1, 4999) ) )
+ 
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF_NOW (1224)        //  "You need $5,000 to get the car rigged - so start working!"
+    
+    //  While the player does not get the cash
+    WHILE_EXEC ( NOT ( CHECK_SCORE_GREATER(p1, 4999) ) )
+    
+       //  If the player died
+       IF ( HAS_CHARACTER_DIED(p1) )
+          CLEAR_ALL_BRIEFS ()
+	         DISPLAY_BRIEF (1236)             //  "Shit like you is only fit for the sidewalk, Gecko."
+	         DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+	         SET flag_failed_mission = 1
+	         SET flag_failed_zaib_med_phone1_m1 = 1
+          RETURN
+       ENDIF
+    
+       //  If the player has been arrested
+       IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF (7085)             //  "Remember, Gecko - a Zaibatsu in custody never talks."
+          DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+          SET flag_failed_mission = 1
+          SET flag_failed_zaib_med_phone1_m1 = 1
+          RETURN
+       ENDIF
+    
+       //  If the Loony car has been destroyed
+       IF ( IS_CAR_WRECKED(z_m_1_dementia_car) )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1223)         //  "I didn't ask for a flaming Dementia, Gecko. Find yourself a new employer."
+          DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+          SET flag_failed_mission = 1
+          SET flag_failed_zaib_med_phone1_m1 = 1
+          RETURN
+       ENDIF
+    
+    ENDWHILE
+    
+ ENDIF
+ 
+ //  The player has the money to buy a bomb
+ 
+ //  Check if the player is in the Loony car at this time
+ IF ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_1_dementia_car) ) )
+ 
+    POINT_ARROW_AT (arrow1, z_m_1_dementia_car)    //  Point arrow at the loony car
+    
+ ELSE
+ 
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF_NOW (1225) 
+    
+    //  OK, Gecko, here's the plan... Take the Dementia to the Bomb Shop and rig it with explosives. Then return the rigged Dementia to the Loony Garage and blow the Loons to the Moon.
+    
+    POINT_ARROW_AT (arrow1, 22.50, 60.50, 3.00)    //  Point arrow at the Bomb Shop
+    
+ ENDIF
+ 
+ 
+ //  While the player does not equip the car a bomb
+ WHILE_EXEC ( NOT ( HAS_CAR_GOT_WEAPON(z_m_1_dementia_car, CAR_BOMB) ) )
+    
+    //  If the player leaves the vehicle
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_1_dementia_car) ) )
+    
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1226)                //  "This car don't drive by ESP - so get your ass back in!"
+       POINT_ARROW_AT (arrow1, z_m_1_dementia_car)         //  Point arrow to the car
+       
+       //  While the player does not return to the vehicle
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_1_dementia_car) ) )
+          
+          //  If the player died
+          IF ( HAS_CHARACTER_DIED(p1) )
+             CLEAR_ALL_BRIEFS ()
+	            DISPLAY_BRIEF (1236)             //  "Shit like you is only fit for the sidewalk, Gecko."
+	            DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+	            SET flag_failed_mission = 1
+	            SET flag_failed_zaib_med_phone1_m1 = 1
+             RETURN
+          ENDIF
+    
+          //  If the player has been arrested
+          IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF (7085)             //  "Remember, Gecko - a Zaibatsu in custody never talks."
+             DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone1_m1 = 1
+             RETURN
+          ENDIF
+    
+          //  If the Loony car has been destroyed
+          IF ( IS_CAR_WRECKED(z_m_1_dementia_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1223)         //  "I didn't ask for a flaming Dementia, Gecko. Find yourself a new employer."
+             DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone1_m1 = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+       
+       ENDWHILE
+       
+       //  The player returned to the vehicle
+       
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1225)
+       
+       //  OK, Gecko, here's the plan... Take the Dementia to the Bomb Shop and rig it with explosives.
+       //  Then return the rigged Dementia to the Loony Garage and blow the Loons to the Moon.
+       
+       POINT_ARROW_AT (arrow1, 22.50, 60.50, 2.00)      //  Point arrow at the Bomb Shop
+       
+    ENDIF
+    
+    //  Checking...
+    
+    //  If the player died
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF (1236)             //  "Shit like you is only fit for the sidewalk, Gecko."
+	      DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_zaib_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  If the player has been arrested
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (7085)             //  "Remember, Gecko - a Zaibatsu in custody never talks."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  If the Loony car has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_1_dementia_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1223)         //  "I didn't ask for a flaming Dementia, Gecko. Find yourself a new employer."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+
+ //  The player rigged the Loony car with explosives
+ 
+ REMOVE_ARROW (arrow1)
+ 
+ UPDATE_DOOR_TARGET (door5, z_m_1_dementia_car)       //  Update the Loony garage door
+ 
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF_NOW (1227)                         //  "The party's over in Crazy Town, Gecko. Dump the rigged Dementia in the Loony Garage and set the explosives."
+ POINT_ARROW_AT (arrow1, 16.50, 30.50, 3.00)      //  Point arrow at the Loony garage
+ 
+ //  While the player does not reach in front of the Loony garage
+ WHILE_EXEC ( NOT ( IS_CAR_IN_BLOCK(z_m_1_dementia_car, 16.50, 30.50, 3.00, 3.00, 2.00) ) )
+    
+    //  If the player leaves the loony car
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_1_dementia_car) ) )
+    
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1226)                //  "This car don't drive by ESP - so get your ass back in!"
+       POINT_ARROW_AT (arrow1, z_m_1_dementia_car)         //  Point arrow at the car
+       
+       //  I will fix an original script issue by modifying a little the code
+       
+       //  If the player does not get back into the car
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_1_dementia_car) ) )
+       
+          //  If the player died
+          IF ( HAS_CHARACTER_DIED(p1) )
+             CLEAR_ALL_BRIEFS ()
+	            DISPLAY_BRIEF (1236)             //  "Shit like you is only fit for the sidewalk, Gecko."
+	            DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+	            SET flag_failed_mission = 1
+	            SET flag_failed_zaib_med_phone1_m1 = 1
+             RETURN
+          ENDIF
+    
+          //  If the player has been arrested
+          IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF (7085)             //  "Remember, Gecko - a Zaibatsu in custody never talks."
+             DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone1_m1 = 1
+             RETURN
+          ENDIF
+    
+          //  If the Loony car has been destroyed
+          IF ( IS_CAR_WRECKED(z_m_1_dementia_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1223)         //  "I didn't ask for a flaming Dementia, Gecko. Find yourself a new employer."
+             DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone1_m1 = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+       
+       ENDWHILE
+       
+       //  The player returned to the car
+       
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1228)                     //  "The Dementia's rigged! Get your ass back in the car and drive cool to the Loony Garage."
+       POINT_ARROW_AT (arrow1, 16.50, 30.50, 3.00)  //  Point at the Loony garage again
+
+    ENDIF
+    
+    
+    //  Checking...
+    
+    //  If the player died
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF (1236)             //  "Shit like you is only fit for the sidewalk, Gecko."
+	      DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_zaib_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  If the player has been arrested
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (7085)             //  "Remember, Gecko - a Zaibatsu in custody never talks."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  If the Loony car has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_1_dementia_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1223)         //  "I didn't ask for a flaming Dementia, Gecko. Find yourself a new employer."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ 
+ //  The player reached in front of the garage door
+
+ REMOVE_ARROW (arrow1)
+ 
+ //  Park the car as fast as possible
+ 
+ EXEC
+ 
+     IF ( IS_CHARACTER_IN_CAR(p1, z_m_1_dementia_car) )
+        PARK (z_m_1_dementia_car, door5)
+     ENDIF
+ 
+ ENDEXEC
+ 
+ 
+ //  While the park does not finish
+ WHILE_EXEC ( NOT ( HAS_PARK_FINISHED() ) )
+ 
+    //  If the player died
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF (1236)             //  "Shit like you is only fit for the sidewalk, Gecko."
+	      DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_zaib_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  If the player has been arrested
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (7085)             //  "Remember, Gecko - a Zaibatsu in custody never talks."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  If the Loony car has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_1_dementia_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1223)         //  "I didn't ask for a flaming Dementia, Gecko. Find yourself a new employer."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ 
+ //  The park has finished
+
+ DELAY_HERE (30)                        //  Wait a bit  (1 second)
+ EXPLODE_LARGE (16.50, 31.50, 4.50)     //  BOOM!
+ DELAY_HERE (30)                        //  Wait a bit  (1 second)
+ 
+ //  Change the building tiles
+ EXEC
+     CHANGE_BLOCK SIDE (16, 31, 3) BOTTOM WALL BULLET NOT_FLAT NOT_FLIP 0 142
+     CHANGE_BLOCK SIDE (16, 31, 4) BOTTOM WALL BULLET NOT_FLAT NOT_FLIP 0 29
+     CHANGE_BLOCK LID (16, 31, 4) NOT_FLAT NOT_FLIP 0 0 734
+     CHANGE_BLOCK LID (15, 31, 4) NOT_FLAT FLIP 0 0 735
+     CHANGE_BLOCK LID (17, 31, 4) NOT_FLAT NOT_FLIP 0 0 735
+     CHANGE_BLOCK TYPE (16, 31, 4) FIELD 0
+     CHANGE_BLOCK TYPE (15, 31, 4) FIELD 0
+     CHANGE_BLOCK TYPE (17, 31, 4) FIELD 0
+ ENDEXEC
+ 
+RETURN        //  Go to the part 2
+
+
+zaib_med_phone1_m1_part_2:       //  Part 2
+
+	z_m_1_black_van = CREATE_CAR (72.50, 83.50, 2.00) 2 0 VAN END          //  Black Van
+	z_m_1_armour = CREATE_OBJ (71.50, 84.50, 2.00) 0 COLLECT_31 END     //  Armour
+ 
+	DISPLAY_BRIEF (1241)      //  "Shit, Gecko, a group of crack Loonies are on their way. You need reinforcements - and fast. Take the Van and meet the Z-Men at North-West Zarelli."
+ 
+	POINT_ARROW_AT (arrow1, z_m_1_black_van)      //  Point arrow at the van
+ 
+ //  While the player does not enter the van
+ WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_1_black_van) ) )
+ 
+    //  If the player died
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF (1236)             //  "Shit like you is only fit for the sidewalk, Gecko."
+	      DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+    
+    //  If the player has been arrested
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1245)             //  "You can pick up no-one from a cell, Gecko. Enjoy the solitude."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+    
+    //  If the black van has just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_1_black_van) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1244)             //  "You flushed the Van down the toilet! Find someone else to wipe your sorry ass, Gecko."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+    
+    //  If the black van has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_1_black_van) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1243)         //  "You wrecked the Van! Back to the phones, Gecko."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player entered the van
+
+ REMOVE_ARROW (arrow1)
+ 
+ GIVE_WEAPON (p1, MACHINE_GUN, 40)      //  Give the player a gun
+ 
+ DISPLAY_BRIEF (1246)          //  "Now go pick up the Z-Men."
+ 
+ //  Create the Z-Men group
+ z_m_1_zaib_man = CREATE_CHAR (97.50, 30.50, 2.00) 8 0 CRIMINAL END
+ GIVE_WEAPON (z_m_1_zaib_man, MACHINE_GUN)
+ SET_CHAR_THREAT_REACTION (z_m_1_zaib_man, REACT_AS_NORMAL)
+ SET_CHAR_OBJECTIVE (z_m_1_zaib_man, WAIT_ON_FOOT)
+ ADD_CHAR_TO_GANG (z_m_1_zaib_man, zaibatsugang)
+ ADD_GROUP_TO_CHARACTER (z_m_1_zaib_man, 2)
+ 
+ POINT_ARROW_AT (arrow1, z_m_1_zaib_man)        //  Point arrow at the Z-Men
+ 
+ //  While the player does not reach the Z-Men location
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 97.50, 30.50, 2.00, 3.00, 3.00) ) )
+    
+    //  If the player leaves the van
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_1_black_van) ) )
+    
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1229)                    //  "Don't try my patience, Gecko. Get back in the Van!"
+       POINT_ARROW_AT (arrow1, z_m_1_black_van)         //  Point arrow at the van
+       
+       //  While the player does not enter the van
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_1_black_van) ) )
+          
+          //  If the van has just sunk
+          IF ( HAS_CAR_JUST_SUNK(z_m_1_black_van) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF (1244)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone1_m1 = 1
+             SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+             RETURN
+          ENDIF
+          
+          //  If the van has been destroyed
+          IF ( IS_CAR_WRECKED(z_m_1_black_van) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1243)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone1_m1 = 1
+             SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+             RETURN
+          ENDIF
+          
+          //  If the player has been arrested
+          IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF (1245)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone1_m1 = 1
+             SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+             RETURN
+          ENDIF
+          
+          //  If the player died
+          IF ( HAS_CHARACTER_DIED(p1) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF (1236)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone1_m1 = 1
+             SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+       
+       ENDWHILE
+       
+       //  The player returned to the van
+       
+       DISPLAY_BRIEF (1231)                               //  "Stop wasting time, Gecko. Go get the Z-Men!"
+       POINT_ARROW_AT (arrow1, 97.50, 30.50, 2.00)        //  Point arrow at the Z-Men location again
+    
+    ENDIF
+    
+    //  Checking...
+    
+    //  If the van has just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_1_black_van) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1244)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+          
+    //  If the van has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_1_black_van) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1243)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+          
+    //  If the player has been arrested
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1245)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+          
+    //  If the player died
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1236)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  The player reached at the Z-Men location
+
+ REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF (1247)                //  "The Z-Men will get in the Van when you blast the horn."
+ 
+ //  While the player does not press horn in the correct position and using the black van
+ WHILE_EXEC ( ( NOT ( IS_CHAR_PRESSING_HORN(p1) ) ) OR ( z_m_1_player_fit_conditions = 0 ) )
+    
+    //  Checking if the player is in position and in the van
+    IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 97.50, 30.50, 2.00, 3.00, 3.00) ) AND ( IS_CHARACTER_IN_CAR(p1, z_m_1_black_van) ) )
+       SET z_m_1_player_fit_conditions = 1
+    ELSE
+       SET z_m_1_player_fit_conditions = 0
+    ENDIF
+    
+    //  If the player leaves the Z-Men position but still in the van
+    IF ( ( z_m_1_player_fit_conditions = 0 ) AND ( IS_CHARACTER_IN_CAR(p1, z_m_1_black_van) ) )
+       IF ( z_m_1_player_ofp_flag = 0 )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF (7010)                   //  "Hey, where are you going? Come back and pick us up!"
+          POINT_ARROW_AT (arrow1, z_m_1_zaib_man)          //  Point arrow at the Z-Men
+          //SET count27 = 1
+          SET z_m_1_player_ofp_flag = 1                        //  Lock this IF
+       ENDIF
+    ENDIF
+    
+    //  If the player leaves the van
+    IF ( ( z_m_1_player_ofc = 0 ) AND ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_1_black_van) ) ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1229)                  //  "Don't try my patience, Gecko. Get back in the Van!"
+       POINT_ARROW_AT (arrow1, z_m_1_black_van)           //  Point arrow at the van
+       SET z_m_1_player_ofc = 1                           //  Lock this IF
+       SET z_m_1_player_ofp_flag = 0                           //  Unlock the previous IF
+    ELSE
+       
+       //  If the player is in the van but the flag has not updated
+       IF ( IS_CHARACTER_IN_CAR(p1, z_m_1_black_van) )
+          SET z_m_1_player_ofc = 0
+       ENDIF
+       
+    ENDIF
+    
+    //  If the player fit all conditions to press the horn, remove the arrow
+    IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 97.50, 30.50, 2.00, 3.00, 3.00) ) AND ( IS_CHARACTER_IN_CAR(p1, z_m_1_black_van) ) )
+       REMOVE_ARROW (arrow1)
+       SET z_m_1_player_ofp_flag = 0                 //  Unlock the second IF of this WHILE loop
+    ENDIF
+    
+    //  Checking...
+    
+    //  If the van has just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_1_black_van) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1244)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+          
+    //  If the van has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_1_black_van) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1243)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+          
+    //  If the player has been arrested
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1245)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+          
+    //  If the player died
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1236)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+    
+    //  If the Z-Men group leader died
+    IF ( HAS_CHARACTER_DIED(z_m_1_zaib_man) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1248)             //  "Z-Men! Dead! Gecko, consider this job terminated."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player pressed the horn in the correct position and using the van
+ 
+ //  Set the Z-Men to enter the van
+ SET_CHAR_OBJECTIVE (z_m_1_zaib_man, ENTER_CAR_AS_PASSENGER, z_m_1_black_van)
+ 
+ WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(z_m_1_zaib_man) ) )
+ 
+    //  If the van has just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_1_black_van) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1244)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+          
+    //  If the van has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_1_black_van) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1243)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+    
+    //  If the Z-Men aren't on the player screen
+    IF ( ( z_m_1_zmen_ofs = 0 ) AND ( NOT ( IS_ITEM_ONSCREEN(z_m_1_zaib_man) ) ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1240)             //  "Hey, wait for us!"
+       POINT_ARROW_AT (arrow1, z_m_1_zaib_man)    //  Point arrow at the Z-Men
+       SET z_m_1_zmen_ofs = 1                  //  Lock this IF
+    ENDIF
+    
+    //  If the Z-Men returned to the player screen
+    IF ( ( z_m_1_zmen_ofs = 1 ) AND ( IS_ITEM_ONSCREEN(z_m_1_zaib_man) ) )
+       REMOVE_ARROW (arrow1)
+       SET z_m_1_zmen_ofs = 0
+    ENDIF
+    
+    //  If the player has been arrested
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1245)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+          
+    //  If the player died
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1236)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+    
+    //  If the Z-Men group leader died
+    IF ( HAS_CHARACTER_DIED(z_m_1_zaib_man) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1248)             //  "Z-Men! Dead! Gecko, consider this job terminated."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The Z-Men entered the van
+
+ MAKE_NEW_LEADER_OF_GROUP (z_m_1_zaib_man, p1)    // Make the player the leader of the Z-Men group
+ 
+ SET_GROUP_TYPE (p1, CHAIN)
+ 
+ //  Do not react to any threats for now
+ SET_CHAR_THREAT_SEARCH (z_m_1_zaib_man, NO_THREATS)
+ SET_CHAR_THREAT_REACTION (z_m_1_zaib_man, NO_REACTION)
+ 
+ //  Create the Loony group
+ z_m_1_loony_group_leader = CREATE_CHAR (16.50, 33.50, 3.00) 11 0 CRIMINAL END
+ GIVE_WEAPON (z_m_1_loony_group_leader, MACHINE_GUN)
+ 
+ //  Do not react to any threats for now
+ SET_CHAR_THREAT_SEARCH (z_m_1_loony_group_leader, NO_THREATS)
+ SET_CHAR_THREAT_REACTION (z_m_1_loony_group_leader, NO_REACTION)
+ 
+ ADD_GROUP_TO_CHARACTER (z_m_1_loony_group_leader, 6)
+ ADD_CHAR_TO_GANG (z_m_1_loony_group_leader, looniegang)
+ 
+ DISPLAY_BRIEF (1249)               //  "Excellent, Gecko, you got the Z-Men. Now head for the Loony Garage and nail that band of crazies!"
+ 
+ POINT_ARROW_AT (arrow1, z_m_1_loony_group_leader)      //  Point arrow to the Loony group
+ 
+ //  While the player does not kill all but one members of the Loony group
+ WHILE_EXEC ( CHECK_NUMBER_ALIVE_IN_GROUP(z_m_1_loony_group_leader, 1) )
+    
+    //  If the Loony Group is on player screen, make them agressive
+    IF ( IS_ITEM_ONSCREEN(z_m_1_loony_group_leader) )
+       SET_CHAR_THREAT_REACTION (z_m_1_loony_group_leader, REACT_AS_NORMAL)
+       SET_CHAR_THREAT_SEARCH (z_m_1_loony_group_leader, LINE_OF_SIGHT_PLAYER_ONLY)
+       SET_CHAR_OBJECTIVE (z_m_1_loony_group_leader, KILL_CHAR_ON_FOOT, p1)
+    ENDIF
+    
+    //  If the player has been arrested
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1245)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+          
+    //  If the player died
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1236)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  The player killed all loonies members but one
+ 
+ WHILE_EXEC ( NOT ( HAS_CHARACTER_DIED(z_m_1_loony_group_leader) ) )
+ 
+    //  If the Loony member is on player screen, make him agressive
+    IF ( IS_ITEM_ONSCREEN(z_m_1_loony_group_leader) )
+       SET_CHAR_THREAT_REACTION (z_m_1_loony_group_leader, REACT_AS_NORMAL)
+       SET_CHAR_THREAT_SEARCH (z_m_1_loony_group_leader, LINE_OF_SIGHT_PLAYER_ONLY)
+       SET_CHAR_OBJECTIVE (z_m_1_loony_group_leader, KILL_CHAR_ON_FOOT, p1)
+    ENDIF
+    
+    //  If the player has been arrested
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1245)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+          
+    //  If the player died
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1236)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_m1 = 1
+       SET flag_failed_z_m_1_part_2 = 1             //  Failed the part 2 of the mission
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+
+ //  Finally...
+ 
+ //  The player killed all the loonies members
+ 
+ //  If the player didn't fail the mission
+ IF ( flag_failed_mission = 0 )
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF (1006)
+    DISPLAY_MESSAGE (1124)         //  JOB COMPLETE!
+    ADD_SCORE (p1, 40000)
+    ADD_MULTIPLIER (p1, 1)
+    CLEAR_WANTED_LEVEL (p1)
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (zaibatsugang, p1, 1)    //  RESPECT +
+    
+    SET flag_passed_zaib_med_phone1_m1 = 1            //  The player passed this mission
+    
+    //  If the player passed this mission and Zaibatsu Mission 3
+    IF ( ( flag_passed_zaib_med_phone1_m1 = 1 ) AND ( flag_passed_zaib_med_phone1_2_m3 = 1 ) )
+       SET_PHONE_DEAD (ph_zaib_med_phone1)      //  Kill the Zaibatsu Medium Phone 1
+       SET flag_kill_zaib_med_phone1 = 1        //  Store that kill
+    ENDIF
+    
+ ENDIF
+    
+RETURN
+
+
+
+clean_up_zaib_med_phone1_m1:               //  Clean up
+
+	DESTROY_GROUP (p1)       //  Destroy the Z-Men/Player group
+	REMOVE_ARROW (arrow1)
+ 
+	SET flag_failed_mission = 0
+ 
+	CLEAR_WANTED_LEVEL (p1)
+	SET_DEATHARREST_STATE (p1, ON)       //  Reset the death arrest checking
+	MISSION_HAS_FINISHED ()
+ 
+ //  If the player completed this mission, count +1 (zaibatsu) mission passed
+ IF ( flag_passed_zaib_med_phone1_m1 = 1 )
+	   ++flag_all_missions_passed
+	   ++flag_zaib_missions_passed
+	   MAKE_DOOR_MANUAL (door5)      //  Keep it as it is
+	ENDIF
+ 
+ //  If the player failed this mission, count +1 (zaibatsu) mission failed
+ IF ( flag_failed_zaib_med_phone1_m1 = 1 )
+	   ++flag_all_missions_failed
+	   ++flag_zaib_missions_failed
+	   MAKE_DOOR_AUTOMATIC (door5)         //  Return to the previous state
+	   CLEAR_WANTED_LEVEL (p1)
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (zaibatsugang, p1, -1)     //  Lose respect
+	ENDIF
+ 
+	SET flag_on_mission = 0
+	SET flag_on_zaib_mission = 0
+ 
+RETURN
+
+MISSIONSTART
+
+  IF ( flag_failed_z_m_1_part_2 = 1 )        //  If the player failed the mission after exploding the Loony garage
+     SET flag_on_mission = 1              //  Player is now playing a mission
+     SET flag_on_zaib_mission = 1              //  Player is now playing a zaibatsu mission
+     GOSUB zaib_med_phone1_m1_part_2:           //  Only do the part 2 of the mission
+  ELSE
+     GOSUB zaib_med_phone1_m1_part_1:           //  Do the part 1 of the mission
+     
+     IF ( flag_failed_mission = 0 )                           //  If the player didn't fail the mission yet
+        GOSUB zaib_med_phone1_m1_part_2:           //  Do the part 2 of the mission
+     ENDIF
+  ENDIF
+
+  GOSUB clean_up_zaib_med_phone1_m1:              //  Do clean up
+  
+MISSIONEND

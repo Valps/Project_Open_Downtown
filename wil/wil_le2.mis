@@ -1,0 +1,263 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX PIZZA CAKE! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_le2.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD loon_easy_phone2_m1_part_1:
+//FORWARD loon_easy_phone2_m1_part_2:
+//FORWARD clean_up_loon_easy_phone2_m1:
+
+OBJ_DATA l_e_2_briefcase
+
+TIMER_DATA l_e_2_bomb_timer
+
+COUNTER l_e_2_bomb_countdown = 149
+COUNTER l_e_2_player_briefcase_flag = 0
+COUNTER l_e_2_exploded_briefcase_flag = 0
+COUNTER l_e_2_pickup_briefcase_flag = 0
+COUNTER l_e_2_bomb_armed_flag = 0
+COUNTER l_e_2_timer_on_screen = 0
+
+CAR_DATA l_e_2_pizza_van
+
+CHAR_DATA l_e_2_driver_pizza_van
+
+loon_easy_phone2_m1_part_1:          //  Part 1 of the mission
+
+	SET flag_on_mission = 1                             //  Player is now playing a mission
+	SET flag_on_loon_mission = 1                             //  Player is now playing a loonies mission
+ 
+	SET flag_failed_loon_easy_phone2_m1 = 0
+ 
+	SET_DEATHARREST_STATE (p1, OFF)            //  Handle deaths and arrests manually
+ 
+	DISPLAY_MESSAGE (1955)                     //  PIZZA CAKE!
+	DISPLAY_BRIEF (1531)                       //  "Jumbo! It's me, Elmo. Pizza Cake restaurants keep screwing up my favorite food [...]"
+ 
+	l_e_2_briefcase = CREATE_OBJ (28.50, 106.50, 3.00) 0 BRIEFCASE END       //  Briefcase with a bomb
+ 
+	SET l_e_2_pickup_briefcase_flag = 1
+	POINT_ARROW_AT (arrow1, l_e_2_briefcase)
+ 
+ //  While the player didn't pick up the briefcase
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 28.50, 106.50, 3.00, 1.00, 1.00) ) )      
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (7077)
+	      DISPLAY_MESSAGE (1125)
+	      SET flag_failed_mission = 1
+	      SET flag_failed_loon_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7070)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  Player picked up the briefcase
+ 
+ REMOVE_ARROW (arrow1)
+ DELETE_ITEM (l_e_2_briefcase)
+ SET l_e_2_player_briefcase_flag = 1
+ DISPLAY_BRIEF (1533)                             //  "Okay, Jumbo, deliver the explosives by hand to Pizza Cake. And don't forget to run away..."
+ POINT_ARROW_AT (arrow1, 13.50, 105.50, 3.00)
+ 
+ //  While the player does not reach at Pizza Cake
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 13.50, 105.50, 3.00, 1.00, 1.00) ) )
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1534)
+	      DISPLAY_MESSAGE (1125)
+	      SET flag_failed_mission = 1
+	      SET flag_failed_loon_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7070)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+
+ //  Player arrived at the Pizza Cake and armed the bomb
+
+ REMOVE_ARROW (arrow1)
+ 
+ l_e_2_briefcase = CREATE_OBJ (13.50, 105.50, 3.00) 0 BRIEFCASE END
+ SET l_e_2_bomb_armed_flag = 1
+ 
+ EXEC
+ 
+     DISPLAY_BRIEF_NOW (1536)                  //  "You got FIVE seconds before the dynamite blows. RUN!"
+ 
+     DISPLAY_TIMER (l_e_2_bomb_timer, 5)
+     SET l_e_2_timer_on_screen = 1
+     
+ ENDEXEC
+ 
+ //  Countdown
+ WHILE_EXEC ( NOT ( l_e_2_bomb_countdown = 0 ) )        
+    --l_e_2_bomb_countdown
+ ENDWHILE
+ 
+ SET l_e_2_timer_on_screen = 0
+ EXPLODE_SMALL (l_e_2_briefcase)                    //  Explode
+ DELETE_ITEM (l_e_2_briefcase)                      //  Delete the briefcase
+ SET l_e_2_exploded_briefcase_flag = 1
+ 
+ //  Change the Pizza Cake building
+ 
+ CHANGE_BLOCK LID (13, 105, 2) NOT_FLAT NOT_FLIP 0 180 601
+ CHANGE_BLOCK SIDE (14, 105, 3) LEFT WALL BULLET NOT_FLAT NOT_FLIP 0 600
+ CHANGE_BLOCK SIDE (13, 106, 3) TOP WALL BULLET NOT_FLAT NOT_FLIP 0 600
+ CHANGE_BLOCK TYPE (13, 105, 2) FIELD 0
+ 
+RETURN        //  Go to the part 2
+
+
+
+loon_easy_phone2_m1_part_2:   //  Part 2
+
+	DISPLAY_BRIEF (1538)           //  "So much for those shitty explosives. Wait! A Pizza Cake Delivery Truck is on its way. Destroy that instead."
+ 
+	l_e_2_pizza_van = CREATE_CAR (125.50, 149.50, 2.00) 1 0 VAN END                  //  Create the Pizza Delivery truck
+	l_e_2_driver_pizza_van = CREATE_CHAR (125.50, 148.50, 2.00) 1 0 CRIMINAL END     //  Create its driver
+ 
+	CHANGE_CAR_LOCK (l_e_2_pizza_van, LOCKOUT_PLAYER)                                //  Lock the van
+ 
+	SET_CHAR_THREAT_SEARCH (l_e_2_driver_pizza_van, NO_THREATS)                        //  There is no threats
+	SET_CHAR_THREAT_REACTION (l_e_2_driver_pizza_van, NO_REACTION)                     //  No react to a threat
+	SET_CHAR_OBJECTIVE (l_e_2_driver_pizza_van, ENTER_CAR_AS_DRIVER, l_e_2_pizza_van)  //  Enter the van as driver
+ 
+	POINT_ARROW_AT (arrow1, l_e_2_pizza_van)                                           //  Point to the van
+ 
+ WHILE_EXEC ( NOT ( IS_CAR_WRECKED(l_e_2_pizza_van) ) )       // While the Pizza Cake Delivery Truck hasn't been destroyed
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       HAS_CHAR_BEEN_ARRESTED(p1)
+	      CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (7077)      //  "You screw the crime, Jumbo, you do the time."
+       DISPLAY_MESSAGE (1125)
+	      SET flag_failed_mission = 1
+	      SET flag_failed_loon_easy_phone2_m1 = 1
+	      SET flag_failed_l_e_2_part_2 = 1          //  Save the "failed part 2" flag
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7070)      //  "That's you out of the running, Jumbo!"
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_easy_phone2_m1 = 1
+       SET flag_failed_l_e_2_part_2 = 1          //  Save the "failed part 2" flag
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  The Pizza Cake Delivery Truck has been destroyed
+ 
+ REMOVE_ARROW (arrow1)
+ 
+ IF ( flag_failed_mission = 0 )                 //  If the player didn't failed the mission
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF_NOW (1535)       //  "You follow bad plans well, Jumbo. Have a deep-fried Pizza Cake and $20,000 to celebrate."
+    DISPLAY_MESSAGE (1124)         //  JOB COMPLETE!
+    ADD_SCORE (p1, 20000)
+    ADD_MULTIPLIER (p1, 1)
+    CLEAR_WANTED_LEVEL (p1)
+    
+    SET flag_passed_loon_easy_phone2_m1 = 1            //  flag_passed_loon_easy_phone2_m1
+    
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (looniegang, p1, 1)        //  RESPECT +
+    
+    IF ( flag_passed_loon_easy_phone2_m1 = 1 )         //  If the player passed this mission
+       SET_PHONE_DEAD (ph_loon_easy_phone2)      //  Kill easy phone 2
+       SET flag_kill_loon_easy_phone2 = 1        //  Store that kill
+    ENDIF
+    
+ ENDIF
+ 
+RETURN
+
+clean_up_loon_easy_phone2_m1:               //  Clean up
+ 
+ //  If the timer is on player screen, delete it
+ IF ( l_e_2_timer_on_screen = 1 )
+    CLEAR_TIMER (l_e_2_bomb_timer)
+ ENDIF
+	
+	REMOVE_ARROW (arrow1)
+ 
+	SET flag_failed_mission = 0           //  Reset flag
+ 
+	CLEAR_WANTED_LEVEL (p1)
+	SET_DEATHARREST_STATE (p1, ON)        //  Return
+ 
+ //  Delete briefcase if it was on the ground when the player failed the mission
+ IF ( ( l_e_2_pickup_briefcase_flag = 1 ) AND ( l_e_2_player_briefcase_flag = 0 ) )
+    DELETE_ITEM (l_e_2_briefcase)
+ ENDIF
+ 
+ //  The same, but during the countdown to explode
+	IF ( ( l_e_2_bomb_armed_flag = 1 ) AND ( l_e_2_exploded_briefcase_flag = 0 ) )
+    DELETE_ITEM (l_e_2_briefcase)
+ ENDIF
+	
+	MISSION_HAS_FINISHED ()
+ 
+ IF ( flag_passed_loon_easy_phone2_m1 = 1 )    //  Count missions passed
+	   ++flag_all_missions_passed
+	   ++flag_loon_missions_passed
+	ENDIF
+ 
+ IF ( flag_failed_loon_easy_phone2_m1 = 1 )    //  Count missions failed and lose respect
+	   ++flag_loon_missions_failed
+	   ++flag_all_missions_failed
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (looniegang, p1, -1)
+	   CLEAR_WANTED_LEVEL (p1)
+	ENDIF
+ 
+	SET flag_on_mission = 0
+	SET flag_on_loon_mission = 0
+ 
+RETURN
+
+
+
+
+MISSIONSTART
+
+IF ( flag_failed_l_e_2_part_2 = 1 )        //  If the player failed the mission after exploding Pizza Cake
+   SET flag_on_mission = 1              //  Player is now playing a mission
+   SET flag_on_loon_mission = 1              //  Player is now playing a loonies mission
+   GOSUB loon_easy_phone2_m1_part_2:           //  Only do the part 2 of the mission
+ELSE
+   GOSUB loon_easy_phone2_m1_part_1:           //  Do part 1 of the mission
+   
+   IF ( flag_failed_mission = 0 )                           //  If the player didn't fail the mission yet
+      GOSUB loon_easy_phone2_m1_part_2:           //  Do part 2 of the mission
+   ENDIF
+ENDIF
+
+GOSUB clean_up_loon_easy_phone2_m1:              //  Do clean up
+
+MISSIONEND

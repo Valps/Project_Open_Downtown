@@ -1,0 +1,1005 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX BIG BANK JOB! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_zm3.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD zaib_med_phone1_2_m3:
+//FORWARD clean_up_zaib_med_phone1_2_m3:
+
+CHAR_DATA z_m_3_tomassi_char
+CHAR_DATA z_m_3_cop_char
+CHAR_DATA z_m_3_van_driver
+
+CHAR_DATA z_m_3_zaib_man
+
+CHAR_DATA z_m_3_guard_1_char
+CHAR_DATA z_m_3_guard_2_char
+
+SOUND z_m_3_alarm_sound
+
+OBJ_DATA z_m_3_false_briefcase		//  The false briefcase, rigged with a bomb
+OBJ_DATA z_m_3_real_briefcase	    //  The real briefcase, filled with cash
+
+CAR_DATA z_m_3_cop_car
+CAR_DATA z_m_3_bank_van_car
+CAR_DATA z_m_3_escape_car
+
+COUNTER z_m_3_zaib_men_ofs = 0		//  ofs = out of screen
+
+COUNTER z_m_3_guard_1_died = 0
+COUNTER z_m_3_guard_2_died = 0
+
+COUNTER z_m_3_player_fit_conditions = 0
+COUNTER z_m_3_player_ofp_flag = 0		//  ofp = out of position
+COUNTER z_m_3_player_out_of_car = 0
+
+COUNTER z_m_3_light_created_flag = 0
+
+zaib_med_phone1_2_m3:
+
+	SET flag_on_mission = 1
+	SET flag_on_zaib_mission = 1
+ 
+	SET flag_failed_zaib_med_phone1_2_m3 = 0
+ 
+	DISPLAY_MESSAGE (1986)        //  BIG BANK JOB!
+	DISPLAY_BRIEF (1131)          //  "Hey, Gecko, it's Trey Welsh. I need some clean cash for a Cop pay-off. There's a Third World Bank Van circling the city. Steal it."
+ 
+ //  Create the Bank van and its driver
+	z_m_3_bank_van_car = CREATE_CAR (191.50, 182.50, 2.00) 35 90 BANKVAN END
+	z_m_3_van_driver = CREATE_CHAR_INSIDE_CAR (z_m_3_bank_van_car) 0 CRIMINAL END
+	CHANGE_CAR_LOCK (z_m_3_bank_van_car, LOCKOUT_THIEF)
+ 
+	POINT_ARROW_AT (arrow1, z_m_3_bank_van_car)        //  Point arrow at the bank van
+ 
+	SET_CHAR_THREAT_SEARCH (z_m_3_van_driver, NO_THREATS)
+	SET_CHAR_THREAT_REACTION (z_m_3_van_driver, REACT_AS_NORMAL)
+ 
+ //  While the player does not enter the bank van
+ WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_3_bank_van_car) ) )
+    
+    //  Bank Van just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_3_bank_van_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1148)        //  "You can drink that polluted shit alone, Gecko. Goodbye."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    //  The bank van has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_3_bank_van_car) )
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1134)        //  "No Bank Van means no money. Get yourself a regular job, joker."
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+	
+ //  The player entered the G4 bank van
+ 
+ GIVE_WEAPON (p1, MACHINE_GUN, 20)
+ 
+ REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF (1132)          //  "Pick up the Z-Men Unit - then I will fill you in on the job."
+ 
+ //  Creating the Z-men
+ z_m_3_zaib_man = CREATE_CHAR (189.50, 39.50, 2.00) 8 0 CRIMINAL_TYPE1 END
+ GIVE_WEAPON (z_m_3_zaib_man, PISTOL)
+ SET_CHAR_OBJECTIVE (z_m_3_zaib_man, WAIT_ON_FOOT)
+ SET_CHAR_THREAT_REACTION (z_m_3_zaib_man, REACT_AS_NORMAL)
+ SET_CHAR_THREAT_SEARCH (z_m_3_zaib_man, AREA)
+ 
+ ADD_GROUP_TO_CHARACTER (z_m_3_zaib_man, 1)
+ ADD_CHAR_TO_GANG (z_m_3_zaib_man, zaibatsugang)
+ 
+ POINT_ARROW_AT (arrow1, 189.50, 40.50, 2.00)          //  Point arrow at the Z-Men location
+ 
+ //  While the player does not reach the Z-Men
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 189.50, 40.50, 2.00, 2.00, 2.00) ) )
+    
+    //  If the player leaves the car
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_3_bank_van_car) ) )
+       
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1146)                //  "Get back in the Bank Van, dumb ass!"
+       POINT_ARROW_AT (arrow1, z_m_3_bank_van_car)         //  Point arrow at the bank van
+       
+       //  While the player does not return to the vehicle
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_3_bank_van_car) ) )
+          
+          //  If the Z-Man has died
+          IF ( HAS_CHARACTER_DIED(z_m_3_zaib_man) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1133)        //  "The Z-Men are dead men! The job's over for you, Gecko."
+             DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone1_2_m3 = 1
+             RETURN
+          ENDIF
+          
+          //  Bank Van just sunk
+          IF ( HAS_CAR_JUST_SUNK(z_m_3_bank_van_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1148)        //  "You can drink that polluted shit alone, Gecko. Goodbye."
+             DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone1_2_m3 = 1
+             RETURN
+          ENDIF
+    
+          //  The bank van has been destroyed
+          IF ( IS_CAR_WRECKED(z_m_3_bank_van_car) )
+             CLEAR_ALL_BRIEFS ()
+	            DISPLAY_BRIEF_NOW (1134)        //  "No Bank Van means no money. Get yourself a regular job, joker."
+	            DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	            SET flag_failed_mission = 1
+	            SET flag_failed_zaib_med_phone1_2_m3 = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+       
+       ENDWHILE
+       
+       //  The player returned to the bank van
+       
+       DISPLAY_BRIEF_NOW (1132)                           //  "Pick up the Z-Men Unit - then I will fill you in on the job."
+       POINT_ARROW_AT (arrow1, 189.50, 40.50, 2.00)       //  Point arrow at the Z-Men location again
+       
+    ENDIF
+    
+    //  If the Z-Man has died
+    IF ( HAS_CHARACTER_DIED(z_m_3_zaib_man) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1133)        //  "The Z-Men are dead men! The job's over for you, Gecko."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+          
+    //  Bank Van just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_3_bank_van_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1148)        //  "You can drink that polluted shit alone, Gecko. Goodbye."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    //  The bank van has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_3_bank_van_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1134)        //  "No Bank Van means no money. Get yourself a regular job, joker."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  The player arrived at the Z-Men location
+
+ REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF (1135)          //  "Hey, Gecko, the Z-Men are expecting you. Sound your horn to get their attention."
+ 
+ //  While the player does not press the horn in the correct place and in the correct car
+ WHILE_EXEC ( ( NOT ( IS_CHAR_PRESSING_HORN(p1) ) ) OR ( z_m_3_player_fit_conditions = 0 ) )
+    
+    //  Checking if the player is fitting all conditions before pressing the horn
+    IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 189.50, 40.50, 2.00, 2.00, 2.00) ) AND ( IS_CHARACTER_IN_CAR(p1, z_m_3_bank_van_car) ) )
+       SET z_m_3_player_fit_conditions = 1
+    ELSE
+       SET z_m_3_player_fit_conditions = 0
+    ENDIF
+    
+    //  If the player leaves the Z-Men location but still in the bank van
+    IF ( ( z_m_3_player_fit_conditions = 0 ) AND ( IS_CHARACTER_IN_CAR(p1, z_m_3_bank_van_car) ) )
+       IF ( z_m_3_player_ofp_flag = 0 )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF (7015)                                 //  "How can you pick them up from there?"
+          POINT_ARROW_AT (arrow1, 189.50, 40.50, 2.00)         //  Point arrow at the Z-Men location again
+          SET z_m_3_player_ofp_flag = 1                                      //  Lock this IF
+       ENDIF
+    ENDIF
+    
+    //  If the player leaves the bank van
+    IF ( ( z_m_3_player_out_of_car = 0 ) AND ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_3_bank_van_car) ) ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1146)                                  //  "Get back in the Bank Van, dumb ass!"
+       POINT_ARROW_AT (arrow1, z_m_3_bank_van_car)                       //  Point arrow to the bank van
+       SET z_m_3_player_out_of_car = 1                                       //  Lock this IF
+       SET z_m_3_player_ofp_flag = 0                                       //  Unlocks the previous IF
+    ELSE
+       
+       //  If the player is in the bank van but the flag isn't updated
+       IF ( IS_CHARACTER_IN_CAR(p1, z_m_3_bank_van_car) )
+          SET z_m_3_player_out_of_car = 0
+       ENDIF
+       
+    ENDIF
+    
+    //  If the player is in the correct position and in the correct car
+    IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 189.50, 40.50, 2.00, 2.00, 2.00) ) AND ( IS_CHARACTER_IN_CAR(p1, z_m_3_bank_van_car) ) )
+       REMOVE_ARROW (arrow1)           //  Remove the arrow from the car (or from the correct position)
+       SET z_m_3_player_ofp_flag = 0                 //  Unlocks the second IF of this WHILE block
+    ENDIF
+    
+    //  Checking mission fail conditions...
+    
+    //  If the Z-Man has died
+    IF ( HAS_CHARACTER_DIED(z_m_3_zaib_man) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1133)        //  "The Z-Men are dead men! The job's over for you, Gecko."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+          
+    //  Bank Van just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_3_bank_van_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1148)        //  "You can drink that polluted shit alone, Gecko. Goodbye."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    //  The bank van has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_3_bank_van_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1134)        //  "No Bank Van means no money. Get yourself a regular job, joker."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+
+ //  The player pressed the horn in the correct position and using the bank van
+
+ ORDER_CHAR_TO_BACKDOOR (z_m_3_zaib_man, z_m_3_bank_van_car)      //  Set the Z-Men to enter the bank van by the back door
+ 
+ //  While the Z-Men does not enter the bank van
+ WHILE_EXEC ( NOT ( IS_GROUP_IN_CAR(z_m_3_zaib_man) ) )
+ 
+    //  If the Z-Man has died
+    IF ( HAS_CHARACTER_DIED(z_m_3_zaib_man) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1133)        //  "The Z-Men are dead men! The job's over for you, Gecko."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    //  If the Z-Men isn't on player screen
+    IF ( ( NOT ( IS_ITEM_ONSCREEN(z_m_3_zaib_man) ) ) AND ( z_m_3_zaib_men_ofs = 0 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1150)             //  "Hey, wait for us!"
+       POINT_ARROW_AT (arrow1, z_m_3_zaib_man)    //  Point arrow at the Z-Men
+       SET z_m_3_zaib_men_ofs = 1                  //  Lock this IF
+    ENDIF
+    
+    //  If the Z-Men returned to the player screen
+    IF ( ( IS_ITEM_ONSCREEN(z_m_3_zaib_man) ) AND ( z_m_3_zaib_men_ofs = 1 ) )
+       REMOVE_ARROW (arrow1)
+       SET z_m_3_zaib_men_ofs = 0
+    ENDIF
+          
+    //  Bank Van just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_3_bank_van_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1148)        //  "You can drink that polluted shit alone, Gecko. Goodbye."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    //  The bank van has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_3_bank_van_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1134)        //  "No Bank Van means no money. Get yourself a regular job, joker."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The Z-Men entered the bank van
+ 
+ 
+ //  Set them to not react to any threat
+ SET_CHAR_THREAT_SEARCH (z_m_3_zaib_man, NO_THREATS)
+ SET_CHAR_THREAT_REACTION (z_m_3_zaib_man, NO_REACTION)
+ 
+ MAKE_NEW_LEADER_OF_GROUP (z_m_3_zaib_man, p1)         //  Make the player the leader of the Z-Men group
+ 
+ DISPLAY_BRIEF (1137)            //  "The Bank is expecting this Van - so be careful with it, Gecko!"
+ 
+ //  Creating the Bank guards
+ z_m_3_guard_1_char = CREATE_CHAR (241.50, 205.50, 2.00) 4 0 CRIMINAL_TYPE1 END
+ SET_CHAR_GRAPHIC_TYPE (z_m_3_guard_1_char, EMERG_GRAPHIC, 0)
+ 
+ z_m_3_guard_2_char = CREATE_CHAR (242.50, 205.50, 2.00) 4 0 CRIMINAL_TYPE1 END
+ SET_CHAR_GRAPHIC_TYPE (z_m_3_guard_2_char, EMERG_GRAPHIC, 0)
+ 
+ GIVE_WEAPON (z_m_3_guard_1_char, PISTOL)
+ GIVE_WEAPON (z_m_3_guard_2_char, PISTOL)
+ 
+ SET_CHAR_THREAT_SEARCH (z_m_3_guard_1_char, NO_THREATS)
+ SET_CHAR_THREAT_SEARCH (z_m_3_guard_2_char, NO_THREATS)
+ 
+ SET_CHAR_THREAT_REACTION (z_m_3_guard_1_char, REACT_AS_NORMAL)
+ SET_CHAR_THREAT_REACTION (z_m_3_guard_2_char, REACT_AS_NORMAL)
+ 
+ //  Briefcase
+ z_m_3_real_briefcase = CREATE_OBJ (233.50, 206.50, 2.00) 90 BRIEFCASE END
+ 
+ POINT_ARROW_AT (arrow1, 240.50, 206.50, 2.00)      //  Point arrow at the Bank
+ 
+ //  Update the bank doors to the G4 Bank Van
+ UPDATE_DOOR_TARGET (door3, z_m_3_bank_van_car)
+ UPDATE_DOOR_TARGET (door19, z_m_3_bank_van_car)
+ 
+ //  While the player does not reach the Bank
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 240.50, 206.50, 2.00, 2.00, 2.00) ) )
+    
+    //  If the player leaves the van
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_3_bank_van_car) ) )
+       
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1146)                //  "Get back in the Bank Van, dumb ass!"
+       POINT_ARROW_AT (arrow1, z_m_3_bank_van_car)         //  Point arrow at the bank van
+       
+       //  While the player does not get back to the van
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_3_bank_van_car) ) )
+       
+          //  Bank Van just sunk
+          IF ( HAS_CAR_JUST_SUNK(z_m_3_bank_van_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1148)        //  "You can drink that polluted shit alone, Gecko. Goodbye."
+             DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone1_2_m3 = 1
+             RETURN
+          ENDIF
+          
+          //  If the guard 1 died
+          IF ( HAS_CHARACTER_DIED(z_m_3_guard_1_char) )
+             SET z_m_3_guard_1_died = 1
+          ENDIF
+          
+          //  If the guard 2 died
+          IF ( HAS_CHARACTER_DIED(z_m_3_guard_2_char) )
+             SET z_m_3_guard_2_died = 1
+          ENDIF
+    
+          //  The bank van has been destroyed
+          IF ( IS_CAR_WRECKED(z_m_3_bank_van_car) )
+             CLEAR_ALL_BRIEFS ()
+	            DISPLAY_BRIEF_NOW (1134)        //  "No Bank Van means no money. Get yourself a regular job, joker."
+	            DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	            SET flag_failed_mission = 1
+	            SET flag_failed_zaib_med_phone1_2_m3 = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+       
+       ENDWHILE
+       
+       //  The player returned to the vehicle
+       
+       DISPLAY_BRIEF_NOW (1137)                          //  "The Bank is expecting this Van - so be careful with it, Gecko!"
+       POINT_ARROW_AT (arrow1, 240.50, 206.50, 2.00)     //  Point at the bank again
+       
+    ENDIF
+    
+    //  Checking...
+    
+    //  If the guard 1 died
+    IF ( ( z_m_3_guard_1_died = 0 ) AND ( HAS_CHARACTER_DIED(z_m_3_guard_1_char) ) )
+       SET z_m_3_guard_1_died = 1
+    ENDIF
+          
+    //  If the guard 2 died
+    IF ( ( z_m_3_guard_2_died = 0 ) AND ( HAS_CHARACTER_DIED(z_m_3_guard_2_char) ) )
+       SET z_m_3_guard_2_died = 1
+    ENDIF
+    
+    
+    //  Bank Van just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_3_bank_van_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1148)        //  "You can drink that polluted shit alone, Gecko. Goodbye."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    //  The bank van has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_3_bank_van_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1134)        //  "No Bank Van means no money. Get yourself a regular job, joker."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  The player arrived at the bank
+
+ IF ( IS_CHARACTER_IN_CAR(p1, z_m_3_bank_van_car) )
+    DISPLAY_BRIEF_NOW (1147)               //  "CHECKING CLEARANCE... THIRD WORLD BANK... 0-01882A... CLEARANCE... OK. HAVE A NICE DAY."
+ ENDIF
+ 
+ //  Set the Z-Men to look for threats
+ SET_CHAR_THREAT_SEARCH (z_m_3_zaib_man, AREA)
+ SET_CHAR_THREAT_REACTION (z_m_3_zaib_man, REACT_AS_NORMAL)
+ 
+ REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF (1138)                //  "Grab the briefcase and get the hell out of there!"
+ 
+ POINT_ARROW_AT (arrow1, z_m_3_real_briefcase)     //  Point arrow at the briefcase
+ 
+ //  While the player does not get the briefcase
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 233.50, 206.50, 2.00, 1.00, 1.00) ) )
+ 
+    //  If the guard 1 died
+    IF ( HAS_CHARACTER_DIED(z_m_3_guard_1_char) )
+       SET z_m_3_guard_1_died = 1
+    ENDIF
+          
+    //  If the guard 2 died
+    IF ( HAS_CHARACTER_DIED(z_m_3_guard_2_char) )
+       SET z_m_3_guard_2_died = 1
+    ENDIF
+    
+    //  Bank Van just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_3_bank_van_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1148)        //  "You can drink that polluted shit alone, Gecko. Goodbye."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       
+       //  Reset the doors states
+       MAKE_DOOR_MANUAL (door3)
+       MAKE_DOOR_MANUAL (door19)
+       OPEN_DOOR (door3)
+       OPEN_DOOR (door19)
+       
+       RETURN
+    ENDIF
+    
+    //  The bank van has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_3_bank_van_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1134)        //  "No Bank Van means no money. Get yourself a regular job, joker."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       
+       //  Reset the doors states
+       MAKE_DOOR_MANUAL (door3)
+       MAKE_DOOR_MANUAL (door19)
+       OPEN_DOOR (door3)
+       OPEN_DOOR (door19)
+       
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player got the briefcase
+ 
+ //  If the guard 1 is alive, make him agressive
+ IF ( z_m_3_guard_1_died = 0 )
+    SET_CHAR_THREAT_SEARCH (z_m_3_guard_1_char, LINE_OF_SIGHT_PLAYER_ONLY)
+    SET_CHAR_THREAT_REACTION (z_m_3_guard_1_char, REACT_AS_NORMAL)
+ ENDIF
+ 
+ //  If the guard 2 is alive, make him agressive
+ IF ( z_m_3_guard_2_died = 0 )
+    SET_CHAR_THREAT_SEARCH (z_m_3_guard_2_char, LINE_OF_SIGHT_PLAYER_ONLY)
+    SET_CHAR_THREAT_REACTION (z_m_3_guard_2_char, REACT_AS_NORMAL)
+ ENDIF
+ 
+ //  Create the alarm sound and light
+ z_m_3_alarm_sound = CREATE_SOUND (232.50, 206.50, 3.00) BANK_ALARM PLAY_FOREVER END
+ light4 = CREATE_LIGHT (233.50, 207.50, 2.00) 4.00 255 (255, 0, 0) 10 10 2
+ 
+ SET z_m_3_light_created_flag = 1                       //  Light has been created
+ 
+ ALTER_WANTED_LEVEL_NO_DROP (p1, 2)    //  POLICE!
+ 
+ REMOVE_ARROW (arrow1)
+ DELETE_ITEM (z_m_3_real_briefcase)                  //  Delete the briefcase
+ 
+ DISPLAY_BRIEF_NOW (1139)                  //  "Get the Bank Van and the clean cash back to the Safehouse - FAST!"
+ 
+ 
+ /*  I will modify this mission a little to be more coherent at this point                                       
+                                                                                                                 
+ If you're purist and want to get the original script behavior, just put this piece of code between /* and */
+ 
+ 
+ ////////////////  Begin Modification
+ 
+ POINT_ARROW_AT (arrow1, z_m_3_bank_van_car)   //  Point arrow at the bank van
+ 
+ //  While the player does not get into the bank van
+ WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_3_bank_van_car) ) )
+ 
+    //  Bank van just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_3_bank_van_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1148)       //  "You can drink that polluted shit alone, Gecko. Goodbye."
+       DISPLAY_MESSAGE (1125)         //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+          
+    //  The bank van has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_3_bank_van_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1134)       //  "No Bank Van means no money. Get yourself a regular job, joker."
+       DISPLAY_MESSAGE (1125)         //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player entered the bank van
+ 
+ ////////////////  End Modification
+ 
+ 
+ 
+ POINT_ARROW_AT (arrow1, 218.50, 92.50, 3.00)     //  Point at the garage
+ 
+ UPDATE_DOOR_TARGET (door1, z_m_3_bank_van_car)               //  Update garage door
+ 
+ //  While the player does not reach the garage's entrance
+ WHILE_EXEC ( NOT ( IS_CAR_IN_BLOCK(z_m_3_bank_van_car, 218.50, 92.50, 3.00, 3.00, 1.00) ) )
+    
+    //  If the player leaves the bank van
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_3_bank_van_car) ) )
+    
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1146)                //  "Get back in the Bank Van, dumb ass!"
+       POINT_ARROW_AT (arrow1, z_m_3_bank_van_car)         //  Point arrow at the bank van
+       
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_3_bank_van_car) ) )
+          
+          //  If the player has been arrested, reset all doors status
+          IF ( HAS_CHAR_BEEN_ARRESTED(p1))
+             MAKE_DOOR_MANUAL (door3)
+             MAKE_DOOR_MANUAL (door19)
+             OPEN_DOOR (door3)
+             OPEN_DOOR (door19)
+          ENDIF
+          
+          //  If the player died, reset all doors status
+          IF ( HAS_CHARACTER_DIED(p1) )
+             MAKE_DOOR_MANUAL (door3)
+             MAKE_DOOR_MANUAL (door19)
+             OPEN_DOOR (door3)
+             OPEN_DOOR (door19)
+          ENDIF
+          
+          //  Bank van just sunk
+          IF ( HAS_CAR_JUST_SUNK(z_m_3_bank_van_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1148)       //  "You can drink that polluted shit alone, Gecko. Goodbye."
+             DISPLAY_MESSAGE (1125)         //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone1_2_m3 = 1
+             
+             //  Reset the doors states
+             MAKE_DOOR_MANUAL (door3)
+             MAKE_DOOR_MANUAL (door19)
+             OPEN_DOOR (door3)
+             OPEN_DOOR (door19)
+             
+             RETURN
+          ENDIF
+          
+          //  The bank van has been destroyed
+          IF ( IS_CAR_WRECKED(z_m_3_bank_van_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1134)       //  "No Bank Van means no money. Get yourself a regular job, joker."
+             DISPLAY_MESSAGE (1125)         //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone1_2_m3 = 1
+             
+             //  Reset the doors states
+             MAKE_DOOR_MANUAL (door3)
+             MAKE_DOOR_MANUAL (door19)
+             OPEN_DOOR (door3)
+             OPEN_DOOR (door19)
+             
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+       
+       ENDWHILE
+       
+       //  The player returned to the bank van
+       
+       DISPLAY_BRIEF_NOW (1139)                            //  "Get the Bank Van and the clean cash back to the Safehouse - FAST!"
+       POINT_ARROW_AT (arrow1, 218.50, 92.50, 3.00)        //  Point arrow at the garage
+    
+    ENDIF
+    
+    //  Checking again...
+    
+    //  If the player has been arrested, reset all doors status
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1))
+       MAKE_DOOR_MANUAL (door3)
+       MAKE_DOOR_MANUAL (door19)
+       OPEN_DOOR (door3)
+       OPEN_DOOR (door19)
+    ENDIF
+          
+    //  If the player died, reset all doors status
+    IF ( HAS_CHARACTER_DIED(p1) )
+       MAKE_DOOR_MANUAL (door3)
+       MAKE_DOOR_MANUAL (door19)
+       OPEN_DOOR (door3)
+       OPEN_DOOR (door19)
+    ENDIF
+          
+    //  Bank van just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_3_bank_van_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1148)       //  "You can drink that polluted shit alone, Gecko. Goodbye."
+       DISPLAY_MESSAGE (1125)         //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+             
+       //  Reset the doors states
+       MAKE_DOOR_MANUAL (door3)
+       MAKE_DOOR_MANUAL (door19)
+       OPEN_DOOR (door3)
+       OPEN_DOOR (door19)
+       
+       RETURN
+    ENDIF
+          
+    //  The bank van has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_3_bank_van_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1134)       //  "No Bank Van means no money. Get yourself a regular job, joker."
+       DISPLAY_MESSAGE (1125)         //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+             
+       //  Reset the doors states
+       MAKE_DOOR_MANUAL (door3)
+       MAKE_DOOR_MANUAL (door19)
+       OPEN_DOOR (door3)
+       OPEN_DOOR (door19)
+       
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  The player arrived at the garage, in front of its door
+ 
+ //  Do the PARK as fast as possible
+ 
+ EXEC
+ 
+     REMOVE_ARROW (arrow1)
+     CLEAR_WANTED_LEVEL (p1)
+     PARK (z_m_3_bank_van_car, door1)
+ 
+ ENDEXEC
+ 
+ //  While the park does not finish
+ WHILE_EXEC ( NOT ( HAS_PARK_FINISHED() ) )
+    
+    //  The bank van has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_3_bank_van_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1134)       //  "No Bank Van means no money. Get yourself a regular job, joker."
+       DISPLAY_MESSAGE (1125)         //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+
+ //  The bank van has parked
+
+ DESTROY_GROUP (p1)                   //  Destroy player/Z-Men group
+ 
+ DISPLAY_BRIEF (1140)                 //  "Find Rollo Tomassi, life-long friend of the Zaibatsu. He can swap clean cash for the necessary Cop pay-off."
+ 
+ //  Create Rollo Tomassi
+ z_m_3_tomassi_char = CREATE_CHAR (177.50, 50.50, 2.00) 8 0 CRIMINAL_TYPE1 END
+ SET_CHAR_THREAT_REACTION (z_m_3_tomassi_char, NO_REACTION)
+ SET_CHAR_OBJECTIVE (z_m_3_tomassi_char, WAIT_ON_FOOT)
+ 
+ POINT_ARROW_AT (arrow1, z_m_3_tomassi_char)          //  Point at Tomassi
+ 
+ //  While the player does not reach Tomassi
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 177.50, 50.50, 2.00, 1.00, 1.00) ) )
+    
+    //  If Tomassi died
+    IF ( HAS_CHARACTER_DIED(z_m_3_tomassi_char) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1141)         //  "Rollo Tomassi was Zaibatsu connected, Gecko. Wasting his ass was a BAD move."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player reached at Tomassi
+ 
+ REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF (1142)             //  "Give the package to the Cop - with our thanks!"
+ 
+ //  Briefcase or package
+ z_m_3_false_briefcase = CREATE_OBJ (178.50, 50.50, 2.00) 90 BRIEFCASE END
+ 
+ POINT_ARROW_AT (arrow1, z_m_3_false_briefcase)     //  Point at it
+ 
+ //  While the player does not get the briefcase
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 178.50, 50.50, 2.00, 1.00, 1.00) ) )
+ 
+    //  If Tomassi died
+    IF ( HAS_CHARACTER_DIED(z_m_3_tomassi_char) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1141)         //  "Rollo Tomassi was Zaibatsu connected, Gecko. Wasting his ass was a BAD move."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player got the briefcase
+ 
+ REMOVE_ARROW (arrow1)
+ DELETE_ITEM (z_m_3_false_briefcase)
+ 
+ //  Create the cop
+ z_m_3_cop_char = CREATE_CHAR (199.50, 151.50, 2.00) 1 0 CRIMINAL END
+ SET_CHAR_GRAPHIC_TYPE (z_m_3_cop_char, EMERG_GRAPHIC, 0)
+ SET_CHAR_OBJECTIVE (z_m_3_cop_char, WAIT_ON_FOOT)
+ SET_CHAR_THREAT_REACTION (z_m_3_cop_char, NO_REACTION)
+ 
+ POINT_ARROW_AT (arrow1, z_m_3_cop_char)   //  Point at the cop, in the cop station in Flotsam
+ 
+ //  Create his car
+ z_m_3_cop_car = CREATE_CAR (198.50, 152.50, 255.00) 14 270 COPCAR END
+ 
+ CHANGE_CAR_LOCK (z_m_3_cop_car, LOCKOUT_PLAYER)  //  Lock it
+ 
+ //  While the player does not reach the cop at the cop station
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 199.50, 151.50, 2.00, 1.00, 1.00) ) )
+    
+    //  If the cop died
+    IF ( HAS_CHARACTER_DIED(z_m_3_cop_char) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1143)             //  "That wasn't so smart, Gecko."
+       DISPLAY_MESSAGE (1125)               //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player reached at the cop
+ 
+ REMOVE_ARROW (arrow1)
+ 
+ //  Spawn the briefcase
+ z_m_3_false_briefcase = CREATE_OBJ (200.50, 151.50, 2.00) 90 BRIEFCASE END
+ 
+ //  Set the cop to go pick up the briefcase
+ SET_CHAR_OBJECTIVE (z_m_3_cop_char, GOTO_AREA_ON_FOOT, 200.50, 151.50, 2.00)
+ 
+ //  While the cop does not reach the briefcase
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ON_FOOT(z_m_3_cop_char, 200.50, 151.50, 2.00, 0.50, 0.50) ) )
+ 
+    //  If the cop died
+    IF ( HAS_CHARACTER_DIED(z_m_3_cop_char) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1143)             //  "That wasn't so smart, Gecko."
+       DISPLAY_MESSAGE (1125)               //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The cop reached at the briefcase
+
+ DISPLAY_BRIEF_NOW (1144)            //  "Give my regards to Trey Welsh. Remind him the price is going up."
+ 
+ DELETE_ITEM (z_m_3_false_briefcase)                //  Delete the briefcase
+ 
+ ORDER_CHAR_TO_DRIVE_CAR (z_m_3_cop_char, z_m_3_cop_car)      //  Set the cop to drive his cop car
+ 
+ //  While the cop does not enter the cop car
+ WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(z_m_3_cop_char, z_m_3_cop_car) ) )
+ 
+    //  If the cop died
+    IF ( HAS_CHARACTER_DIED(z_m_3_cop_char) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1143)             //  "That wasn't so smart, Gecko."
+       DISPLAY_MESSAGE (1125)               //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The cop entered the cop car
+ 
+ EXPLODE_LARGE (z_m_3_cop_car)      //  RIP
+ 
+ //  ( the actual explosion is 'medium' instead of large, a little bug. We can fix this by setting the EXPLODE_LARGE to the cop char instead of his car )
+ 
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF_NOW (1145)    //  "His price just went down, Gecko. Get a vehicle and get to the Safehouse."
+ 
+ POINT_ARROW_AT (arrow1, 178.50, 81.50, 2.00)      //  Point at the garage
+ 
+ ALTER_WANTED_LEVEL (p1, 4)  //  POLICE!
+ 
+ //  While the player does not reach the garage's surroundings using a car
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 178.50, 83.50, 2.00, 8.00, 3.00) ) )
+    DO_NOWT
+ ENDWHILE
+ 
+ //  The player reached at the garage's surroundings
+ 
+ //  Store the car the player is in and update the door to it
+ STORE_CAR_CHARACTER_IS_IN (p1, z_m_3_escape_car)
+ UPDATE_DOOR_TARGET (door2, z_m_3_escape_car)
+ 
+ //  While the player does not reach the very front of the garage door
+ WHILE_EXEC ( NOT ( IS_CAR_IN_BLOCK(z_m_3_escape_car, 178.50, 81.50, 2.00, 3.00, 1.00) ) )
+    DO_NOWT
+ ENDWHILE
+ 
+ REMOVE_ARROW (arrow1)
+ 
+ //  Do the park as fast as possible
+ 
+ EXEC
+ 
+     STORE_CAR_CHARACTER_IS_IN (p1, z_m_3_escape_car)
+     UPDATE_DOOR_TARGET (door2, z_m_3_escape_car)
+     PARK (z_m_3_escape_car, door2)
+ 
+ ENDEXEC
+ 
+ //  While the park does not finish
+ WHILE_EXEC ( NOT ( HAS_PARK_FINISHED() ) )
+    
+    //  Somehow the car has been destroyed during the park
+    IF ( IS_CAR_WRECKED(z_m_3_escape_car) )
+       DISPLAY_MESSAGE (1125)           //  "JOB FAILED!"
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ IF ( flag_failed_mission = 0 )                      //  If the player didn't fail the mission
+ 
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF (1008)      //  "Impressive, Gecko! This display of force will remind the Cops not to bite the Zaibatsu hand that feeds them. Your fine performance is worthy of $40,000."
+    DISPLAY_MESSAGE (1124)    //  JOB COMPLETE!
+    
+    SET flag_passed_zaib_med_phone1_2_m3 = 1       //  The player passed this mission
+    
+    ADD_SCORE (p1, 40000)
+    ADD_MULTIPLIER (p1, 1)
+    CLEAR_WANTED_LEVEL (p1)
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (zaibatsugang, p1, 1)   //  RESPECT +
+    
+    //  If the player passed this mission and the Zaibatsu Medium Phone 1 Mission 1
+    IF ( ( flag_passed_zaib_med_phone1_2_m3 = 1 ) AND ( flag_passed_zaib_med_phone1_m1 = 1 ) )
+       SET_PHONE_DEAD (ph_zaib_med_phone1)                              //  Kill the Phone 1
+       SET flag_kill_zaib_med_phone1 = 1                                //  Store that kill
+    ENDIF
+    
+    //  If the player passed this mission and the Zaibatsu Medium Phone 2 Mission 1
+    IF ( ( flag_passed_zaib_med_phone1_2_m3 = 1 ) AND ( flag_passed_zaib_med_phone2_m1 = 1 ) )
+       SET_PHONE_DEAD (ph_zaib_med_phone2)                              //  Kill the Phone 2
+       SET flag_kill_zaib_med_phone2 = 1                                //  Store that kill
+    ENDIF
+    
+ ENDIF
+
+RETURN
+
+
+
+clean_up_zaib_med_phone1_2_m3:                               //  Clean up
+
+	REMOVE_ARROW (arrow1)
+ 
+	SET flag_failed_mission = 0
+ 
+	CLEAR_WANTED_LEVEL (p1)
+	DELETE_ITEM (z_m_3_alarm_sound)
+ 
+ //  If the alarm light has been created
+ IF ( z_m_3_light_created_flag = 1 )
+	   DELETE_ITEM (light4)
+	ENDIF
+ 
+	MISSION_HAS_FINISHED ()
+ 
+ //  If the player completed this mission, count +1 (zaibatsu) mission passed
+ IF ( flag_passed_zaib_med_phone1_2_m3 = 1 )
+	   ++flag_all_missions_passed
+	   ++flag_zaib_missions_passed
+	   MAKE_DOOR_MANUAL (door1)       //  Keep it as it is
+	   MAKE_DOOR_MANUAL (door19)      //  Keep it as it is
+	   MAKE_DOOR_MANUAL (door3)       //  Keep it as it is
+	   MAKE_DOOR_MANUAL (door2)       //  Keep it as it is
+	ENDIF
+ 
+ //  If the player failed this mission, count +1 (zaibatsu) mission failed
+ IF ( ( flag_failed_zaib_med_phone1_2_m3 = 1 ) OR ( CHECK_DEATHARREST_EXECUTED() ) )
+	   ++flag_all_missions_failed
+	   ++flag_zaib_missions_failed
+	   MAKE_DOOR_AUTOMATIC (door1)       //  Return to the previous state
+	   MAKE_DOOR_AUTOMATIC (door19)      //  Return to the previous state
+	   MAKE_DOOR_AUTOMATIC (door3)       //  Return to the previous state
+	   MAKE_DOOR_AUTOMATIC (door2)       //  Return to the previous state
+	   CLEAR_WANTED_LEVEL (p1)
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (zaibatsugang, p1, -1)  //  Lose respect
+	ENDIF
+ 
+	SET flag_on_mission = 0
+	SET flag_on_zaib_mission = 0
+ 
+RETURN
+
+MISSIONSTART
+GOSUB zaib_med_phone1_2_m3:
+GOSUB clean_up_zaib_med_phone1_2_m3:
+MISSIONEND

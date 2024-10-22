@@ -1,0 +1,843 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Dimentia to go! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_lm3.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD loon_med_phone1_2_m3:
+//FORWARD clean_up_loon_med_phone1_2_m3:
+
+CAR_DATA l_m_3_limo_car
+CAR_DATA l_m_3_player_car
+
+CHAR_DATA l_m_3_dodo_char
+CHAR_DATA l_m_3_cop_1_char
+CHAR_DATA l_m_3_cop_2_char
+CHAR_DATA l_m_3_lance_char
+
+OBJ_DATA l_m_3_molotov
+OBJ_DATA l_m_3_silenced_mg
+OBJ_DATA l_m_3_pwr_gen
+
+COUNTER l_m_3_player_spotted = 0
+COUNTER l_m_3_lance_on_screen = 0
+COUNTER l_m_3_waiting_on_pos = 0
+COUNTER l_m_3_player_in_c_comp = 0
+
+loon_med_phone1_2_m3:
+
+	SET flag_on_mission = 1
+	SET flag_on_loon_mission = 1
+ 
+	SET flag_failed_loon_med_phone1_2_m3 = 0
+ 
+	DISPLAY_MESSAGE (1972)                                               //  DIMENTIA TO GO!
+ 
+	l_m_3_dodo_char = CREATE_CHAR (45.50, 75.50, 3.00) 11 0 CRIMINAL END
+	SET_CHAR_THREAT_SEARCH (l_m_3_dodo_char, NO_THREATS)
+	SET_CHAR_THREAT_REACTION (l_m_3_dodo_char, NO_REACTION)
+	ADD_CHAR_TO_GANG (l_m_3_dodo_char, looniegang)
+ 
+	DISPLAY_BRIEF (1311)  //  "Hey, Jumbo, it's Elmo here. The Cops have a new Dementia Limousine in their Car Compound [...] Meet my friend Dodo at the University - he will help you."
+	POINT_ARROW_AT (arrow1, l_m_3_dodo_char)           //  Point at Dodo in the University
+ 
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 45.50, 75.50, 3.00, 1.00, 1.00) ) )    //  While the player didn't reached at Dodo's location
+    
+    IF ( HAS_CHARACTER_DIED(l_m_3_dodo_char) )         //  If Dodo died
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1313)             //  "Uh-oh! Dodo's dead! I don't think I can ever forgive you, Jumbo."
+	      DISPLAY_MESSAGE (1125)
+	      SET flag_failed_mission = 1
+	      SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+
+ //  Player arrived at Dodo's location
+
+ REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF (1314)                       //  "Hello, Elmo's special friend. I have arranged for a gun and some bombs to be left behind the Harman Hotel [...]"
+ 
+ l_m_3_molotov = CREATE_OBJ (162.50, 160.50, 2.00) 0 COLLECT_04 10 END        //  Molotov
+ l_m_3_silenced_mg = CREATE_OBJ (162.50, 162.50, 2.00) 0 COLLECT_09 30 END        //  Silenced machine-gun
+ 
+ POINT_ARROW_AT (arrow1, 163.50, 161.50, 2.00)           //  Point arrow to Harman Hotel
+ 
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ANY_MEANS(p1, 163.50, 161.50, 2.00, 1.00, 3.00) ) )     //  While the player didn't reached at Harman Hotel
+    DO_NOWT
+ ENDWHILE
+ 
+ //  Player arrived at Harman Hotel
+
+ REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF (1316)      //  "The guard outside the Cop Car Compound is too nice to die. Get some wheels and meet Lance - he will distract the Guard for $1,000 a pop."
+ 
+ l_m_3_lance_char = CREATE_CHAR (195.50, 242.50, 2.00) 8 180 CRIMINAL END          //  Create Lance
+ 
+ SET_CHAR_THREAT_SEARCH (l_m_3_lance_char, NO_THREATS)                //  There is no threats to him
+ SET_CHAR_THREAT_REACTION (l_m_3_lance_char, NO_REACTION)             //  Do not react from a threat
+ 
+ POINT_ARROW_AT (arrow1, l_m_3_lance_char)                            //  Point at Lance
+ 
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 195.50, 242.50, 2.00, 2.00, 2.00) ) )        //  While the player didn't reached at Lance by car
+    
+    IF ( HAS_CHARACTER_DIED(l_m_3_lance_char) )     //  If Lance died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1317)         //  "Lance is... dead, Jumbo. Find yourself a new job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  Player reached at Lance by car
+
+ REMOVE_ARROW (arrow1)       //  Remove arrow from Lance
+ 
+ //  Check if the player has 1000 dollars
+ 
+ IF ( NOT ( CHECK_SCORE_GREATER(p1, 999) ) )     //  If not...
+ 
+    DISPLAY_BRIEF (1318)          //  "Are you serious? I ain't moving for anything less than a thousand."
+    
+    WHILE_EXEC ( NOT ( CHECK_SCORE_GREATER(p1, 999) ) )      //  While the player didn't get 1000 dollars
+    
+       IF ( HAS_CHARACTER_DIED(l_m_3_lance_char) )         //  If Lance died
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1317)             //  "Lance is... dead, Jumbo. Find yourself a new job."
+          DISPLAY_MESSAGE (1125)
+          SET flag_failed_mission = 1
+          SET flag_failed_loon_med_phone1_2_m3 = 1
+          RETURN
+       ENDIF
+    
+    ENDWHILE
+    
+    DISPLAY_BRIEF_NOW (1319)              //  "You got the money - now go get Lance!"
+    POINT_ARROW_AT (arrow1, l_m_3_lance_char)         //  Point arrow at Lance
+    
+ ENDIF
+ 
+ //  Player has 1000 dollars
+ 
+ // (This piece of code below is useless unless the player has 1000 dollars)
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 195.50, 242.50, 2.00, 3.00, 4.00) ) )  //  While the player didn't reached at Lance by car
+    
+    IF ( HAS_CHARACTER_DIED(l_m_3_lance_char) )     //  If Lance died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1317)         //  "Lance is... dead, Jumbo. Find yourself a new job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  Player reached at Lance by car and he has 1000 dollars
+ 
+ REMOVE_ARROW (arrow1)       //  Remove arrow from Lance
+ DISPLAY_BRIEF (1320)        //  "A thousand bucks! I'm all yours, big boy."
+ 
+ EXEC
+     STORE_CAR_CHARACTER_IS_IN (p1, l_m_3_player_car)                        //  auto-explanatory
+     SET_CHAR_OBJECTIVE (l_m_3_lance_char, ENTER_CAR_AS_PASSENGER, l_m_3_player_car)        //  Set Lance to enter the player's car
+ ENDEXEC
+ 
+ WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(l_m_3_lance_char) ) )         //  While Lance didn't enter the player's car
+ 
+    IF ( HAS_CHARACTER_DIED(l_m_3_lance_char) )     //  If Lance died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1317)         //  "Lance is... dead, Jumbo. Find yourself a new job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    IF ( ( l_m_3_lance_on_screen = 0 ) AND ( NOT ( IS_ITEM_ONSCREEN(l_m_3_lance_char) ) ) )     //  If Lance isn't on the player screen
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (7005)               //  "Hey! Wait for me, stud!"
+       POINT_ARROW_AT (arrow1, l_m_3_lance_char)      //  Point at Lance
+       SET l_m_3_lance_on_screen = 1                    //  Lock this IF
+    ENDIF
+    
+    IF ( ( l_m_3_lance_on_screen = 1 ) AND ( IS_ITEM_ONSCREEN(l_m_3_lance_char) ) )      //  If Lance returned to player's screen
+       REMOVE_ARROW (arrow1)             //  Remove arrow from him
+       SET l_m_3_lance_on_screen = 0                   //  Unlock the previous IF
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(l_m_3_player_car) )        //  If the car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1321)          //  "Lance! Dead! That's the job over for you, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  Lance entered in the player's car
+ 
+ ADD_SCORE_NO_MULT (p1, -1000)      //  Pay him
+ DISPLAY_BRIEF (1322)               //  "Drop Lance outside the Cop Car Compound and leave the vehicle - Lance will need it."
+ 
+ POINT_ARROW_AT (arrow1, 204.50, 168.50, 2.00)      //  Point at Cop Car Compound
+ 
+ 
+ //  Create the cops
+ 
+ l_m_3_cop_1_char = CREATE_CHAR (204.50, 170.50, 2.00) 1 180 CRIMINAL_TYPE1 END
+ l_m_3_cop_2_char = CREATE_CHAR (203.50, 174.50, 2.00) 1 180 CRIMINAL_TYPE1 END
+ 
+ SET_CHAR_GRAPHIC_TYPE (l_m_3_cop_1_char, EMERG_GRAPHIC, 0)
+ SET_CHAR_GRAPHIC_TYPE (l_m_3_cop_2_char, EMERG_GRAPHIC, 0)
+ 
+ SET_CHAR_THREAT_SEARCH (l_m_3_cop_1_char, NO_THREATS)
+ SET_CHAR_THREAT_SEARCH (l_m_3_cop_2_char, LINE_OF_SIGHT_PLAYER_ONLY)
+ 
+ SET_CHAR_THREAT_REACTION (l_m_3_cop_1_char, REACT_AS_NORMAL)
+ SET_CHAR_THREAT_REACTION (l_m_3_cop_2_char, REACT_AS_NORMAL)
+ 
+ SET_CHAR_OBJECTIVE (l_m_3_cop_1_char, WAIT_ON_FOOT)
+ 
+ GIVE_WEAPON (l_m_3_cop_1_char, PISTOL)
+ GIVE_WEAPON (l_m_3_cop_2_char, PISTOL)
+ 
+ l_m_3_limo_car = CREATE_CAR (203.50, 175.50, 2.00) 16 180 ISETLIMO END      //  Limo
+ 
+ l_m_3_pwr_gen = CREATE_OBJ (202.50, 172.50, 3.00) 0 POWERGEN END           //  Power Generator
+ 
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 204.50, 168.50, 2.00, 1.00, 1.00) ) )     //  While the player didn't reached at Cop Car Compound
+ 
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, l_m_3_player_car) ) )       //  If the player leaves the car Lance is into
+    
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1323)                //  "You can't leave Lance, Jumbo!"
+       POINT_ARROW_AT (arrow1, l_m_3_player_car)         //  Point at the car Lance is into
+       
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, l_m_3_player_car) ) )   //  While the player didn't returned to the car
+       
+          IF ( HAS_CHARACTER_DIED(l_m_3_lance_char) )    //  If Lance died
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1317)        //  "Lance is... dead, Jumbo. Find yourself a new job."
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_loon_med_phone1_2_m3 = 1
+             RETURN
+          ENDIF
+          
+          IF ( HAS_CHARACTER_DIED(l_m_3_cop_1_char) )    //  If the cop died
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1326)        //  "I didn't say you could kill the Cop, Jumbo. Consider yourself off the job."
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_loon_med_phone1_2_m3 = 1
+             RETURN
+          ENDIF
+          
+          IF ( HAS_CHARACTER_DIED(l_m_3_cop_2_char) )    //  If the other cop died
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1326)        //  "I didn't say you could kill the Cop, Jumbo. Consider yourself off the job."
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_loon_med_phone1_2_m3 = 1
+             RETURN
+          ENDIF
+          
+          IF ( IS_CAR_WRECKED(l_m_3_limo_car) )      //  If the limo car has been destroyed
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1327)        //  "My dream car! Wasted! Stay away from me for a while, Jumbo."
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_loon_med_phone1_2_m3 = 1
+             RETURN
+          ENDIF
+          
+          IF ( IS_CAR_WRECKED(l_m_3_player_car) )      //  If the car Lance is into has been destroyed
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1321)        //  "Lance! Dead! That's the job over for you, Jumbo."
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_loon_med_phone1_2_m3 = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+       
+       ENDWHILE
+       
+       //  Player returned to the car Lance is into
+       
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1324)             //  "Drive to the Cop Car Compound - and hurry, Jumbo!"
+       POINT_ARROW_AT (arrow1, 204.50, 168.50, 2.00)     //  Point at Cop Car Compound again
+    
+    ENDIF
+    
+    //  Checking...
+    
+    IF ( HAS_CHARACTER_DIED(l_m_3_lance_char) )    //  If Lance died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1317)        //  "Lance is... dead, Jumbo. Find yourself a new job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(l_m_3_player_car) )      //  If the car Lance is into has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1321)        //  "Lance! Dead! That's the job over for you, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(l_m_3_limo_car) )      //  If the limo car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1327)        //  "My dream car! Wasted! Stay away from me for a while, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+          
+    IF ( HAS_CHARACTER_DIED(l_m_3_cop_1_char) )    //  If the cop died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1326)        //  "I didn't say you could kill the Cop, Jumbo. Consider yourself off the job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+          
+    IF ( HAS_CHARACTER_DIED(l_m_3_cop_2_char) )    //  If the other cop died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1326)        //  "I didn't say you could kill the Cop, Jumbo. Consider yourself off the job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player arrived at Cop Car Compound by car
+
+ SET l_m_3_player_in_c_comp = 1
+ REMOVE_ARROW (arrow1)
+ 
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF_NOW (1325)          //  "Get out of the vehicle, Jumbo, and wait to see if Lance does his stuff."
+ POINT_ARROW_AT (arrow1, 206.50, 170.50, 2.00)     //  Point arrow at the front of Cop Car Compound
+ 
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 206.50, 170.50, 2.00, 1.00, 1.00) ) )      //  While the player didn't reached the destination by foot
+    
+    IF ( HAS_CHARACTER_DIED(l_m_3_lance_char) )    //  If Lance died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1317)        //  "Lance is... dead, Jumbo. Find yourself a new job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(l_m_3_player_car) )      //  If the car Lance is into has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1321)        //  "Lance! Dead! That's the job over for you, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(l_m_3_limo_car) )      //  If the limo car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1327)        //  "My dream car! Wasted! Stay away from me for a while, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(l_m_3_cop_1_char) )    //  If the cop died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1326)        //  "I didn't say you could kill the Cop, Jumbo. Consider yourself off the job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+          
+    IF ( HAS_CHARACTER_DIED(l_m_3_cop_2_char) )    //  If the other cop died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1326)        //  "I didn't say you could kill the Cop, Jumbo. Consider yourself off the job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  Player reached at the destination on foot
+
+ CHANGE_CAR_LOCK (l_m_3_player_car, LOCKOUT_PLAYER)            //  Lock the car to prevents the player getting back to it
+ REMOVE_ARROW (arrow1)                               //  Remove arrow from the destination
+ SET_CHAR_OBJECTIVE (l_m_3_lance_char, LEAVE_CAR, l_m_3_player_car)        //  Set Lance to leave his car
+ 
+ WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(l_m_3_lance_char) ) )    //  While Lance didn't leave his car
+ 
+    IF ( HAS_CHARACTER_DIED(l_m_3_lance_char) )    //  If Lance died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1317)        //  "Lance is... dead, Jumbo. Find yourself a new job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    IF ( ( l_m_3_waiting_on_pos = 0 ) AND ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 206.50, 170.50, 2.00, 1.00, 1.00) ) ) )    //  If the player leaves his place
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (7006)        //  "Where are you going? Watch Lance in action!"
+       POINT_ARROW_AT (arrow1, 206.50, 170.50, 2.00)         //  Point the arrow back to the destination
+       SET l_m_3_waiting_on_pos = 1         //  Lock this IF
+    ENDIF
+    
+    IF ( ( l_m_3_waiting_on_pos = 1 ) AND ( LOCATE_CHARACTER_ON_FOOT(p1, 206.50, 170.50, 2.00, 1.00, 1.00) ) )  //  If the player returned to his position
+       REMOVE_ARROW (arrow1)        //  Remove arrow
+       SET l_m_3_waiting_on_pos = 0              //  Unlock the previous IF
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(l_m_3_player_car) )      //  If the car Lance is into has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1321)        //  "Lance! Dead! That's the job over for you, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(l_m_3_limo_car) )      //  If the limo car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1327)        //  "My dream car! Wasted! Stay away from me for a while, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(l_m_3_cop_1_char) )    //  If the cop died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1326)        //  "I didn't say you could kill the Cop, Jumbo. Consider yourself off the job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+          
+    IF ( HAS_CHARACTER_DIED(l_m_3_cop_2_char) )    //  If the other cop died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1326)        //  "I didn't say you could kill the Cop, Jumbo. Consider yourself off the job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  Lance left his car
+
+ SET_CHAR_OBJECTIVE (l_m_3_lance_char, GOTO_CHAR_ON_FOOT, l_m_3_cop_1_char)          //  Set Lance to go talk with the Cop
+ 
+ WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(l_m_3_lance_char) ) )            //  While he didn't do it
+ 
+    IF ( HAS_CHARACTER_DIED(l_m_3_lance_char) )    //  If Lance died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1317)        //  "Lance is... dead, Jumbo. Find yourself a new job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    IF ( ( l_m_3_waiting_on_pos = 0 ) AND ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 206.50, 170.50, 2.00, 1.00, 1.00) ) ) )    //  If the player leaves his place
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (7006)        //  "Where are you going? Watch Lance in action!"
+       POINT_ARROW_AT (arrow1, 206.50, 170.50, 2.00)         //  Point the arrow back to the destination
+       SET l_m_3_waiting_on_pos = 1         //  Lock this IF
+    ENDIF
+    
+    IF ( ( l_m_3_waiting_on_pos = 1 ) AND ( LOCATE_CHARACTER_ON_FOOT(p1, 206.50, 170.50, 2.00, 1.00, 1.00) ) )  //  If the player returned to his position
+       REMOVE_ARROW (arrow1)        //  Remove arrow
+       SET l_m_3_waiting_on_pos = 0              //  Unlock the previous IF
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(l_m_3_player_car) )      //  If the car Lance is into has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1321)        //  "Lance! Dead! That's the job over for you, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(l_m_3_limo_car) )      //  If the limo car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1327)        //  "My dream car! Wasted! Stay away from me for a while, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(l_m_3_cop_1_char) )    //  If the cop died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1326)        //  "I didn't say you could kill the Cop, Jumbo. Consider yourself off the job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+          
+    IF ( HAS_CHARACTER_DIED(l_m_3_cop_2_char) )    //  If the other cop died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1326)        //  "I didn't say you could kill the Cop, Jumbo. Consider yourself off the job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  Lance arrived at the cop
+ 
+ MAKE_CHAR_DO_NOTHING (l_m_3_cop_1_char)           //  Set the cop to do nothing
+ 
+ SET_CHAR_THREAT_REACTION (l_m_3_cop_1_char, NO_REACTION)      //  Do not react to threats
+ SET_CHAR_OBJECTIVE (l_m_3_cop_1_char, ENTER_CAR_AS_PASSENGER, l_m_3_player_car)    //  Set Lance to enter the car as passenger
+ 
+ DELAY_HERE (30)                                //  Wait a moment
+ 
+ SET_CHAR_OBJECTIVE (l_m_3_lance_char, ENTER_CAR_AS_DRIVER, l_m_3_player_car)    //  Set the cop to enter the car as driver
+ SET_CHAR_DRIVE_AGGRESSION (l_m_3_lance_char, ON)                      //  Cop will drive agressively
+ 
+ WHILE_EXEC (   ( NOT ( IS_CHAR_OBJECTIVE_PASSED(l_m_3_cop_1_char) ) )  OR  ( NOT ( IS_CHAR_OBJECTIVE_PASSED(l_m_3_lance_char) ) )  )   //  While both haven't entered the car
+ 
+    IF ( HAS_CHARACTER_DIED(l_m_3_lance_char) )    //  If Lance died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1317)        //  "Lance is... dead, Jumbo. Find yourself a new job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    IF ( ( l_m_3_waiting_on_pos = 0 ) AND ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 206.50, 170.50, 2.00, 1.00, 1.00) ) ) )    //  If the player leaves his place
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (7006)        //  "Where are you going? Watch Lance in action!"
+       POINT_ARROW_AT (arrow1, 206.50, 170.50, 2.00)         //  Point the arrow back to the destination
+       SET l_m_3_waiting_on_pos = 1         //  Lock this IF
+    ENDIF
+    
+    IF ( ( l_m_3_waiting_on_pos = 1 ) AND ( LOCATE_CHARACTER_ON_FOOT(p1, 206.50, 170.50, 2.00, 1.00, 1.00) ) )  //  If the player returned to his position
+       REMOVE_ARROW (arrow1)        //  Remove arrow
+       SET l_m_3_waiting_on_pos = 0              //  Unlock the previous IF
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(l_m_3_player_car) )      //  If the car Lance is into has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1321)        //  "Lance! Dead! That's the job over for you, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(l_m_3_limo_car) )      //  If the limo car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1327)        //  "My dream car! Wasted! Stay away from me for a while, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(l_m_3_cop_1_char) )    //  If the cop died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1326)        //  "I didn't say you could kill the Cop, Jumbo. Consider yourself off the job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+          
+    IF ( HAS_CHARACTER_DIED(l_m_3_cop_2_char) )    //  If the other cop died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1326)        //  "I didn't say you could kill the Cop, Jumbo. Consider yourself off the job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  Both Lance and the cop entered the car
+
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF_NOW (1328)           //  "Lance's filthy allure is working. Enter the Cop Car Compound and kill the other guard - I don't like him."
+ POINT_ARROW_AT (arrow1, 209.50, 171.50, 2.00)
+ 
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 209.50, 171.50, 2.00, 0.50, 0.50) ) )
+    
+    IF ( IS_CAR_WRECKED(l_m_3_limo_car) )      //  If the limo car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1327)        //  "My dream car! Wasted! Stay away from me for a while, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(l_m_3_cop_2_char) )    //  If the other cop died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1326)        //  "I didn't say you could kill the Cop, Jumbo. Consider yourself off the job."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  Player arrived at the point
+
+ REMOVE_ARROW (arrow1)
+ 
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF_NOW (1329)       //  "Ssh! Don't let the guard see you!"
+ 
+ //  Create the same cop already created? Possibly duplicated char
+ /*
+ l_m_3_cop_2_char = CREATE_CHAR (203.50, 174.50, 2.00) 1 180 CRIMINAL_TYPE1 END
+ SET_CHAR_GRAPHIC_TYPE (l_m_3_cop_2_char, EMERG_GRAPHIC, 0)
+ SET_CHAR_THREAT_SEARCH (l_m_3_cop_2_char, LINE_OF_SIGHT_PLAYER_ONLY)
+ SET_CHAR_THREAT_REACTION (l_m_3_cop_2_char, REACT_AS_NORMAL)
+ GIVE_WEAPON (l_m_3_cop_2_char, PISTOL)
+ */
+ 
+ POINT_ARROW_AT (arrow1, l_m_3_cop_2_char)    //  Point the arrow at the guard inside the Cop Car Compound
+ 
+ WHILE_EXEC ( NOT ( HAS_CHARACTER_DIED(l_m_3_cop_2_char) ) )     //  While the player didn't kill him
+ 
+    IF ( IS_CAR_WRECKED(l_m_3_limo_car) )      //  If the limo car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1327)        //  "My dream car! Wasted! Stay away from me for a while, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+    IF ( ( HAS_CHAR_SPOTTED_PLAYER(l_m_3_cop_2_char) ) AND ( l_m_3_player_spotted = 0 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1330)          //  "He's spotted you, Jumbo. This is going to make the job tough."
+       SET_CHAR_OBJECTIVE (l_m_3_cop_2_char, KILL_CHAR_ON_FOOT, p1)    //  Set the guard to kill the player
+       SET l_m_3_player_spotted = 1          //  Lock this IF
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player killed the guard
+ 
+ REMOVE_ARROW (arrow1)
+ 
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF (1331)     //  "Use your Molotov Cocktails to blow up the door locks."
+ 
+ POINT_ARROW_AT (arrow1, l_m_3_pwr_gen)     //  Point arrow at power generator
+ 
+ WHILE_EXEC ( CHECK_OBJ_MODEL(l_m_3_pwr_gen, POWERGEN) )         //  While the power generator was not be destroyed
+ 
+    IF ( IS_CAR_WRECKED(l_m_3_limo_car) )      //  If the limo car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1327)        //  "My dream car! Wasted! Stay away from me for a while, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The powergen has been destroyed  (so the l_m_3_pwr_gen will be the model "POWERGEN_DEAD" )
+
+ REMOVE_ARROW (arrow1)
+ 
+ OPEN_DOOR (door20)
+ OPEN_DOOR (door8)
+ 
+ DISPLAY_BRIEF (1332)      //  "Take that Dementia Limousine and put your foot to the floor!"
+ 
+ POINT_ARROW_AT (arrow1, l_m_3_limo_car)     //  Point arrow to the limo
+ 
+ WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, l_m_3_limo_car) ) )   //  While the player didn't get into the car
+ 
+    IF ( IS_CAR_WRECKED(l_m_3_limo_car) )      //  If the limo car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1327)        //  "My dream car! Wasted! Stay away from me for a while, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player entered the limo
+
+ REMOVE_ARROW (arrow1)
+ 
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF (1334)                      //  "Okay, Jumbo, get the Limousine back to the Asylum - real cool, yeah!"
+ 
+ POINT_ARROW_AT (arrow1, 39.50, 3.50, 2.00)    //  Point arrow to the garage
+ 
+ UPDATE_DOOR_TARGET (door9, l_m_3_limo_car)        //  Update garage door to the limo
+ 
+ WHILE_EXEC ( NOT ( IS_CAR_IN_BLOCK(l_m_3_limo_car, 39.50, 3.50, 2.00, 2.00, 2.00) ) )    //  While the player didn't reached at the garage's entrance
+ 
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, l_m_3_limo_car) ) )    //  If the player left the limo
+    
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1333)                //  "This car's hot, Jumbo, so get back in!"
+       POINT_ARROW_AT (arrow1, l_m_3_limo_car)
+       
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, l_m_3_limo_car) ) )    //  While the player didn't return to the limo
+       
+          IF ( IS_CAR_WRECKED(l_m_3_limo_car) )      //  If the limo car has been destroyed
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1327)        //  "My dream car! Wasted! Stay away from me for a while, Jumbo."
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_loon_med_phone1_2_m3 = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+       
+       ENDWHILE
+       
+       //  Player returned to the limo
+       
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1335)              //  "Quit foolin' and drive to the Asylum - smooth, brother."
+       POINT_ARROW_AT (arrow1, 39.50, 3.50, 2.00)       //  Point arrow to the garage again
+    
+    ENDIF
+    
+    //  Checking...
+    
+    IF ( IS_CAR_WRECKED(l_m_3_limo_car) )      //  If the limo car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1327)        //  "My dream car! Wasted! Stay away from me for a while, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+
+ 
+ ENDWHILE
+ 
+ //  Player is at front of the garage's door
+
+ REMOVE_ARROW (arrow1)
+ PARK (l_m_3_limo_car, door9)
+ 
+ WHILE_EXEC ( NOT ( HAS_PARK_FINISHED() ) )
+ 
+    IF ( IS_CAR_WRECKED(l_m_3_limo_car) )      //  If the limo car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1327)        //  "My dream car! Wasted! Stay away from me for a while, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The park has finished
+ 
+ IF ( flag_failed_mission = 0 )           //  If the player didn't failed the mission
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF (1009)     //  "Ooh, Jumbo! I just LOVE this new Dementia Limousine! Here's $40,000 for being so thoughtful."
+    DISPLAY_MESSAGE (1124)   //  JOB COMPLETE!
+    ADD_SCORE (p1, 40000)
+    ADD_MULTIPLIER (p1, 1)
+    CLEAR_WANTED_LEVEL (p1)
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (looniegang, p1, 1)    //  RESPECT +
+    
+    SET flag_passed_loon_med_phone1_2_m3 = 1                 //  The player passed this mission
+    
+    SUPPRESS_THIS_CAR_MODEL (NONE)      //  The Dementia Limousine isn't supressed anymore, so it will spawn on the streets normally
+    
+    IF ( ( flag_passed_loon_med_phone1_2_m3 = 1 ) AND ( flag_passed_loon_med_phone1_m1 = 1 ) )    //  If the player passed both this mission and the Loonie Medium Mission 1
+       SET_PHONE_DEAD (ph_loon_med_phone1)           //  Kill the Loonies Medium Phone 1
+       SET flag_kill_loon_med_phone1 = 1             //  Store that kill
+    ENDIF
+    
+    IF ( ( flag_passed_loon_med_phone1_2_m3 = 1 ) AND ( flag_passed_loon_med_phone2_m1 = 1 ) )    //  If the player passed both this mission and the Loonie Medium Mission 2
+       SET_PHONE_DEAD (ph_loon_med_phone2)           //  Kill the Loonies Medium Phone 2
+       SET flag_kill_loon_med_phone2 = 1             //  Store that kill
+    ENDIF
+    
+ ENDIF
+ 
+RETURN
+
+
+clean_up_loon_med_phone1_2_m3:               //  Clean up
+
+	REMOVE_ARROW (arrow1)
+	SET flag_failed_mission = 0
+	CLEAR_WANTED_LEVEL (p1)
+	MISSION_HAS_FINISHED ()
+ 
+ IF ( flag_passed_loon_med_phone1_2_m3 = 1 )       //  If the player completed this mission, count +1 (loonies) mission passed
+	   ++flag_all_missions_passed
+	   ++flag_loon_missions_passed
+	   MAKE_DOOR_MANUAL (door9)      //  Keep it shutted
+	ENDIF
+ 
+ IF ( ( flag_failed_loon_med_phone1_2_m3 = 1 ) OR ( CHECK_DEATHARREST_EXECUTED() ) )    //  If the player failed this mission, count +1 (loonies) mission failed
+	   ++flag_loon_missions_failed
+	   ++flag_all_missions_failed
+	   MAKE_DOOR_AUTOMATIC (door9)            //  Restore the previous status
+	   CLOSE_DOOR (door8)                     //  Keep it shutted
+	   CLOSE_DOOR (door20)                    //  Keep it shutted
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (looniegang, p1, -1)   //  Lose respect
+	   CLEAR_WANTED_LEVEL (p1)
+	ENDIF
+ 
+	SET flag_on_mission = 0            //  The player isn't playing a mission anymore
+	SET flag_on_loon_mission = 0            //  The player isn't playing a loonies mission anymore
+ 
+RETURN
+
+MISSIONSTART
+GOSUB loon_med_phone1_2_m3:
+GOSUB clean_up_loon_med_phone1_2_m3:
+MISSIONEND

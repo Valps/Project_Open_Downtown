@@ -1,0 +1,214 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX FOLLOW THAT TRAITOR! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_ym3.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD yaku_med_phone1_2_m3:
+//FORWARD clean_up_yaku_med_phone1_2_m3:
+
+OBJ_DATA y_m_3_machine_gun
+
+CHAR_DATA y_m_3_enemy_char
+CHAR_DATA y_m_3_traitor_char
+CHAR_DATA y_m_3_torturer_char
+
+COUNTER y_m_3_player_spotted_once = 0
+COUNTER y_m_3_countdown = 0
+
+yaku_med_phone1_2_m3:
+
+	SET flag_on_mission = 1                        // Player is playing a mission
+	SET flag_on_yaku_mission = 1                        // Player is playing a yakuza mission
+ 
+	SET flag_failed_yaku_med_phone1_2_m3 = 0
+ 
+	DISPLAY_MESSAGE (1979)                          //  FOLLOW THAT TRAITOR!
+	DISPLAY_BRIEF (1191)                            //  "Hi, Kosai, it's Johnny Zoo. I think my top man is selling information to the Zaibatsu. I want you to tail him."
+ 
+	y_m_3_traitor_char = CREATE_CHAR (80.50, 176.50, 2.00) 13 0 CRIMINAL END         //  The traitor
+ 
+	UPDATE_DOOR_TARGET (door4, y_m_3_traitor_char)                                   //  Update the door
+ 
+ //  Creating the traitor's path
+ 
+	ADD_PATROL_POINT (y_m_3_traitor_char, 76.50, 169.50, 2.00)
+	ADD_PATROL_POINT (y_m_3_traitor_char, 69.50, 169.50, 2.00)
+	ADD_PATROL_POINT (y_m_3_traitor_char, 62.50, 169.50, 2.00)
+	ADD_PATROL_POINT (y_m_3_traitor_char, 59.50, 169.50, 2.00)
+	ADD_PATROL_POINT (y_m_3_traitor_char, 59.50, 176.50, 2.00)
+	ADD_PATROL_POINT (y_m_3_traitor_char, 63.50, 176.50, 2.00)
+	ADD_PATROL_POINT (y_m_3_traitor_char, 63.50, 174.50, 2.00)
+ 
+	SET_CHAR_THREAT_SEARCH (y_m_3_traitor_char, LINE_OF_SIGHT_PLAYER_ONLY)           //  Only the player is a threat, line of sight
+	SET_CHAR_THREAT_REACTION (y_m_3_traitor_char, NO_REACTION)                       //  Do not react to the player
+ 
+	POINT_ARROW_AT (arrow1, y_m_3_traitor_char)                                      //  Point arrow to the traitor
+ 
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ON_FOOT(y_m_3_traitor_char, 63.50, 174.50, 2.00, 0.50, 0.50) ) )
+    
+    IF ( HAS_CHARACTER_DIED(y_m_3_traitor_char))
+	      CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1192)               //  "He's dead, Kosai, and dead men can tell us nothing. This job is over."
+	      DISPLAY_MESSAGE (1125)
+	      SET flag_failed_mission = 1
+	      SET flag_failed_yaku_med_phone1_2_m3 = 1
+       RETURN
+     ENDIF
+     
+     IF ( HAS_CHAR_SPOTTED_PLAYER(y_m_3_traitor_char) )     //  If the traitor saw the player
+     
+        IF ( y_m_3_player_spotted_once = 0 )
+           CLEAR_ALL_BRIEFS ()
+           DISPLAY_BRIEF_NOW (1199)      //  "If he sees you again, Kosai, kiss this job goodbye."
+           SET y_m_3_player_spotted_once = 1               //  Lock this IF
+           SET y_m_3_countdown = 120             //  Begin internal countdown, the player will have 120 game cycles to leave out of sight of the traitor
+        ENDIF
+        
+        IF ( y_m_3_countdown = 0 )               //  The traitor sees the player again
+           CLEAR_ALL_BRIEFS ()
+           DISPLAY_BRIEF_NOW (1193)      //  "He saw you, Kosai, and now the job is history. Learn to follow simple instructions and you might live longer."
+           DISPLAY_MESSAGE (1125)        //  JOB FAILED!
+           SET flag_failed_mission = 1
+           SET flag_failed_yaku_med_phone1_2_m3 = 1
+           RETURN
+        ENDIF
+        
+     ENDIF
+     
+     IF ( y_m_3_countdown > 0 )                  //  If the player has been spotted once, do countdown
+        --y_m_3_countdown
+     ENDIF
+    
+	ENDWHILE
+ 
+ 
+ //  The traitor reaches at the hideout
+ 
+ IF ( NOT ( IS_ITEM_ACCURATELY_ONSCREEN(y_m_3_traitor_char) ) )          //  If the player didn't saw the traitor hiding at the hideout
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF_NOW (1194)                  //  "You lost him, Kosai. In future concentrate on the job and you will not make so many mistakes."
+    DISPLAY_MESSAGE (1125)
+    SET flag_failed_mission = 1
+    SET flag_failed_yaku_med_phone1_2_m3 = 1
+    RETURN
+ ENDIF
+ 
+ //  The player saw the traitor hiding at the hideout
+
+ REMOVE_ARROW (arrow1)                           //  Remove arrow from the traitor
+ DELETE_ITEM (y_m_3_traitor_char)                              //  Discard the traitor. He will disappear as soon as he get out of player's screen
+ DISPLAY_BRIEF_NOW (1195)                        //  "Excellent, you found the traitor's hideout. He must suffer the Yakuza way [...]"
+ 
+ y_m_3_torturer_char = CREATE_CHAR (98.50, 218.50, 3.00) 13 180 CRIMINAL END    //  Create "Refried Noodle", the ancient torture master
+ GIVE_WEAPON (y_m_3_torturer_char, MACHINE_GUN)
+ SET_CHAR_OBJECTIVE (y_m_3_torturer_char, WAIT_ON_FOOT)
+ SET_CHAR_THREAT_REACTION (y_m_3_torturer_char, NO_REACTION)
+ 
+ POINT_ARROW_AT (arrow1, y_m_3_torturer_char)                                   //  Point arrow to Refried Noodle
+ y_m_3_machine_gun = CREATE_OBJ (99.50, 218.50, 3.00) 0 COLLECT_01 10 END   //  Create a machine gun
+ 
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 98.50, 218.50, 3.00, 0.40, 0.40) ) )     //  While the player didn't meet with the Refried Noodle
+ 
+    IF ( HAS_CHARACTER_DIED(y_m_3_torturer_char) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1196)                  //  "Refried Noodle was older than this city, Kosai. Consider his death a bad mistake on your part."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone1_2_m3 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+
+ REMOVE_ARROW (arrow1)                           //  Remove arrow
+ ADD_GROUP_TO_CHARACTER (p1, 0)                  //  Create a group to the player
+ 
+ DELETE_ITEM (y_m_3_traitor_char)                              //  Delete y_m_3_traitor_char again?
+ 
+ DISPLAY_BRIEF (1197)                            //  "I am Refried Noodle. Here is a weapon - if you need it."
+ 
+ ADD_EXISTING_CHAR_TO_GROUP (p1, y_m_3_torturer_char)           //  Add Refried Noodle to the player group
+ 
+ DISPLAY_BRIEF (1198)                            //  "The traitor and his men must die! Kill them all, Kosai!"
+ 
+ y_m_3_enemy_char = CREATE_CHAR (58.50, 172.50, 2.00) 13 0 CRIMINAL END        //  Create an enemy
+ GIVE_WEAPON (y_m_3_enemy_char, MACHINE_GUN)
+ SET_CHAR_THREAT_SEARCH (y_m_3_enemy_char, AREA_PLAYER_ONLY)
+ SET_CHAR_THREAT_REACTION (y_m_3_enemy_char, REACT_AS_NORMAL)
+ SET_CHAR_OBJECTIVE (y_m_3_enemy_char, WAIT_ON_FOOT)
+ ADD_CHAR_TO_GANG (y_m_3_enemy_char, yakuzagang)
+ ADD_GROUP_TO_CHARACTER (y_m_3_enemy_char, 2)
+ 
+ POINT_ARROW_AT (arrow1, y_m_3_enemy_char)
+ 
+ WHILE_EXEC ( NOT ( IS_ITEM_ONSCREEN(y_m_3_enemy_char) ) )        //  Do nothing while he didn't see the player
+    DO_NOWT
+ ENDWHILE
+
+ SET_CHAR_OBJECTIVE (y_m_3_enemy_char, KILL_CHAR_ON_FOOT, p1)     //  Now kill the player
+ 
+ WHILE_EXEC ( CHECK_NUMBER_ALIVE_IN_GROUP(y_m_3_enemy_char, 1) )       //  while at least 1 member of group alive
+    DO_NOWT
+ ENDWHILE
+
+ WHILE_EXEC ( NOT ( HAS_CHARACTER_DIED(y_m_3_enemy_char) ) )           //  while the last member of the group didn't died
+    DO_NOWT
+ ENDWHILE
+ 
+ IF ( flag_failed_mission = 0 )                                    //  If the player didn't failed the mission
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF (1005)                              //  "No one betrays the mighty Yakuza. Loyal assassins are the future, Kosai. As a reward I give you $40,000."
+    DISPLAY_MESSAGE (1124)                            //  JOB COMPLETE!
+    ADD_SCORE (p1, 40000)
+    ADD_MULTIPLIER (p1, 1)
+    CLEAR_WANTED_LEVEL (p1)
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (yakuzagang, p1, 1)     //  RESPECT +
+    SET flag_passed_yaku_med_phone1_2_m3 = 1
+    
+    IF ( ( flag_passed_yaku_med_phone1_2_m3 = 1 ) AND ( flag_passed_yaku_med_phone1_m1 = 1 ) )           //  If the player finished this mission and passed the Yakuza Medium Phone 1 Mission 1
+       SET_PHONE_DEAD (ph_yaku_med_phone1)                                    //  Kill the phone 1
+       SET flag_kill_yaku_med_phone1 = 1                                      //  Store that kill
+    ENDIF
+ 
+    IF ( ( flag_passed_yaku_med_phone1_2_m3 = 1 ) AND ( flag_passed_yaku_med_phone2_m1 = 1 ) )           //  If the player finished this mission and passed the Yakuza Medium Phone 2 Mission 1
+       SET_PHONE_DEAD (ph_yaku_med_phone2)                                    //  Kill the phone 2
+       SET flag_kill_yaku_med_phone2 = 1                                      //  Store that kill
+    ENDIF
+ 
+ ENDIF
+
+RETURN                    //  Go to clean up
+
+clean_up_yaku_med_phone1_2_m3:               //  Clean up
+
+	DESTROY_GROUP (p1)           //  Destroy the player group
+	CLEAR_WANTED_LEVEL (p1)
+	REMOVE_ARROW (arrow1)
+	SET flag_failed_mission = 0               //  Reset "failed mission" flag
+	MISSION_HAS_FINISHED ()
+ 
+ IF ( flag_passed_yaku_med_phone1_2_m3 = 1 )
+	   ++flag_all_missions_passed            //  Count +1 mission passed
+	   ++flag_yaku_missions_passed            //  Count +1 yakuza mission passed
+	ENDIF
+ 
+ IF ( ( flag_failed_yaku_med_phone1_2_m3 = 1 ) OR ( CHECK_DEATHARREST_EXECUTED() ) )       // If the player failed the mission by mission script or by death or arrest
+    ++flag_all_missions_failed            //  Count +1 mission failed
+	   ++flag_yaku_missions_failed            //  Count +1 yakuza mission failed
+	   CLEAR_WANTED_LEVEL (p1)
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (yakuzagang, p1, -1)
+	ENDIF
+	
+	SET flag_on_mission = 0                                       // Player isn't inside a mission anymore
+	SET flag_on_yaku_mission = 0                                       // Player isn't inside a yakuza mission anymore
+ 
+RETURN
+
+MISSIONSTART
+GOSUB yaku_med_phone1_2_m3:
+GOSUB clean_up_yaku_med_phone1_2_m3:
+MISSIONEND

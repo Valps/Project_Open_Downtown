@@ -1,0 +1,127 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX SWAT VAN THEFT XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_yh1.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD yaku_hard_phone_m1:
+//FORWARD clean_up_yaku_hard_phone_m1:
+
+COUNTER y_h_1_van_parked = 0
+COUNTER y_h_1_van_collected = 0
+COUNTER y_h_1_van_ready_to_park = 0
+COUNTER y_h_1_van_flag = 0			// seems to not be useful
+
+CAR_DATA y_h_1_swat_van
+
+yaku_hard_phone_m1:
+	SET flag_on_mission = 1
+	SET flag_on_yaku_mission = 1
+	SET flag_failed_yaku_hard_phone_m1 = 0
+ 
+	DISPLAY_MESSAGE (1980)        // SWAT VAN SWIPE!
+	DISPLAY_BRIEF (1341)          // "Hi, Kosai, it's Johnny Zoo. The authorities have impounded my favorite car and I want you to steal me a SWAT Van [...]"
+ 
+ WHILE_EXEC ( y_h_1_van_parked = 0 )
+
+    //  The player get into a SWAT van
+    IF ( ( IS_CHARACTER_IN_MODEL(p1, SWATVAN) ) AND ( y_h_1_van_collected = 0 ) )
+       DISPLAY_BRIEF (1342)                         //  "Very cool, Kosai. Bring it to my garage."
+	      POINT_ARROW_AT (arrow1, 43.50, 249.50, 2.00)
+	      SET y_h_1_van_collected = 1
+	      STORE_CAR_CHARACTER_IS_IN (p1, y_h_1_swat_van)
+	      UPDATE_DOOR_TARGET (door10, y_h_1_swat_van)
+	      SET y_h_1_van_flag = 1
+    ENDIF
+    
+    //  If the player leaves a SWAT van
+    IF ( NOT ( IS_CHARACTER_IN_MODEL(p1, SWATVAN) ) )
+    IF ( y_h_1_van_collected = 1 )
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1343)          //  "What's taking you so long, Kosai? Where's my SWAT Van?"
+	      REMOVE_ARROW (arrow1)
+	      SET y_h_1_van_collected = 0
+	      SET y_h_1_van_flag = 0
+    ENDIF
+    ENDIF
+    
+    //  If the SWAT van is in front of the garage
+    IF ( ( y_h_1_van_collected = 1 ) AND ( IS_CAR_IN_BLOCK(y_h_1_swat_van, 43.50, 249.50, 2.00, 3.00, 1.00) ) )
+       REMOVE_ARROW (arrow1)
+	      PARK (y_h_1_swat_van, door10)
+	      SET y_h_1_van_ready_to_park = 1
+    ENDIF
+
+    IF ( y_h_1_van_ready_to_park = 1 )
+       
+       //  While the parking is executed
+       WHILE_EXEC ( NOT ( HAS_PARK_FINISHED() ) )
+          
+          IF ( IS_CAR_WRECKED(y_h_1_swat_van) )
+             DISPLAY_MESSAGE (1125)      // JOB FAILED!
+	            SET flag_failed_yaku_hard_phone_m1 = 1
+	            SET flag_failed_mission = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+          
+       ENDWHILE
+       
+       //  The park finished
+    
+       SET y_h_1_van_parked = 1
+    
+    ENDIF
+    
+ ENDWHILE
+	
+ 
+ //  If the SWAT van was parked and the player does not failed the mission
+ IF ( ( y_h_1_van_parked = 1 ) AND ( flag_failed_mission = 0 ) )
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF (1350)
+    DISPLAY_MESSAGE (1124)
+    ADD_SCORE (p1, 60000)
+    ADD_MULTIPLIER (p1, 1)
+    CLEAR_WANTED_LEVEL (p1)
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (yakuzagang, p1, 1)
+    SET flag_passed_yaku_hard_phone_m1 = 1
+ ENDIF
+ 
+RETURN
+
+
+
+clean_up_yaku_hard_phone_m1:            //  Clean up
+
+	REMOVE_ARROW (arrow1)
+	SET flag_failed_mission = 0
+	CLEAR_WANTED_LEVEL (p1)
+	MISSION_HAS_FINISHED ()
+ 
+ IF ( flag_passed_yaku_hard_phone_m1 = 1 )   //  Count missions passed
+	   ++flag_all_missions_passed
+	   ++flag_yaku_missions_passed
+	   MAKE_DOOR_MANUAL (door10)                //  Keep it as it is
+ ENDIF
+ 
+	IF ( ( flag_failed_yaku_hard_phone_m1 = 1 ) OR ( CHECK_DEATHARREST_EXECUTED() ) )
+	   ++flag_all_missions_failed
+	   ++flag_yaku_missions_failed
+	   MAKE_DOOR_AUTOMATIC (door10)             //  Reset to the previous state, before the mission start
+	   CLEAR_WANTED_LEVEL (p1)
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (yakuzagang, p1, -1)
+	ENDIF
+ 
+	SET flag_on_mission = 0
+	SET flag_on_yaku_mission = 0
+ 
+RETURN
+
+MISSIONSTART
+GOSUB yaku_hard_phone_m1:
+GOSUB clean_up_yaku_hard_phone_m1:
+MISSIONEND

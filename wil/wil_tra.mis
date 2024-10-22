@@ -1,0 +1,301 @@
+// Decompiled from "wil_tra.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD function43:
+//FORWARD function44:
+//FORWARD function45:
+
+OBJ_DATA mach_gun_reward_tm
+OBJ_DATA bonus_token_reward_tm
+CAR_DATA tutorial_car_tm
+
+trai_miss_phone_m1:                   // Real Mission script
+
+	SET flag_failed_tutorial = 0                 // SET "Failed Training Mission" to zero
+	SET_DEATHARREST_STATE (p1, OFF)      // Handle the death/arrest manually
+	tutorial_car_tm = CREATE_CAR (156.50, 142.50, 2.00) 1 0 MESSER END       // Tutorial car
+	DISPLAY_MESSAGE (1952)               //  TUTORIAL!
+	DISPLAY_BRIEF (1600)                 //  "Hey there, stranger! Welcome to the Downtown District. Stick around if you wanna learn what's going down..."
+	DISPLAY_BRIEF (1601)                 //  "Apart from neutral areas like this one, the city is carved up between three feuding gangs [...]"
+ 
+ WHILE_EXEC ( NOT ( t_m_initial_brief_finished = 1 ) )    //  While the initial explaining hasn't finished.
+   IF ( HAS_CHARACTER_DIED(p1) )      //  Player died
+      CLEAR_ALL_BRIEFS ()
+      DISPLAY_BRIEF_NOW (1609)        //  "That wasn't so smart, now was it?"
+      SET flag_failed_mission = 1
+      SET flag_failed_tutorial = 1
+      RETURN                          //  Finish this function and go to clean up
+   ENDIF
+   IF ( HAS_CHAR_BEEN_ARRESTED(p1) )  //  Player arrested
+      CLEAR_ALL_BRIEFS ()
+      DISPLAY_BRIEF_NOW (1609)        //  "That wasn't so smart, now was it?"
+      SET flag_failed_mission = 1
+      SET flag_failed_tutorial = 1
+      RETURN                          //  Finish this function and go to clean up
+   ENDIF
+   IF ( NOT ( LOCATE_CHARACTER_ANY_MEANS(p1, 159.50, 140.50, 2.00, 17.00, 14.00) ) )   // If the player didn't stay in the church area
+      CLEAR_ALL_BRIEFS ()
+      DISPLAY_BRIEF_NOW (1603)        //  "Try life in the big city on your own, ya worthless piece-a-shit!"
+      SET flag_failed_mission = 1
+      SET flag_failed_tutorial = 1
+      RETURN
+   ENDIF
+   
+   // mission stuff
+        
+   IF ( ( t_m_flag_car_destroyed = 0 ) AND ( IS_CAR_WRECKED(tutorial_car_tm) ) )     // Tutorial car destroyed
+      SET t_m_car_destroyed = 1       // Car wrecked
+      SET t_m_flag_car_destroyed = 1       // "do IF once" lock flag  (Lock this IF)
+   ENDIF
+   
+   IF ( NOT ( t_m_brief_1_flag = 1 ) )    // Display this brief once  (rembember, all the code below is inside a WHILE loop)
+      DISPLAY_BRIEF (1604)      // "You wanna work for a gang, you follow their colored markers to their phones and pick up a job. [...]"
+      SET t_m_brief_1_flag = 1
+   ENDIF
+   
+   IF ( NOT ( t_m_brief_2_flag = 1 ) )    // Display this brief once
+      DISPLAY_BRIEF (1605)      // (blah blah blah)
+      SET t_m_brief_2_flag = 1
+   ENDIF
+   
+   IF ( NOT ( t_m_brief_3_flag = 1 ) )   // Display this brief once
+      DISPLAY_BRIEF (1606)      // (blah blah blah)
+      SET t_m_brief_3_flag = 1
+   ENDIF
+
+   IF ( NOT ( t_m_brief_4_flag = 1 ) )    // Display this brief once
+      DISPLAY_BRIEF (1607)       // (blah blah blah)
+      SET t_m_brief_4_flag = 1
+   ENDIF
+   
+   IF ( NOT ( IS_BRIEF_ONSCREEN( ) ) )    // If all initial briefs are finished
+      SET t_m_initial_brief_finished = 1                      // Finish this WHILE loop
+   ENDIF
+   
+ ENDWHILE
+ 
+ SET flag_on_mission = 1                  // The player is playing a mission (so he cannot start a gang mission until finish/fail the tutorial)
+ SET flag_on_zaib_mission = 1                  // The player is playing a zaibatsu mission  (not sure why this is here)
+
+ IF ( ( t_m_car_destroyed = 0 ) AND ( NOT ( IS_CHARACTER_IN_ANY_CAR(p1) ) ) )     //  Car is not destroyed and the Player isn't inside a car
+    DISPLAY_BRIEF (1608)    // "You need transportation and a weapon to get started in this city - and I'm giving you both. There's the car... and there's a pistol inside."
+    POINT_ARROW_AT (arrow1, tutorial_car_tm)                //  Point arrow at tutorial car
+    CHANGE_CAR_LOCK (tutorial_car_tm, LOCKOUT_THIEF)        //  Lock this car for thieves (except the Player)
+ ENDIF
+ 
+ 
+ 
+ // Player didn't get into a car yet
+ 
+ 
+ WHILE_EXEC ( NOT ( IS_CHARACTER_IN_ANY_CAR(p1) ) )
+ 
+ IF ( HAS_CHARACTER_DIED(p1) )
+   CLEAR_ALL_BRIEFS ()
+   DISPLAY_BRIEF_NOW (1609)   //  "That wasn't so smart, now was it"
+   SET flag_failed_mission = 1
+   SET flag_failed_tutorial = 1
+   RETURN
+ ENDIF
+
+ IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+   CLEAR_ALL_BRIEFS ()
+   DISPLAY_BRIEF_NOW (1609)   //  "That wasn't so smart, now was it"
+   SET flag_failed_mission = 1
+   SET flag_failed_tutorial = 1
+   RETURN
+ ENDIF
+ 
+ IF ( ( t_m_brief_flag_car_destroyed = 0 ) AND ( IS_CAR_WRECKED(tutorial_car_tm) ) )
+   CLEAR_ALL_BRIEFS ()
+   DISPLAY_BRIEF_NOW (1610)   //  "Pyromaniac, huh? Well find yourself another vehicle, wise ass."
+   REMOVE_ARROW (arrow1)
+   SET t_m_brief_flag_car_destroyed = 1
+ ENDIF
+
+ IF ( ( t_m_brief_flag_car_sunk = 0 ) AND ( HAS_CAR_JUST_SUNK(tutorial_car_tm) ) )
+   CLEAR_ALL_BRIEFS ()
+   DISPLAY_BRIEF_NOW (1612)   //  "Dickwad! There ain't a vehicle in the city that works underwater!"
+   REMOVE_ARROW (arrow1)
+   SET t_m_brief_flag_car_sunk = 1
+ ENDIF
+ 
+ ENDWHILE
+	   
+ REMOVE_ARROW (arrow1)                         // Remove arrow from the car
+ 
+ IF ( IS_CHARACTER_IN_CAR(p1, tutorial_car_tm) )        // Player entered the tutorial car
+   GIVE_WEAPON (p1, PISTOL, 10)                // Give the player a pistol
+ ENDIF
+
+ DISPLAY_BRIEF (1613)       //  "You wanna see where the gangs operate? Follow the big pink marker to the Zaibatsu zone and look out for the men in grey suits [...]"
+ POINT_ARROW_AT (arrow1, 188.50, 37.50, 2.00)
+	   
+    
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 188.50, 37.50, 2.00, 1.00, 1.00) ) )
+ 
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1609)   //  "That wasn't so smart, now was it"
+       SET flag_failed_mission = 1
+       SET flag_failed_tutorial = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1609)   //  "That wasn't so smart, now was it"
+       SET flag_failed_mission = 1
+       SET flag_failed_tutorial = 1
+       RETURN
+    ENDIF
+    
+    // Not sure why this is here
+    IF ( ( t_m_flag_1_player_died = 0 ) AND ( HAS_CHARACTER_DIED(p1) ) )
+       SET t_m_flag_1_player_died = 1
+    ENDIF
+    
+ ENDWHILE
+ 
+ // Player arrived at the zaibatsu's info phone
+ 
+ REMOVE_ARROW (arrow1)       // Remove arrow from zaibatsu info phone location
+ DELAY_HERE (500)            // Waits the Zaibatsu brief
+ DISPLAY_BRIEF (1614)        // "The next stop is Loony Land, home to the guys in bright green nightdresses. Their cars are obvious from the smiling faces on top."
+ POINT_ARROW_AT (arrow1, 38.50, 38.50, 2.00)   // Next place
+
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 38.50, 38.50, 2.00, 0.50, 0.50) ) )   // While player has not arrived at loonies info phone
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1609)   //  "That wasn't so smart, now was it"
+       SET flag_failed_mission = 1
+       SET flag_failed_tutorial = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1609)   //  "That wasn't so smart, now was it"
+       SET flag_failed_mission = 1
+       SET flag_failed_tutorial = 1
+       RETURN
+    ENDIF
+    
+    // Not sure why this is here
+    IF ( ( t_m_flag_2_player_died = 0 ) AND ( HAS_CHARACTER_DIED(p1) ) )
+       SET t_m_flag_2_player_died = 1
+    ENDIF
+ ENDWHILE
+ 
+ // Player arrived at the loonie's info phone
+
+ REMOVE_ARROW (arrow1)           // Remove arrow from loonies info phone location
+ DELAY_HERE (500)                // Waits the Loonies brief
+ DISPLAY_BRIEF (1615)            // "Now let's visit the Yakuza territory. These fellas dress sharp in the latest blue collection from Milan [...]"
+ POINT_ARROW_AT (arrow1, 31.00, 157.00, 2.00)  // Next place
+
+ 
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 31.00, 157.00, 2.00, 0.50, 0.50) ) )
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1609)   //  "That wasn't so smart, now was it"
+       SET flag_failed_mission = 1
+       SET flag_failed_tutorial = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1609)   //  "That wasn't so smart, now was it"
+       SET flag_failed_mission = 1
+       SET flag_failed_tutorial = 1
+       RETURN
+    ENDIF
+    
+    // Not sure why this is here
+    IF ( ( t_m_flag_3_player_died = 0 ) AND ( HAS_CHARACTER_DIED(p1) ) )
+       SET t_m_flag_3_player_died = 1
+    ENDIF
+ ENDWHILE
+ 
+ // Player arrived at the yakuza's info phone
+ 
+ REMOVE_ARROW (arrow1)            // Remove arrow from yakuza info phone location
+ DELAY_HERE (500)                 // Waits the Yakuza brief
+ DISPLAY_BRIEF (1616)             // "Now you can see how the city's sliced follow the big pink marker back to me. I got a little somethin' for ya..."
+ POINT_ARROW_AT (arrow1, 159.50, 139.50, 2.00)    // Next place
+
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ANY_MEANS(p1, 159.50, 139.50, 2.00, 0.50, 0.50) ) )
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1609)   //  "That wasn't so smart, now was it"
+       SET flag_failed_mission = 1
+       SET flag_failed_tutorial = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1609)   //  "That wasn't so smart, now was it"
+       SET flag_failed_mission = 1
+       SET flag_failed_tutorial = 1
+       RETURN
+    ENDIF
+ ENDWHILE
+
+ // Player arrived at the Church
+ 
+ REMOVE_ARROW (arrow1)
+ 
+ IF ( flag_failed_mission = 0 )
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF_NOW (1617)      // "I don't know much but I taught you all I know. Here's my S-Uzi Machine Gun - plus a Special Token for your trouble."
+    ADD_SCORE (p1, 20000)
+    CLEAR_WANTED_LEVEL (p1)
+    mach_gun_reward_tm = CREATE_OBJ (160.50, 138.50, 2.00) 0 COLLECT_01 30 END
+    bonus_token_reward_tm = CREATE_OBJ (161.50, 138.50, 2.00) 0 BONUS_TOKEN END
+    SET flag_passed_tutorial = 1
+    IF ( flag_passed_tutorial = 1 )
+       SET_PHONE_DEAD (ph_tutorial_phone)
+       SET flag_kill_tutorial_phone = 1
+    ENDIF
+ ENDIF
+ 
+RETURN   // End of trai_miss_phone_m1
+
+
+clean_up_trai_miss_phone_m1:       // Clean up
+
+	SET flag_failed_mission = 0                    // Reset "Failed Mission" flag
+	CLEAR_WANTED_LEVEL (p1)           // Clear wanted level
+	REMOVE_ARROW (arrow1)             // Remove arrow
+	SET t_m_useless_counter = 0                   // This counter isn't used, not sure why this is here
+	SET flag_failed_tutorial = 0              // Reset "Failed Training Mission"
+	SET t_m_initial_brief_finished = 0                    // Reset the first WHILE loop counter 
+	SET_DEATHARREST_STATE (p1, ON)    // Reset Death Arrest Check state
+	MISSION_HAS_FINISHED ()
+ 
+	SET flag_on_mission = 0                //  The player isn't inside a mission anymore
+	SET flag_on_zaib_mission = 0                //  The player isn't inside a ""zaibatsu"" mission anymore
+ 
+RETURN
+
+
+han_trai_miss_phone_m1:        // Mission Handler
+
+ IF ( flag_on_mission = 0 )             // Not inside a mission
+    IF ( flag_passed_tutorial = 0 )    // Not completed tutorial yet
+       IF ( flag_failed_tutorial = 0 ) // Not failed tutorial
+          GOSUB trai_miss_phone_m1:    // Start Training Mission
+	         GOSUB clean_up_trai_miss_phone_m1:    // Clean up
+       ENDIF
+    ENDIF
+ ENDIF
+ 
+
+RETURN
+
+MISSIONSTART
+GOSUB han_trai_miss_phone_m1:              // Start Mission Handler
+MISSIONEND

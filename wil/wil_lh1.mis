@@ -1,0 +1,960 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX TAXI DRIVERS MUST DIE! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_lh1.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD loon_hard_phone_m1:
+//FORWARD clean_up_loon_hard_phone_m1:
+
+CHAR_DATA l_h_1_driver_1_char
+CHAR_DATA l_h_1_driver_2_char
+CHAR_DATA l_h_1_driver_3_char
+
+CAR_DATA l_h_1_taxi_1_car
+CAR_DATA l_h_1_taxi_2_car
+CAR_DATA l_h_1_taxi_3_car
+
+COUNTER l_h_1_drvr_1_died = 0
+COUNTER l_h_1_drvr_2_died = 0
+COUNTER l_h_1_drvr_3_died = 0
+
+COUNTER l_h_1_abnd_1_taxi = 0         //   abnd = abandoned
+COUNTER l_h_1_ofp_1_taxi = 0          //   ofp = out of place
+COUNTER l_h_1_in_place_1_taxi = 0
+COUNTER l_h_1_player_in_place_1 = 0
+
+COUNTER l_h_1_abnd_2_taxi = 0
+COUNTER l_h_1_ofp_2_taxi = 0
+COUNTER l_h_1_in_place_2_taxi = 0
+COUNTER l_h_1_player_in_place_2 = 0
+
+COUNTER l_h_1_abnd_3_taxi = 0
+COUNTER l_h_1_ofp_3_taxi = 0
+COUNTER l_h_1_in_place_3_taxi = 0
+COUNTER l_h_1_player_in_place_3 = 0
+
+loon_hard_phone_m1:
+
+	SET flag_on_mission = 1
+	SET flag_on_loon_mission = 1
+ 
+	SET flag_failed_loon_hard_phone_m1 = 0
+ 
+	DISPLAY_MESSAGE (1973)                //  TAXI DRIVERS MUST DIE!
+ 
+	l_h_1_taxi_1_car = CREATE_CAR (132.50, 55.50, 2.00) 1 0 TAXI END      //  First taxi
+ 
+	l_h_1_driver_1_char = CREATE_CHAR_INSIDE_CAR (l_h_1_taxi_1_car) 13 CRIMINAL END      //  Its driver
+ 
+	SET_CHAR_THREAT_SEARCH (l_h_1_driver_1_char, NO_THREATS)
+	SET_CHAR_THREAT_REACTION (l_h_1_driver_1_char, NO_REACTION)
+	SET_CHAR_DRIVE_AGGRESSION (l_h_1_driver_1_char, ON)
+ 
+	DISPLAY_BRIEF (1741)    //  "Hey, Jumbo, it's Elmo. The Taxis in this city won't give me a ride. I have chosen three of them for special attention. Go get the first Taxi."
+	POINT_ARROW_AT (arrow1, l_h_1_taxi_1_car)   //  Point arrow at the first taxi
+ 
+ WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_1_car) ) )     //  While the player does not enter the car
+ 
+    IF ( HAS_CAR_JUST_SUNK(l_h_1_taxi_1_car) )   //  If the first taxi has just sunk
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1747)        //  "That ain't no Water Taxi, Jumbo."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+ 
+    IF ( IS_CAR_WRECKED(l_h_1_taxi_1_car) )      //  If the first taxi has been destroyed
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1746)        //  "The Taxi's wrecked, Jumbo - and the radio doesn't even work!"
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( ( l_h_1_drvr_1_died = 0 ) AND ( HAS_CHARACTER_DIED(l_h_1_driver_1_char) ) )     //  How the driver can die before get pulled out of the car?
+       SET l_h_1_drvr_1_died = 1
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  Player entered the first taxi
+
+	REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF (1748)                   //  "Do your worst, Jumbo. Taxi Drivers must DIE!"
+ POINT_ARROW_AT (arrow1, l_h_1_driver_1_char)
+ 
+ IF ( NOT ( IS_CHARACTER_IN_CAR(l_h_1_driver_1_char, l_h_1_taxi_1_car) ) )           //  If the first taxi driver isn't in the car
+    IF ( NOT ( l_h_1_drvr_1_died = 1 ) )                              //  If the is alive
+       SET_CHAR_THREAT_REACTION (l_h_1_driver_1_char, REACT_AS_NORMAL)
+       SET_CHAR_THREAT_SEARCH (l_h_1_driver_1_char, LINE_OF_SIGHT_PLAYER_ONLY)
+       SET_CHAR_OBJECTIVE (l_h_1_driver_1_char, KILL_CHAR_ANY_MEANS, p1)       //  Kill the player
+    ENDIF
+ ENDIF
+	
+ WHILE_EXEC ( NOT ( HAS_CHARACTER_DIED(l_h_1_driver_1_char) ) )           //  While the first taxi driver is alive
+       
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_1_car) ) )    //  If the player leaves the taxi
+       
+       DISPLAY_BRIEF (1750)               //  "No time for fare dodging, Jumbo. Get back in the Taxi and get on with the job."
+       POINT_ARROW_AT (arrow1, l_h_1_taxi_1_car)
+          
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_1_car) ) )    //  While the player does not return to the taxi
+       
+          //  Checking...
+          
+          IF ( HAS_CAR_JUST_SUNK(l_h_1_taxi_1_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1747)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_loon_hard_phone_m1 = 1
+             RETURN
+          ENDIF
+             
+          IF ( IS_CAR_WRECKED(l_h_1_taxi_1_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1746)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_loon_hard_phone_m1 = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+          
+       ENDWHILE
+       
+       //  The player returned to the taxi
+       
+       DISPLAY_BRIEF (1751)               //  "Now waste the Taxi Driver!"
+       POINT_ARROW_AT (arrow1, l_h_1_driver_1_char)
+       
+    ENDIF
+    
+    //  Checking...
+    
+    IF ( HAS_CAR_JUST_SUNK(l_h_1_taxi_1_car) )   //  If the first taxi has just sunk
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1747)        //  "That ain't no Water Taxi, Jumbo."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+ 
+    IF ( IS_CAR_WRECKED(l_h_1_taxi_1_car) )      //  If the first taxi has been destroyed
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1746)        //  "The Taxi's wrecked, Jumbo - and the radio doesn't even work!"
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+
+ //  The player killed the first taxi driver
+
+ REMOVE_ARROW (arrow1)
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF_NOW (1749)                             //  "Now take the Taxi to the South Docks Car Crusher and get it crushed."
+ POINT_ARROW_AT (arrow1, 246.50, 238.50, 2.00)        //  Point arrow at the South Docks Car Crusher
+ 
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 246.50, 238.50, 2.00, 10.00, 4.00) ) )  //  While the player does not reach the car crusher
+    
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_1_car) ) )    //  If the player leaves the taxi
+       
+       DISPLAY_BRIEF (1750)               //  "No time for fare dodging, Jumbo. Get back in the Taxi and get on with the job."
+       POINT_ARROW_AT (arrow1, l_h_1_taxi_1_car)
+          
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_1_car) ) )    //  While the player does not return to the taxi
+       
+          //  Checking...
+          
+          IF ( HAS_CAR_JUST_SUNK(l_h_1_taxi_1_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1747)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_loon_hard_phone_m1 = 1
+             RETURN
+          ENDIF
+             
+          IF ( IS_CAR_WRECKED(l_h_1_taxi_1_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1746)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_loon_hard_phone_m1 = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+          
+       ENDWHILE
+       
+       //  The player returned to the taxi
+       
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1753)                           //  "Stop messing about, Jumbo. It's crusher time!"
+       POINT_ARROW_AT (arrow1, 246.50, 238.50, 2.00)
+       
+    ENDIF
+    
+    //  Checking...
+    
+    IF ( HAS_CAR_JUST_SUNK(l_h_1_taxi_1_car) )   //  If the first taxi has just sunk
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1747)        //  "That ain't no Water Taxi, Jumbo."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+ 
+    IF ( IS_CAR_WRECKED(l_h_1_taxi_1_car) )      //  If the first taxi has been destroyed
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1746)        //  "The Taxi's wrecked, Jumbo - and the radio doesn't even work!"
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  The player arrived at the car crusher
+ 
+ REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF (1754)          //  "Get out of the Taxi and enjoy the Crusher Magic, Jumbo."
+ 
+ WHILE_EXEC ( NOT ( IS_CAR_CRUSHED(l_h_1_taxi_1_car) ) )
+ 
+    IF ( IS_CAR_IN_BLOCK(l_h_1_taxi_1_car, 246.50, 238.50, 2.00, 10.00, 4.00) )
+       SET l_h_1_in_place_1_taxi = 1
+    ELSE
+       SET l_h_1_in_place_1_taxi = 0
+    ENDIF
+    
+    IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 246.50, 238.50, 2.00, 10.00, 4.00) ) AND ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_1_car) ) )
+       SET l_h_1_player_in_place_1 = 1
+    ELSE
+       SET l_h_1_player_in_place_1 = 0
+    ENDIF
+    
+    
+    IF ( ( l_h_1_player_in_place_1 = 0 ) AND ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_1_car) ) )   //  The player is in the taxi, but the taxi isn't on the right place
+       IF ( l_h_1_ofp_1_taxi = 0 )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (7004)                          //  "Get back and crush that Taxi!"
+          POINT_ARROW_AT (arrow1, 246.50, 238.50, 2.00)
+          SET l_h_1_ofp_1_taxi = 1                              //  Lock this IF
+       ENDIF
+    ENDIF
+    
+    IF ( ( l_h_1_abnd_1_taxi = 0 ) AND ( l_h_1_in_place_1_taxi = 0 ) )                  //  The taxi isn't on the right place
+    
+       IF ( NOT ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_1_car) ) )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1750)                 //  "No time for fare dodging, Jumbo. Get back in the Taxi and get on with the job."
+          POINT_ARROW_AT (arrow1, l_h_1_taxi_1_car)
+          SET l_h_1_abnd_1_taxi = 1                          //  Lock this IF
+          SET l_h_1_ofp_1_taxi = 0
+       ENDIF
+       
+    ENDIF
+    
+    IF ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_1_car) )
+       SET l_h_1_abnd_1_taxi = 0
+    ENDIF
+    
+    IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 246.50, 238.50, 2.00, 10.00, 4.00) ) AND ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_1_car) ) )
+       REMOVE_ARROW (arrow1)
+       SET l_h_1_ofp_1_taxi = 0
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(l_h_1_taxi_1_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1746)        //  "The Taxi's wrecked, Jumbo - and the radio doesn't even work!"
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+       
+ ENDWHILE
+ 
+ //  The first taxi was crushed
+ 
+ IF ( NOT ( IS_CAR_IN_BLOCK(l_h_1_taxi_1_car, 244.50, 243.50, 3.00, 1.00, 1.00) ) )   //  The car was NOT crushed at the correct crusher
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF_NOW (1755)     //  "Uh-oh, wrong Car Crusher, Jumbo. You made me look like a fool and that's hard to do!"
+    DISPLAY_MESSAGE (1125)       //  JOB FAILED!
+    SET flag_failed_mission = 1
+    SET flag_failed_loon_hard_phone_m1 = 1
+    // ++flag_all_missions_failed         I removed these commands since there is already a "mission fail" count in the clean up
+    // ++flag_loon_missions_failed
+    RETURN
+ ENDIF
+ 
+ IF ( IS_CAR_IN_BLOCK(l_h_1_taxi_1_car, 244.50, 243.50, 3.00, 1.00, 1.00) )   //  The car was crushed at the correct crusher
+ 
+    DISPLAY_BRIEF (1767)                                         //  "Cool, Jumbo, but I still can't get a ride. We need to create some chaos so steal another Taxi."
+    
+    l_h_1_taxi_2_car = CREATE_CAR (243.50, 181.50, 3.00) 1 0 TAXI END
+    
+    l_h_1_driver_2_char = CREATE_CHAR (244.50, 181.50, 3.00) 13 0 CRIMINAL_TYPE1 END
+    SET_CHAR_THREAT_SEARCH (l_h_1_driver_2_char, NO_THREATS)
+    SET_CHAR_THREAT_REACTION (l_h_1_driver_2_char, NO_REACTION)
+    ADD_GROUP_TO_CHARACTER (l_h_1_driver_2_char, 1)
+    SET_MIN_MEMBERS_BEFORE_GROUP_SPLITS (l_h_1_driver_2_char, 0)
+    GIVE_WEAPON (l_h_1_driver_2_char, PISTOL)
+    
+    POINT_ARROW_AT (arrow1, l_h_1_taxi_2_car)
+    
+ ENDIF
+
+ SET_CHAR_OBJECTIVE (l_h_1_driver_2_char, ENTER_CAR_AS_DRIVER, l_h_1_taxi_2_car)
+
+ WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(l_h_1_driver_2_char) ) )
+ 
+    //  Checking...
+    
+    IF ( HAS_CAR_JUST_SUNK(l_h_1_taxi_2_car) )   //  If the second taxi has just sunk
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1744)        //  "Is this what they call a River Taxi?"
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+ 
+    IF ( IS_CAR_WRECKED(l_h_1_taxi_2_car) )      //  If the second taxi has been destroyed
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1742)        //  "I decide when the Taxis are destroyed, Jumbo. You obviously ain't up for the job. Beat it."
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(l_h_1_driver_2_char) )    //  ???????????????  Only using teleport to kill them before they enter the taxi
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1743)        //  "Shit, Jumbo, it's too late - the bastards are on to us! The job's off for now."         (??????)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+
+ //  l_h_1_driver_2_char  entered the car
+ 
+ WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_2_car) ) )
+ 
+    //  Checking...
+    
+    IF ( HAS_CAR_JUST_SUNK(l_h_1_taxi_2_car) )   //  If the second taxi has just sunk
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1747)        //  "That ain't no Water Taxi, Jumbo."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+ 
+    IF ( IS_CAR_WRECKED(l_h_1_taxi_2_car) )      //  If the second taxi has been destroyed
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1746)        //  "The Taxi's wrecked, Jumbo - and the radio doesn't even work!"
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( ( l_h_1_drvr_2_died = 0 ) AND ( HAS_CHARACTER_DIED(l_h_1_driver_2_char) ) )     //  How the driver can die before get pulled out of the car?
+       SET l_h_1_drvr_2_died = 1
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  Player entered the second taxi
+
+ REMOVE_ARROW (arrow1)
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF_NOW (1756)          //  "Shit, Jumbo, there's two of them! Oh well... Waste them both!"
+ POINT_ARROW_AT (arrow1, l_h_1_driver_2_char)
+ 
+ IF ( NOT ( IS_CHARACTER_IN_CAR(l_h_1_driver_2_char, l_h_1_taxi_2_car) ) )
+    IF ( NOT ( l_h_1_drvr_2_died = 1 ) )
+       SET_CHAR_THREAT_REACTION (l_h_1_driver_2_char, REACT_AS_NORMAL)
+       SET_CHAR_THREAT_SEARCH (l_h_1_driver_2_char, LINE_OF_SIGHT_PLAYER_ONLY)
+       SET_CHAR_OBJECTIVE (l_h_1_driver_2_char, KILL_CHAR_ANY_MEANS, p1)
+    ENDIF
+ ENDIF
+ 
+ WHILE_EXEC ( NOT ( HAS_CHARACTER_DIED(l_h_1_driver_2_char) ) )
+ 
+    IF ( CHECK_NUMBER_ALIVE_IN_GROUP(l_h_1_driver_2_char, 1) )
+       IF ( NOT ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_2_car) ) )
+          
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF (1757)                    //  "What's with the itchy feet? Get back in the Taxi and get the job done."
+          POINT_ARROW_AT (arrow1, l_h_1_taxi_2_car)
+          
+          WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_2_car) ) )
+             
+             IF ( HAS_CAR_JUST_SUNK(l_h_1_taxi_2_car) )
+                CLEAR_ALL_BRIEFS ()
+                DISPLAY_BRIEF_NOW (1747)
+                DISPLAY_MESSAGE (1125)
+                SET flag_failed_mission = 1
+                SET flag_failed_loon_hard_phone_m1 = 1
+                RETURN
+             ENDIF
+             
+             IF ( IS_CAR_WRECKED(l_h_1_taxi_2_car) )
+                CLEAR_ALL_BRIEFS ()
+                DISPLAY_BRIEF_NOW (1746)
+                DISPLAY_MESSAGE (1125)
+                SET flag_failed_mission = 1
+                SET flag_failed_loon_hard_phone_m1 = 1
+                RETURN
+             ENDIF
+             
+             ENDEXEC
+          
+          ENDWHILE
+          
+          DISPLAY_BRIEF (1758)           //  "Kill the Taxi Drivers, Jumbo!"
+          POINT_ARROW_AT (arrow1, l_h_1_driver_2_char)
+          
+       ENDIF
+    ENDIF
+    
+    //  Checking...
+    
+    IF ( HAS_CAR_JUST_SUNK(l_h_1_taxi_2_car) )   //  If the second taxi has just sunk
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1747)        //  "That ain't no Water Taxi, Jumbo."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+ 
+    IF ( IS_CAR_WRECKED(l_h_1_taxi_2_car) )      //  If the second taxi has been destroyed
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1746)        //  "The Taxi's wrecked, Jumbo - and the radio doesn't even work!"
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player killed all the gang in the second taxi
+
+ REMOVE_ARROW (arrow1)
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF (1759)                      //  "This is FUN! Back to the South Docks Car Crusher, Jumbo."
+ POINT_ARROW_AT (arrow1, 246.50, 238.50, 2.00)
+ 
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 246.50, 238.50, 2.00, 10.00, 4.00) ) )      //  While the player does not reach the car crusher
+ 
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_2_car) ) )         //  The player left the taxi
+    
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1750)                //  "No time for fare dodging, Jumbo. Get back in the Taxi and get on with the job."
+       POINT_ARROW_AT (arrow1, l_h_1_taxi_2_car)
+       
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_2_car) ) )
+       
+          IF ( HAS_CAR_JUST_SUNK(l_h_1_taxi_2_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1747)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_loon_hard_phone_m1 = 1
+             RETURN
+          ENDIF
+             
+          IF ( IS_CAR_WRECKED(l_h_1_taxi_2_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1746)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_loon_hard_phone_m1 = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+       
+       ENDWHILE
+       
+       //  The player returned to the taxi
+       
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1753)      //  "Stop messing about, Jumbo. It's crusher time!"
+       POINT_ARROW_AT (arrow1, 246.50, 238.50, 2.00)
+       
+    ENDIF
+    
+    //  Checking...
+    
+    IF ( HAS_CAR_JUST_SUNK(l_h_1_taxi_2_car) )   //  If the second taxi has just sunk
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1747)        //  "That ain't no Water Taxi, Jumbo."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+ 
+    IF ( IS_CAR_WRECKED(l_h_1_taxi_2_car) )      //  If the second taxi has been destroyed
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1746)        //  "The Taxi's wrecked, Jumbo - and the radio doesn't even work!"
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player arrived at South Docks Car Crusher
+
+ REMOVE_ARROW (arrow1)
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF (1760)      //  "You know the score, Jumbo. Out of the Taxi - it's Crusher Time!"
+ 
+ WHILE_EXEC ( NOT ( IS_CAR_CRUSHED(l_h_1_taxi_2_car) ) )
+ 
+    IF ( IS_CAR_IN_BLOCK(l_h_1_taxi_2_car, 246.50, 238.50, 2.00, 10.00, 4.00) )
+       SET l_h_1_in_place_2_taxi = 1
+    ELSE
+       SET l_h_1_in_place_2_taxi = 0
+    ENDIF
+    
+    IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 246.50, 238.50, 2.00, 10.00, 4.00) ) AND ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_2_car) ) )
+       SET l_h_1_player_in_place_2 = 1
+    ELSE
+       SET l_h_1_player_in_place_2 = 0
+    ENDIF
+    
+    
+    IF ( ( l_h_1_player_in_place_2 = 0 ) AND ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_2_car) ) )   //  The player is in the taxi, but the taxi isn't on the right place
+       IF ( l_h_1_ofp_2_taxi = 0 )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (7004)                          //  "Get back and crush that Taxi!"
+          POINT_ARROW_AT (arrow1, 246.50, 238.50, 2.00)
+          SET l_h_1_ofp_2_taxi = 1                              //  Lock this IF
+       ENDIF
+    ENDIF
+    
+    IF ( ( l_h_1_abnd_2_taxi = 0 ) AND ( l_h_1_in_place_2_taxi = 0 ) )                  //  The taxi isn't on the right place
+    
+       IF ( NOT ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_2_car) ) )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1750)                 //  "No time for fare dodging, Jumbo. Get back in the Taxi and get on with the job."
+          POINT_ARROW_AT (arrow1, l_h_1_taxi_2_car)
+          SET l_h_1_abnd_2_taxi = 1                          //  Lock this IF
+          SET l_h_1_ofp_2_taxi = 0
+       ENDIF
+       
+    ENDIF
+    
+    IF ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_2_car) )
+       SET l_h_1_abnd_2_taxi = 0
+    ENDIF
+    
+    IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 246.50, 238.50, 2.00, 10.00, 4.00) ) AND ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_2_car) ) )
+       REMOVE_ARROW (arrow1)
+       SET l_h_1_ofp_2_taxi = 0
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(l_h_1_taxi_2_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1746)        //  "The Taxi's wrecked, Jumbo - and the radio doesn't even work!"
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+       
+ ENDWHILE
+
+ //  The second taxi was crushed
+
+ IF ( NOT ( IS_CAR_IN_BLOCK(l_h_1_taxi_2_car, 244.50, 243.50, 3.00, 1.00, 1.00) ) )   //  The car was NOT crushed at the correct crusher
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF_NOW (1755)        //  "Uh-oh, wrong Car Crusher, Jumbo. You made me look like a fool and that's hard to do!"
+    DISPLAY_MESSAGE (1125)
+    SET flag_failed_mission = 1
+    SET flag_failed_loon_hard_phone_m1 = 1
+    RETURN
+ ENDIF
+ 
+ IF ( IS_CAR_IN_BLOCK(l_h_1_taxi_2_car, 244.50, 243.50, 3.00, 1.00, 1.00) )         //  The car was crushed at the correct crusher
+ 
+    DISPLAY_BRIEF (1761)              //  "Now I'm getting free rides, Jumbo. This is good. Let's mess up one last Taxi, just for fun."
+    
+    l_h_1_taxi_3_car = CREATE_CAR (162.50, 149.50, 2.00) 1 0 TAXI END
+    
+    l_h_1_driver_3_char = CREATE_CHAR (162.50, 148.50, 2.00) 13 0 CRIMINAL_TYPE1 END
+    SET_CHAR_THREAT_SEARCH (l_h_1_driver_3_char, NO_THREATS)
+    SET_CHAR_THREAT_REACTION (l_h_1_driver_3_char, NO_REACTION)
+    ADD_GROUP_TO_CHARACTER (l_h_1_driver_3_char, 4)
+    GIVE_WEAPON (l_h_1_driver_3_char, PISTOL)
+    
+    POINT_ARROW_AT (arrow1, l_h_1_taxi_3_car)             //  Point arrow at the third taxi
+    
+ ENDIF
+
+ SET_CHAR_OBJECTIVE (l_h_1_driver_3_char, ENTER_CAR_AS_DRIVER, l_h_1_taxi_3_car)
+
+ WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(l_h_1_driver_3_char) ) )       //  While the driver does not enter the third car
+    
+    IF ( HAS_CHARACTER_DIED(l_h_1_driver_3_char) )       //  ???????????????
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1743)               //  "Shit, Jumbo, it's too late - the bastards are on to us! The job's off for now."      (?????)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CAR_JUST_SUNK(l_h_1_taxi_3_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1744)               //  "Is this what they call a River Taxi?"
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(l_h_1_taxi_3_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1742)               //  "I decide when the Taxis are destroyed, Jumbo. You obviously ain't up for the job. Beat it."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+
+ //  l_h_1_driver_3_char entered the third taxi
+ 
+ WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_3_car) ) )       //  While the player does not enter the third taxi
+ 
+    IF ( HAS_CAR_JUST_SUNK(l_h_1_taxi_3_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1747)               //  "That ain't no Water Taxi, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(l_h_1_taxi_3_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1746)               //  "The Taxi's wrecked, Jumbo - and the radio doesn't even work!"
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( ( l_h_1_drvr_3_died = 0 ) AND ( HAS_CHARACTER_DIED(l_h_1_driver_3_char) ) )     //  How the driver can die before get pulled out of the car?
+       SET l_h_1_drvr_3_died = 1
+    ENDIF
+ 
+ ENDWHILE
+
+ //  The player entered the third taxi
+ 
+ REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF (1762)             //  "Shit, Jumbo, there's a whole gang of them in this Taxi. Kill them all!"
+ POINT_ARROW_AT (arrow1, l_h_1_driver_3_char)
+ 
+ IF ( NOT ( IS_CHARACTER_IN_CAR(l_h_1_driver_3_char, l_h_1_taxi_3_car) ) )
+    IF ( NOT ( l_h_1_drvr_3_died = 1 ) )
+       SET_CHAR_THREAT_REACTION (l_h_1_driver_3_char, REACT_AS_NORMAL)
+       SET_CHAR_THREAT_SEARCH (l_h_1_driver_3_char, LINE_OF_SIGHT_PLAYER_ONLY)
+       SET_CHAR_OBJECTIVE (l_h_1_driver_3_char, KILL_CHAR_ANY_MEANS, p1)
+    ENDIF
+ ENDIF
+ 
+ 
+ WHILE_EXEC ( NOT ( HAS_CHARACTER_DIED(l_h_1_driver_3_char) ) )              //  While the third driver is alive
+ 
+    IF ( CHECK_NUMBER_ALIVE_IN_GROUP(l_h_1_driver_3_char, 1) )
+    
+       IF ( NOT ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_3_car) ) )    //  The player left the taxi
+          
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF (1764)                    //  "If you want to stay on the job, Jumbo, get back in the Taxi."
+          POINT_ARROW_AT (arrow1, l_h_1_taxi_3_car)
+          
+          WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_3_car) ) )   //  While the player does not get back in the taxi
+             
+             //  Checking...
+             
+             IF ( HAS_CAR_JUST_SUNK(l_h_1_taxi_3_car) )
+                CLEAR_ALL_BRIEFS ()
+                DISPLAY_BRIEF_NOW (1747)
+                DISPLAY_MESSAGE (1125)
+                SET flag_failed_mission = 1
+                SET flag_failed_loon_hard_phone_m1 = 1
+                RETURN
+             ENDIF
+             
+             IF ( IS_CAR_WRECKED(l_h_1_taxi_3_car) )
+                CLEAR_ALL_BRIEFS ()
+                DISPLAY_BRIEF_NOW (1746)
+                DISPLAY_MESSAGE (1125)
+                SET flag_failed_mission = 1
+                SET flag_failed_loon_hard_phone_m1 = 1
+                RETURN
+             ENDIF
+             
+             ENDEXEC
+          
+          ENDWHILE
+          
+          //  The player returned to the taxi
+          
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF (1763)           //  "Welcome back, Jumbo! Now kill those scum!"
+          POINT_ARROW_AT (arrow1, l_h_1_driver_3_char)
+          
+       ENDIF
+       
+    ENDIF
+    
+    //  Checking...
+    
+    IF ( HAS_CAR_JUST_SUNK(l_h_1_taxi_3_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1747)               //  "That ain't no Water Taxi, Jumbo."
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(l_h_1_taxi_3_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1746)               //  "The Taxi's wrecked, Jumbo - and the radio doesn't even work!"
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+
+ //  The player killed all the gang in the third taxi
+
+ REMOVE_ARROW (arrow1)
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF (1765)                            //  "Get that Taxi crushed, Jumbo - you know you want to."
+ POINT_ARROW_AT (arrow1, 246.50, 238.50, 2.00)
+ 
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 246.50, 238.50, 2.00, 10.00, 4.00) ) )    //  While the player does not reach the car crusher
+ 
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_3_car) ) )         //  The player left the taxi
+    
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1750)                //  "No time for fare dodging, Jumbo. Get back in the Taxi and get on with the job."
+       POINT_ARROW_AT (arrow1, l_h_1_taxi_3_car)
+       
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_3_car) ) )
+          
+          //  Checking...
+          
+          IF ( HAS_CAR_JUST_SUNK(l_h_1_taxi_3_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1747)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_loon_hard_phone_m1 = 1
+             RETURN
+          ENDIF
+          
+          IF ( IS_CAR_WRECKED(l_h_1_taxi_3_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1746)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_loon_hard_phone_m1 = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+       
+       ENDWHILE
+       
+       //  The player returned to the taxi
+       
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1753)                       //  "Stop messing about, Jumbo. It's crusher time!"
+       POINT_ARROW_AT (arrow1, 246.50, 238.50, 2.00)
+    
+    ENDIF
+    
+    //  Checking...
+    
+    IF ( HAS_CAR_JUST_SUNK(l_h_1_taxi_3_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1747)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(l_h_1_taxi_3_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1746)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player arrived at the car crusher
+
+ REMOVE_ARROW (arrow1)
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF (1766)          //  "Get out of the Taxi so it can be sent to Taxi Heaven."
+ 
+ 
+ 
+ WHILE_EXEC ( NOT ( IS_CAR_CRUSHED(l_h_1_taxi_3_car) ) )
+ 
+    IF ( IS_CAR_IN_BLOCK(l_h_1_taxi_3_car, 246.50, 238.50, 2.00, 10.00, 4.00) )
+       SET l_h_1_in_place_3_taxi = 1
+    ELSE
+       SET l_h_1_in_place_3_taxi = 0
+    ENDIF
+    
+    IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 246.50, 238.50, 2.00, 10.00, 4.00) ) AND ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_3_car) ) )
+       SET l_h_1_player_in_place_3 = 1
+    ELSE
+       SET l_h_1_player_in_place_3 = 0
+    ENDIF
+    
+    
+    IF ( ( l_h_1_player_in_place_3 = 0 ) AND ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_3_car) ) )   //  The player is in the taxi, but the taxi isn't on the right place
+       IF ( l_h_1_ofp_3_taxi = 0 )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (7004)                          //  "Get back and crush that Taxi!"
+          POINT_ARROW_AT (arrow1, 246.50, 238.50, 2.00)
+          SET l_h_1_ofp_3_taxi = 1                              //  Lock this IF
+       ENDIF
+    ENDIF
+    
+    IF ( ( l_h_1_abnd_3_taxi = 0 ) AND ( l_h_1_in_place_3_taxi = 0 ) )                  //  The taxi isn't on the right place
+    
+       IF ( NOT ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_3_car) ) )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1750)                 //  "No time for fare dodging, Jumbo. Get back in the Taxi and get on with the job."
+          POINT_ARROW_AT (arrow1, l_h_1_taxi_3_car)
+          SET l_h_1_abnd_3_taxi = 1                          //  Lock this IF
+          SET l_h_1_ofp_3_taxi = 0
+       ENDIF
+       
+    ENDIF
+    
+    IF ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_3_car) )
+       SET l_h_1_abnd_3_taxi = 0
+    ENDIF
+    
+    IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 246.50, 238.50, 2.00, 10.00, 4.00) ) AND ( IS_CHARACTER_IN_CAR(p1, l_h_1_taxi_3_car) ) )
+       REMOVE_ARROW (arrow1)
+       SET l_h_1_ofp_3_taxi = 0
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(l_h_1_taxi_3_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1746)        //  "The Taxi's wrecked, Jumbo - and the radio doesn't even work!"
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_loon_hard_phone_m1 = 1
+       RETURN
+    ENDIF
+       
+ ENDWHILE
+ 
+ //  The third taxi has been crushed
+ 
+ IF ( NOT ( IS_CAR_IN_BLOCK(l_h_1_taxi_3_car, 244.50, 243.50, 3.00, 1.00, 1.00) ) )   //  The car was NOT crushed at the correct crusher
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF_NOW (1755)           //  "Uh-oh, wrong Car Crusher, Jumbo. You made me look like a fool and that's hard to do!"
+    DISPLAY_MESSAGE (1125)
+    SET flag_failed_mission = 1
+    SET flag_failed_loon_hard_phone_m1 = 1
+    RETURN
+ ENDIF
+ 
+ IF ( flag_failed_mission = 0 )                     //  If the player do not failed the mission
+ 
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF_NOW (1752)           //  "Good work, Jumbo. Now I get Taxis superquick! I'm giving you $60,000 because I like you so much. Keep in touch!"
+    DISPLAY_MESSAGE (1124)             //  JOB COMPLETE!
+    ADD_SCORE (p1, 60000)
+    ADD_MULTIPLIER (p1, 1)
+    CLEAR_WANTED_LEVEL (p1)
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (looniegang, p1, 1)   //  RESPECT +
+    
+    SET flag_passed_loon_hard_phone_m1 = 1                 //  The player passed this mission
+ 
+ ENDIF
+
+
+RETURN
+
+
+
+clean_up_loon_hard_phone_m1:                             //  Clean up
+
+	SET flag_failed_mission = 0
+ 
+	REMOVE_ARROW (arrow1)
+ 
+	CLEAR_WANTED_LEVEL (p1)
+ 
+	MISSION_HAS_FINISHED ()
+ 
+ IF ( flag_passed_loon_hard_phone_m1 = 1 )  //  If the player completed this mission, count +1 (loonies) mission passed
+	   ++flag_all_missions_passed
+	   ++flag_loon_missions_passed
+	ENDIF
+ 
+ IF ( ( flag_failed_loon_hard_phone_m1 = 1 ) OR ( CHECK_DEATHARREST_EXECUTED() ) )    //  If the player failed this mission, count +1 (loonies) mission failed
+    ++flag_loon_missions_failed
+	   ++flag_all_missions_failed
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (looniegang, p1, -1)    //  Lose respect
+	   CLEAR_WANTED_LEVEL (p1)
+ ENDIF
+	
+	SET flag_on_mission = 0
+	SET flag_on_loon_mission = 0
+ 
+RETURN
+
+MISSIONSTART
+GOSUB loon_hard_phone_m1:
+GOSUB clean_up_loon_hard_phone_m1:
+MISSIONEND

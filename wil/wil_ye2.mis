@@ -1,0 +1,755 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX BANK ROBBERY! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_ye2.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD yaku_easy_phone2_m1:
+//FORWARD clean_up_yaku_easy_phone2_m1:
+
+CHAR_DATA y_e_2_guard_1_char
+CHAR_DATA y_e_2_guard_2_char
+CHAR_DATA y_e_2_hiroshi_char
+
+CAR_DATA y_e_2_escape_car
+
+SOUND y_e_2_alarm_sound
+
+COUNTER y_e_2_player_died = 0
+COUNTER y_e_2_player_arrested = 0
+
+COUNTER y_e_2_cop_bribe_gotten = 0
+
+COUNTER y_e_2_respray_car_flag = 0
+COUNTER y_e_2_guards_killed = 0
+COUNTER y_e_2_hiroshi_on_screen = 0
+COUNTER y_e_2_guard_1_died = 0
+COUNTER y_e_2_guard_2_died = 0
+COUNTER y_e_2_alarm_flag = 0
+
+yaku_easy_phone2_m1:
+
+	SET flag_on_mission = 1
+	SET flag_on_yaku_mission = 1
+	SET flag_failed_yaku_easy_phone2_m1 = 0
+ 
+	SET_DEATHARREST_STATE (p1, OFF)             //  Handle Death Arrests manually
+ 
+	DISPLAY_MESSAGE (1976)                      //  BANK ROBBERY!
+ 
+	y_e_2_escape_car = CREATE_CAR (52.50, 150.50, 2.00) 5 90 GRAHAM END
+ 
+	DISPLAY_BRIEF (1650)                                  //  "Ah, Kosai! Johnny Zoo here. I am having money illegally transferred to my bank account [...]"
+	POINT_ARROW_AT (arrow1, y_e_2_escape_car)             //  Point arrow to the car
+ 
+ // While the player does not enter the car
+ WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, y_e_2_escape_car) ) )     
+ 
+    IF ( HAS_CHARACTER_DIED(p1) )              //  Player died
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1657)                //  "That was foolish, Kosai."
+	      DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CAR_JUST_SUNK(y_e_2_escape_car) )              //  Car just sunk
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1667)                //  "You fool, Kosai! Could you not have chosen a more appropriate time to take a bath?"
+	      DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )              //  Player busted
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (7096)                //  "Your weakness is detestable, Kosai!"
+	      DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(y_e_2_escape_car) )              //  Car destroyed
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (7093)                //  "You made a stupid mistake, Kosai!"
+	      DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    
+ ENDWHILE
+ 
+ //  Player entered the car
+
+ GIVE_WEAPON (p1, MACHINE_GUN, 10)
+ REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF_NOW (1651)                          //  "Hiroshi will have moved the money into my account by the time you reach the City Bank to pick him up"
+ POINT_ARROW_AT (arrow1, 194.50, 177.50, 2.00)
+ 
+ //  While the player does not reach at the City Bank
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ANY_MEANS(p1, 194.50, 177.50, 2.00, 3.00, 2.00) ) )
+    
+    // If the player leaves the car
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, y_e_2_escape_car) ) )            
+    
+       DISPLAY_BRIEF_NOW (1658)                               // "Stay in the car, Kosai! I will advise you."
+       POINT_ARROW_AT (arrow1, y_e_2_escape_car)                        // Point arrow to the car
+       
+       // While the player does not get back to the car
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, y_e_2_escape_car) ) )      
+       
+          IF ( HAS_CHARACTER_DIED(p1) )              //  Player died
+             CLEAR_ALL_BRIEFS ()
+	            DISPLAY_BRIEF_NOW (1657)                //  "That was foolish, Kosai."
+	            DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+	            SET flag_failed_mission = 1
+	            SET flag_failed_yaku_easy_phone2_m1 = 1
+             RETURN
+          ENDIF
+          
+          IF ( HAS_CAR_JUST_SUNK(y_e_2_escape_car) )              //  Car just sunk
+             CLEAR_ALL_BRIEFS ()
+	            DISPLAY_BRIEF_NOW (1667)                //  "You fool, Kosai! Could you not have chosen a more appropriate time to take a bath?"
+	            DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+	            SET flag_failed_mission = 1
+	            SET flag_failed_yaku_easy_phone2_m1 = 1
+             RETURN
+          ENDIF
+          
+          IF ( HAS_CHAR_BEEN_ARRESTED(p1) )              //  Player busted
+             CLEAR_ALL_BRIEFS ()
+	            DISPLAY_BRIEF_NOW (7096)                //  "Your weakness is detestable, Kosai!"
+	            DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+	            SET flag_failed_mission = 1
+	            SET flag_failed_yaku_easy_phone2_m1 = 1
+             RETURN
+          ENDIF
+    
+          IF ( IS_CAR_WRECKED(y_e_2_escape_car) )              //  Escape car destroyed
+             CLEAR_ALL_BRIEFS ()
+	            DISPLAY_BRIEF_NOW (7093)                //  "You made a stupid mistake, Kosai!"
+	            DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+	            SET flag_failed_mission = 1
+	            SET flag_failed_yaku_easy_phone2_m1 = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+    
+       ENDWHILE
+       
+       // Player entered the car again
+       
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1659)                           //  "This is no time to play around, Kosai."
+       POINT_ARROW_AT (arrow1, 194.50, 177.50, 2.00)  //  Point arrow to the Bank again
+       
+    ENDIF
+    
+    //  Player is in the car
+    
+    //  Checking...
+    
+    IF ( HAS_CHARACTER_DIED(p1) )              //  Player died
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1657)                //  "That was foolish, Kosai."
+	      DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CAR_JUST_SUNK(y_e_2_escape_car) )              //  Car just sunk
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1667)                //  "You fool, Kosai! Could you not have chosen a more appropriate time to take a bath?"
+	      DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )              //  Player busted
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (7096)                //  "Your weakness is detestable, Kosai!"
+	      DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(y_e_2_escape_car) )              //  Escape car destroyed
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (7093)                //  "You made a stupid mistake, Kosai!"
+	      DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  The player arrived at the bank
+ 
+ 
+ REMOVE_ARROW (arrow1)   // Remove arrow from bank's entrance
+ 
+ y_e_2_guard_1_char = CREATE_CHAR (185.50, 174.50, 3.00) 4 90 CRIMINAL_TYPE1 END    // Guard 1
+ y_e_2_guard_2_char = CREATE_CHAR (185.50, 175.50, 3.00) 4 90 CRIMINAL_TYPE1 END    // Guard 2
+ 
+ SET_CHAR_GRAPHIC_TYPE (y_e_2_guard_1_char, EMERG_GRAPHIC, 0)          // set the graphic type to look like a cop
+ SET_CHAR_GRAPHIC_TYPE (y_e_2_guard_2_char, EMERG_GRAPHIC, 0)          // set the graphic type to look like a cop
+ 
+ SET_CHAR_THREAT_SEARCH (y_e_2_guard_1_char, NO_THREATS)               // Do not search for threats yet
+ SET_CHAR_THREAT_REACTION (y_e_2_guard_1_char, REACT_AS_NORMAL)        // Do not flee from a threat
+ SET_CHAR_THREAT_SEARCH (y_e_2_guard_2_char, NO_THREATS)               // Do not search for threats yet
+ SET_CHAR_THREAT_REACTION (y_e_2_guard_2_char, REACT_AS_NORMAL)        // Do not flee from a threat
+ 
+ SET_CHAR_OBJECTIVE (y_e_2_guard_1_char, GUARD_SPOT)                   // Stay where him was spawned
+ SET_CHAR_OBJECTIVE (y_e_2_guard_2_char, GUARD_SPOT)                   // Stay where him was spawned
+ 
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF (1665)               //  "Hiroshi will not come out until the two City Bank Guards are out of the way. What are you waiting for, Kosai?"
+ POINT_ARROW_AT (arrow1, y_e_2_guard_1_char)      //  Point arrow1 to Guard 1
+ POINT_ARROW_AT (arrow2, y_e_2_guard_2_char)      //  Point arrow2 to Guard 2
+ 
+ //  While at least one of the guards still alive
+ WHILE_EXEC ( NOT ( y_e_2_guards_killed = 2 ) )      
+    
+    IF ( HAS_CHARACTER_DIED(p1) )   //  Player died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1657)     //  "That was foolish, Kosai."
+       DISPLAY_MESSAGE (1125)       //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(y_e_2_escape_car) )   //  Escape car destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7093)     //  "You made a stupid mistake, Kosai!"
+       DISPLAY_MESSAGE (1125)       //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )   //  Player busted
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (7096)             //  "Your weakness is detestable, Kosai!"
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( ( y_e_2_guard_1_died = 0 ) AND ( HAS_CHARACTER_DIED(y_e_2_guard_1_char) ) )     //  Guard 1 died
+       REMOVE_ARROW (arrow1)                                    //  Remove arrow from him
+       ++y_e_2_guards_killed                                                //  Count +1 guard killed
+       SET y_e_2_guard_1_died = 1                                          //  Lock this IF
+    ENDIF
+    
+    IF ( ( y_e_2_guard_2_died = 0 ) AND ( HAS_CHARACTER_DIED(y_e_2_guard_2_char) ) )     //  Guard 2 died
+       REMOVE_ARROW (arrow2)                                    //  Remove arrow from him
+       ++y_e_2_guards_killed                                                //  Count +1 guard killed
+       SET y_e_2_guard_2_died = 1                                          //  Lock this IF
+    ENDIF
+    
+    IF ( ( y_e_2_guard_1_died = 1 ) AND ( y_e_2_guard_2_died = 1 ) )                  //  If the two guards have been killed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1654)         //  "You enjoyed killing those Guards, Kosai. This is the Yakuza way! Look - there's Hiroshi!"
+    ENDIF
+    
+    IF ( HAS_CAR_JUST_SUNK(y_e_2_escape_car) )    //  Car just sunk
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1667)             //  "You fool, Kosai! Could you not have chosen a more appropriate time to take a bath?"
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_ITEM_ONSCREEN(y_e_2_guard_1_char) )                                   // If the guard 1 is on player screen
+       SET_CHAR_THREAT_SEARCH (y_e_2_guard_1_char, LINE_OF_SIGHT_PLAYER_ONLY)     // Look for the player as a threat
+       SET_CHAR_THREAT_REACTION (y_e_2_guard_1_char, REACT_AS_NORMAL)             // Do not flee from the threat
+    ENDIF
+    
+    IF ( IS_ITEM_ONSCREEN(y_e_2_guard_2_char) )                                   // If the guard 2 is on player screen
+       SET_CHAR_THREAT_SEARCH (y_e_2_guard_2_char, LINE_OF_SIGHT_PLAYER_ONLY)     // Look for the player as a threat
+       SET_CHAR_THREAT_REACTION (y_e_2_guard_2_char, REACT_AS_NORMAL)             // Do not flee from the threat
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  All guards died
+
+ y_e_2_hiroshi_char = CREATE_CHAR (183.50, 175.50, 3.00) 13 0 CRIMINAL END        //  Spawn Hiroshi
+ GIVE_WEAPON (y_e_2_hiroshi_char, MACHINE_GUN)                                    //  Give him a gun
+ SET_CHAR_THREAT_SEARCH (y_e_2_hiroshi_char, NO_THREATS)                          //  There is no threats in particular
+ SET_CHAR_THREAT_REACTION (y_e_2_hiroshi_char, NO_REACTION)                       //  Do not flee from a threat
+ ADD_CHAR_TO_GANG (y_e_2_hiroshi_char, yakuzagang)                                //  He is a yakuza member
+ UPDATE_DOOR_TARGET (door16, y_e_2_hiroshi_char)                                  //  Open the door16 if Hiroshi is close to it
+ 
+ y_e_2_alarm_sound = CREATE_SOUND (183.50, 174.50, 4.00) BANK_ALARM PLAY_FOREVER END    //  Bank Alarm sound
+ light2 = CREATE_LIGHT (184.50, 175.50, 2.50) 3.00 255 (255, 0, 0) 10 10 2    //  Bank Alarm light
+ 
+ SET y_e_2_alarm_flag = 1                                                      //  Part 2 of the mission
+ SET_CHAR_OBJECTIVE (y_e_2_hiroshi_char, GOTO_AREA_ON_FOOT, 184.50, 175.50, 3.00)   //  Go outside of the bank's building
+ 
+ //  While Hiroshi does not reached the outside of the building
+ WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(y_e_2_hiroshi_char) ) )
+ 
+    IF ( HAS_CHARACTER_DIED(p1) )   //  Player died
+       CLEAR_ALL_BRIEFS ()          //  Remove all messages from the screen
+       DISPLAY_BRIEF_NOW (1657)     //  "That was foolish, Kosai."
+       DISPLAY_MESSAGE (1125)       //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( ( NOT ( IS_ITEM_ONSCREEN(y_e_2_hiroshi_char) ) ) AND ( y_e_2_hiroshi_on_screen = 0 ) )      //  IF Hiroshi isn't on player screen
+       CLEAR_ALL_BRIEFS ()                                             //  Remove all messages from the screen
+       DISPLAY_BRIEF (1675)                                            //  "Kosai! What about Hiroshi?"
+       POINT_ARROW_AT (arrow1, y_e_2_hiroshi_char)                                   //  Point arrow to him
+       SET y_e_2_hiroshi_on_screen = 1                                                 //  Lock this IF
+    ENDIF
+    
+    IF ( ( IS_ITEM_ONSCREEN(y_e_2_hiroshi_char) ) AND ( y_e_2_hiroshi_on_screen = 1 ) )      //  IF is on player screen again
+       REMOVE_ARROW (arrow1)                                   //  Remove the arrow from him
+       SET y_e_2_hiroshi_on_screen = 0                                         //  Lock this IF and unlock the previous IF
+    ENDIF
+    
+    IF ( HAS_CAR_JUST_SUNK(y_e_2_escape_car) )    //  Car just sunk
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1667)             //  "You fool, Kosai! Could you not have chosen a more appropriate time to take a bath?"
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(y_e_2_escape_car) )   //  Escape car destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7093)     //  "You made a stupid mistake, Kosai!"
+       DISPLAY_MESSAGE (1125)       //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )   //  Player busted
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (7096)             //  "Your weakness is detestable, Kosai!"
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  Hiroshi exit the building
+ 
+ ADD_GROUP_TO_CHARACTER (p1, 0)               //  Create a (empty) group for the player
+ ADD_EXISTING_CHAR_TO_GROUP (p1, y_e_2_hiroshi_char)        //  Add Hiroshi to the player's group
+ ALTER_WANTED_LEVEL_NO_DROP (p1, 2)           //  Add 2 wanted levels to the player, no drop if he already get more than 2 levels before
+ ADD_SCORE (p1, 5000)                         //  Add 5000 in score to 
+ 
+ CLEAR_ALL_BRIEFS ()                          //  Remove all messages from the screen
+ DISPLAY_BRIEF (1655)                         //  "SHIT! Someone tipped off the Cops, Kosai! Your Cop Wanted Level has risen. Here's $5,000 [...]"
+ POINT_ARROW_AT (arrow1, y_e_2_escape_car) //  Point arrow to the car
+ 
+ //  While the player does not enter the car
+ WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, y_e_2_escape_car) ) )
+ 
+    IF ( HAS_CHARACTER_DIED(p1) )              //  Player died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1657)                //  "That was foolish, Kosai."
+       DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CAR_JUST_SUNK(y_e_2_escape_car) )              //  Car just sunk
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1667)                //  "You fool, Kosai! Could you not have chosen a more appropriate time to take a bath?"
+       DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )              //  Player busted
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1674)                //  "IDIOT! Do not think that I will forget this in a hurry!"
+       DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(y_e_2_escape_car) )              //  Car destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7093)                //  "You made a stupid mistake, Kosai!"
+       DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player entered the vehicle
+ 
+ POINT_ARROW_AT (arrow1, 86.50, 160.50, 2.00) //  Point arrow to the Max Paynt
+ 
+ //  While player didn't clear up his wanted level
+ WHILE_EXEC ( CHECK_HEADS_GREATER(p1, 0) )
+ 
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, y_e_2_escape_car) ) )
+       
+       DISPLAY_BRIEF (1666)                 //  "You must stay in the car to get it resprayed, Kosai."
+       POINT_ARROW_AT (arrow1, y_e_2_escape_car)      //  Point arrow to the car
+       
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, y_e_2_escape_car) ) )
+          
+          //  The player hasn't any wanted level, so he used cop bribe (while at foot)
+          IF ( NOT ( CHECK_HEADS_GREATER(p1, 0) ) )
+             IF ( y_e_2_cop_bribe_gotten = 0 )
+                SET y_e_2_cop_bribe_gotten = 1
+                DISPLAY_BRIEF_NOW (1662)  //  "Bribing Cops is a smart way to reduce your Cop Wanted Level, Kosai.
+                                          //  Now go to the Safehouse to collect your reward."
+             ENDIF
+          ENDIF
+          
+          IF ( HAS_CHARACTER_DIED(p1) )              //  Player died
+             CLEAR_ALL_BRIEFS ()
+	            DISPLAY_BRIEF_NOW (1657)                //  "That was foolish, Kosai."
+	            DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+	            SET flag_failed_mission = 1
+	            SET flag_failed_yaku_easy_phone2_m1 = 1
+             RETURN
+          ENDIF
+    
+          IF ( HAS_CAR_JUST_SUNK(y_e_2_escape_car) )              //  Car just sunk
+             CLEAR_ALL_BRIEFS ()
+	            DISPLAY_BRIEF_NOW (1667)                //  "You fool, Kosai! Could you not have chosen a more appropriate time to take a bath?"
+	            DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+	            SET flag_failed_mission = 1
+	            SET flag_failed_yaku_easy_phone2_m1 = 1
+             RETURN
+          ENDIF
+    
+          IF ( HAS_CHAR_BEEN_ARRESTED(p1) )              //  Player busted
+             CLEAR_ALL_BRIEFS ()
+	            DISPLAY_BRIEF_NOW (1674)                //  "IDIOT! Do not think that I will forget this in a hurry!"
+	            DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+	            SET flag_failed_mission = 1
+	            SET flag_failed_yaku_easy_phone2_m1 = 1
+             RETURN
+          ENDIF
+    
+          IF ( IS_CAR_WRECKED(y_e_2_escape_car) )              //  Car destroyed
+             CLEAR_ALL_BRIEFS ()
+	            DISPLAY_BRIEF_NOW (7093)                //  "You made a stupid mistake, Kosai!"
+	            DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+	            SET flag_failed_mission = 1
+	            SET flag_failed_yaku_easy_phone2_m1 = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+       
+       ENDWHILE
+       
+       //  The player returned to the car
+       
+       IF ( y_e_2_cop_bribe_gotten = 0 )
+          DISPLAY_BRIEF (1668)                //  "You need a respray superfast, Kosai. Get back in the car!"
+          POINT_ARROW_AT (arrow1, 86.50, 160.50, 2.00)    //  Point arrow to the Max Paynt
+       ELSE
+          POINT_ARROW_AT (arrow1, 76.50, 200.50, 2.00)      //  Point at the garage entrance
+       ENDIF
+       
+       
+    ENDIF
+    
+
+    //  Checking...
+    
+    //  Player died
+    IF ( HAS_CHARACTER_DIED(p1) )              
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1657)                //  "That was foolish, Kosai."
+       DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  Car just sunk
+    IF ( HAS_CAR_JUST_SUNK(y_e_2_escape_car) )              
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1667)                //  "You fool, Kosai! Could you not have chosen a more appropriate time to take a bath?"
+       DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  Player busted
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )              
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1674)                //  "IDIOT! Do not think that I will forget this in a hurry!"
+       DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  Car destroyed
+    IF ( IS_CAR_WRECKED(y_e_2_escape_car) )              
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7093)                //  "You made a stupid mistake, Kosai!"
+       DISPLAY_MESSAGE (1125)                  //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  Player cleared up his wanted level
+ 
+ EXEC
+ 
+ //  If the car has color been changed
+ IF ( NOT ( CHECK_CAR_REMAP(y_e_2_escape_car, 5) ) )              //  Car colour changed to 9 = White
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF_NOW (1661)                    //  "Nice respray, Kosai. Now get your ass to the Safehouse to collect your reward."
+    ADD_SCORE (p1, 5000)
+ ENDIF
+ 
+ //  Car colour not changed, so the player picked up a Cop Bribe using the car
+ IF ( CHECK_CAR_REMAP(y_e_2_escape_car, 5) )    
+    IF ( NOT ( y_e_2_cop_bribe_gotten = 1 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1662)  //  "Bribing Cops is a smart way to reduce your Cop Wanted Level, Kosai.
+                                 //  Now go to the Safehouse to collect your reward."
+       SET y_e_2_cop_bribe_gotten = 1
+    ENDIF
+ ENDIF
+ 
+ POINT_ARROW_AT (arrow1, 76.50, 200.50, 2.00)      //  Point at the garage entrance
+ UPDATE_DOOR_TARGET (door12, y_e_2_escape_car)     //  Update garage door
+ 
+ ENDEXEC
+ 
+ 
+ //  While the car isn't in front of the garage door
+ WHILE_EXEC ( NOT ( IS_CAR_IN_BLOCK(y_e_2_escape_car, 76.50, 200.50, 2.00, 3.00, 1.00) ) )     
+    
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, y_e_2_escape_car) ) )
+       DISPLAY_BRIEF_NOW (1658)                     //  "Stay in the car, Kosai! I will advise you."
+       POINT_ARROW_AT (arrow1, y_e_2_escape_car)    //  Point arrow to the car
+       
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, y_e_2_escape_car) ) )
+       
+          //  the usual check...
+          
+          IF ( HAS_CHARACTER_DIED(p1) )             
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1657)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_yaku_easy_phone2_m1 = 1
+             RETURN
+          ENDIF
+          
+          IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF (1674)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_yaku_easy_phone2_m1 = 1
+             RETURN
+          ENDIF
+          
+          IF ( HAS_CAR_JUST_SUNK(y_e_2_escape_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF (1667)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_yaku_easy_phone2_m1 = 1
+             RETURN
+          ENDIF
+          
+          IF ( IS_CAR_WRECKED(y_e_2_escape_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (7093)
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_yaku_easy_phone2_m1 = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+          
+       ENDWHILE
+       
+       //  Player returned to the car
+       
+       DISPLAY_BRIEF (1664)                               //  "I would quit fooling around if were you, Kosai."
+       POINT_ARROW_AT (arrow1, 76.50, 200.50, 2.00)       //  Point at the garage again
+       
+    ENDIF
+    
+    //  the customary checking again...
+    
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1657)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+          
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1674)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+          
+    IF ( HAS_CAR_JUST_SUNK(y_e_2_escape_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1667)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+          
+    IF ( IS_CAR_WRECKED(y_e_2_escape_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7093)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ 
+ //  Car ready to park
+ 
+ REMOVE_ARROW (arrow1)                    //   Remove arrow from the garage
+ PARK (y_e_2_escape_car, door12)          //   Park the car
+ 
+ // While park not finished
+ WHILE_EXEC ( NOT ( HAS_PARK_FINISHED() ) )        
+ 
+    IF ( HAS_CHARACTER_DIED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1657)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1674)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(y_e_2_escape_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (7093)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_easy_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  The car has been parked
+ 
+ IF ( flag_failed_mission = 0 )               //  If the player do not failed the mission
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF (1652)         //  "Thank you for your efforts, Kosai. It is with gratitude I give you $20,000."
+    DISPLAY_MESSAGE (1124)       //  JOB COMPLETE!
+    ADD_SCORE (p1, 20000)
+    ADD_MULTIPLIER (p1, 1)
+    CLEAR_WANTED_LEVEL (p1)
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (yakuzagang, p1, 1)     //  RESPECT +
+    SET flag_passed_yaku_easy_phone2_m1 = 1
+    
+    IF ( flag_passed_yaku_easy_phone2_m1 = 1 )         //  Checking if the player passed the mission
+       SET_PHONE_DEAD (ph_yaku_easy_phone2)      //  Kill the phone
+       SET flag_kill_yaku_easy_phone2 = 1        //  Save that kill status
+    ENDIF
+    
+ ENDIF
+
+RETURN
+
+
+clean_up_yaku_easy_phone2_m1:      //  Clean up
+
+	DESTROY_GROUP (p1)                //  Destroy the link between Hiroshi
+	REMOVE_ARROW (arrow1)             //  Remove arrow
+ REMOVE_ARROW (arrow2)             //  Remove arrow
+	CLEAR_WANTED_LEVEL (p1)           //  Clear wanted level
+	SET flag_failed_mission = 0                    //  Reset "failed mission" flag
+	DELETE_ITEM (y_e_2_alarm_sound)   //  Delete the alarm sound
+	SET_DEATHARREST_STATE (p1, ON)    //  Reseting death arrest check
+ 
+ IF ( y_e_2_alarm_flag = 1 )       //  If the bank alarm was triggered
+	   DELETE_ITEM (light2)           //  Delete it
+	ENDIF
+ 
+	MISSION_HAS_FINISHED ()
+ 
+ IF ( flag_passed_yaku_easy_phone2_m1 = 1 )            //  If the player passed this mission
+	   ++flag_all_missions_passed                 //  Count +1 mission passed
+	   ++flag_yaku_missions_passed                 //  Count +1 yakuza mission passed
+	   MAKE_DOOR_MANUAL (door12)
+	   MAKE_DOOR_MANUAL (door16)
+	ENDIF
+ 
+ IF ( flag_failed_yaku_easy_phone2_m1 = 1 )             //  If the player failed this mission
+	   ++flag_all_missions_failed                 //  Count +1 mission failed
+	   ++flag_yaku_missions_failed                 //  Count +1 yakuza mission failed
+	   CLEAR_WANTED_LEVEL (p1)        
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (yakuzagang, p1, -1)    //  Reduce respect with yakuza
+	   MAKE_DOOR_AUTOMATIC (door12)        //  Return to the normal state
+    MAKE_DOOR_AUTOMATIC (door16)        //  Return to the normal state
+	ENDIF
+ 
+	SET flag_on_mission = 0                    //  The player isn't playing a mission anymore
+	SET flag_on_yaku_mission = 0                    //  The player isn't playing a yakuza mission anymore
+ 
+RETURN
+
+MISSIONSTART
+GOSUB yaku_easy_phone2_m1:
+GOSUB clean_up_yaku_easy_phone2_m1:
+MISSIONEND

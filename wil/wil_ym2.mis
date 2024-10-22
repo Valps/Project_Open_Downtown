@@ -1,0 +1,364 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX GET GAMA REI! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_ym2.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD yaku_med_phone2_m1:
+//FORWARD clean_up_yaku_med_phone2_m1:
+
+COUNTER y_m_2_ready_to_pick_up = 0
+COUNTER y_m_2_player_in_medicar = 0
+COUNTER y_m_2_rdy_to_park = 0
+COUNTER y_m_2_rei_1_on_screen = 0
+COUNTER y_m_2_rei_2_on_screen = 0
+
+CAR_DATA y_m_2_medical_car
+CAR_DATA y_m_2_loonies_1_car
+CAR_DATA y_m_2_loonies_2_car
+
+CHAR_DATA y_m_2_gama_rei_char
+CHAR_DATA y_m_2_assassin_1_char
+CHAR_DATA y_m_2_assassin_2_char
+
+yaku_med_phone2_m1:
+
+	SET flag_on_mission = 1                  // Player is playing a mission
+	SET flag_on_yaku_mission = 1                  // Player is playing a yakuza mission
+ 
+	SET flag_failed_yaku_med_phone2_m1 = 0
+ 
+	DISPLAY_MESSAGE (1978)                     //  GET GAMA REI!
+	DISPLAY_BRIEF (1371)                       //  "Hi, Kosai, it's Johnny Zoo. Gama Rei has to leave the City Hospital - fast. He's in plastic surgery so you need a Medicar."
+ 
+ WHILE_EXEC ( y_m_2_ready_to_pick_up = 0 )
+ 
+    IF ( IS_CHARACTER_IN_MODEL(p1, MEDICAR) )
+       //  Player entered a Medical car
+       IF ( y_m_2_player_in_medicar = 0 )
+          CLEAR_ALL_BRIEFS ()
+	         DISPLAY_BRIEF (1372)                          //  "Excellent, Kosai. Now collect Gama Rei from the City Hospital."
+	         POINT_ARROW_AT (arrow1, 88.50, 84.50, 2.00)
+	         SET y_m_2_player_in_medicar = 1                               //  Lock this IF
+	         STORE_CAR_CHARACTER_IS_IN (p1, y_m_2_medical_car)
+	         UPDATE_DOOR_TARGET (door17, y_m_2_medical_car)
+	         UPDATE_DOOR_TARGET (door18, y_m_2_medical_car)
+       ENDIF
+    ENDIF
+    
+    IF ( NOT ( IS_CHARACTER_IN_MODEL(p1, MEDICAR) ) )
+       IF ( y_m_2_player_in_medicar = 1 )
+          //  Player get out of a Medical car
+          CLEAR_ALL_BRIEFS ()
+	         DISPLAY_BRIEF_NOW (1373)                      //  "What are you doing with the Medicar, Kosai? You have a job to do!"
+	         REMOVE_ARROW (arrow1)
+	         SET y_m_2_player_in_medicar = 0                               //  Unlock the previous IF
+       ENDIF
+    ENDIF
+    
+    IF ( ( y_m_2_player_in_medicar = 1 ) AND ( IS_CAR_IN_BLOCK(y_m_2_medical_car, 88.50, 84.50, 2.00, 3.00, 2.00) ) )        //  If the player arrived at the hospital entrance with a medicar
+       IF ( IS_CHARACTER_IN_CAR(p1, y_m_2_medical_car) )
+      	   REMOVE_ARROW (arrow1)                         //  Remove arrow from the hospital entrance
+	         SET y_m_2_ready_to_pick_up = 1                               //  Finish this WHILE loop
+       ENDIF
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  Player arrived at the hospital entrance with a medicar
+ 
+	CLEAR_ALL_BRIEFS ()
+	DISPLAY_BRIEF_NOW (1374)                    //  "Have patience, Kosai. Gama Rei only just got his new face."
+ 
+	y_m_2_gama_rei_char = CREATE_CHAR (92.50, 83.50, 2.00) 13 0 CRIMINAL END              //  Create Gama Rei
+	SET_CHAR_THREAT_REACTION (y_m_2_gama_rei_char, NO_REACTION)                           //  Do not flee from a threat
+	SET_CHAR_THREAT_SEARCH (y_m_2_gama_rei_char, NO_THREATS)                              //  There is not threats to him
+	UPDATE_DOOR_TARGET (door6, y_m_2_gama_rei_char)                                       //  Update door to him
+	SET_CHAR_OBJECTIVE (y_m_2_gama_rei_char, GOTO_AREA_ON_FOOT, 92.50, 84.50, 2.00)       //  Go to outside of the Hospital building
+ 
+ WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(y_m_2_gama_rei_char) ) )    //  While Gama Rei didn't reach outside of the Hospital building
+ 
+    IF ( HAS_CHARACTER_DIED(y_m_2_gama_rei_char) )                  //  If Gama Rei died
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1375)                      //  "Gama Rei is dead!"
+	      DISPLAY_MESSAGE (1125)
+	      SET flag_failed_mission = 1
+	      SET flag_failed_yaku_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( ( y_m_2_rei_2_on_screen = 0 ) AND ( NOT ( IS_ITEM_ONSCREEN(y_m_2_gama_rei_char) ) ) )    //  If Gama Rei isn't on player screen
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (7003)                          //  "Where are you going? Pick up Gama Rei!"
+       POINT_ARROW_AT (arrow1, y_m_2_gama_rei_char)                 //  Point arrow to Gama Rei
+       SET y_m_2_rei_2_on_screen = 1                               //  Lock this IF
+    ENDIF
+    
+    IF ( ( y_m_2_rei_2_on_screen = 1 ) AND ( IS_ITEM_ONSCREEN(y_m_2_gama_rei_char) ) )     //  If Gama Rei is (again) on player screen
+       REMOVE_ARROW (arrow1)
+       SET y_m_2_rei_2_on_screen = 0                               //  Unlock this IF
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(y_m_2_medical_car) )                    //  If the medical car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1376)                      //  "The man who destroys a Medicar, Kosai, is not a well man. Such people don't get jobs."    :X
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  Gama Rei is outside the Hospital building
+ 
+ SET_CHAR_OBJECTIVE (y_m_2_gama_rei_char, ENTER_CAR_AS_PASSENGER, y_m_2_medical_car)            //  Now Gama Rei will enter the medicar
+ 
+ WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(y_m_2_gama_rei_char) ) )
+    
+    IF ( HAS_CHARACTER_DIED(y_m_2_gama_rei_char) )                  //  If Gama Rei died
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1375)                      //  "Gama Rei is dead!"
+	      DISPLAY_MESSAGE (1125)
+	      SET flag_failed_mission = 1
+	      SET flag_failed_yaku_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( ( y_m_2_rei_1_on_screen = 0 ) AND ( NOT ( IS_ITEM_ONSCREEN( y_m_2_gama_rei_char ) ) ) )   //  If Gama Rei isn't on player screen
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1386)                                        //  "Hey, wait for me!"
+       POINT_ARROW_AT (arrow1, y_m_2_gama_rei_char)                //  Point arrow at him
+       SET y_m_2_rei_1_on_screen = 1                               //  Lock this IF
+    ENDIF
+    
+    IF ( ( y_m_2_rei_1_on_screen = 1 ) AND ( IS_ITEM_ONSCREEN( y_m_2_gama_rei_char ) ) )      //  If Gama Rei is (again) on player screen
+       REMOVE_ARROW (arrow1)                                   //  Remove arrow from him
+       SET y_m_2_rei_1_on_screen = 0                                         //  Unlock this IF
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(y_m_2_medical_car) )                    //  If the medical car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1376)                      //  "The man who destroys a Medicar, Kosai, is not a well man. Such people don't get jobs."    :X
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+
+ //  Gama Rei entered the medical car
+
+ CLOSE_DOOR (door6)                  //  Close the Hospital door
+ 
+ DISPLAY_BRIEF (1377)                //  "Gama Rei must be taken to the Safehouse before the Loonies dispatch Assassins. Move it!"
+ 
+ UPDATE_DOOR_TARGET (door7, y_m_2_medical_car)  //  Update door to medical car
+ 
+ POINT_ARROW_AT (arrow1, 35.50, 187.50, 2.00)        //  Point arrow to a garage
+ 
+ DISPLAY_BRIEF (1378)                //  "Gama Rei has stolen Loony secrets so they want him bad. Watch his ass, Kosai."
+ 
+ 
+ //  Spawn gang cars
+ y_m_2_loonies_1_car = CREATE_GANG_CAR (81.50, 109.50, 2.00) 16 0 ISETTA END
+ y_m_2_loonies_2_car = CREATE_GANG_CAR (112.50, 75.50, 2.00) 16 0 ISETTA END
+ 
+ //  Spawn the Loonies assassins
+ y_m_2_assassin_1_char = CREATE_CHAR_INSIDE_CAR (y_m_2_loonies_1_car) 11 CRIMINAL END
+ y_m_2_assassin_2_char = CREATE_CHAR_INSIDE_CAR (y_m_2_loonies_2_car) 11 CRIMINAL END
+ 
+ //  Set their favourite model, if they lose the original cars
+ SET_FAVOURITE_MODEL (y_m_2_assassin_1_char, ISETTA)
+ SET_FAVOURITE_MODEL (y_m_2_assassin_2_char, ISETTA)
+ 
+ //  Search threats
+ SET_CHAR_THREAT_SEARCH (y_m_2_assassin_1_char, AREA)
+ SET_CHAR_THREAT_SEARCH (y_m_2_assassin_2_char, AREA)
+ 
+ //  Do not flee from threats
+ SET_CHAR_THREAT_REACTION (y_m_2_assassin_1_char, REACT_AS_NORMAL)
+ SET_CHAR_THREAT_REACTION (y_m_2_assassin_2_char, REACT_AS_NORMAL)
+ 
+ //  Give weapons to the assassins
+ GIVE_WEAPON (y_m_2_assassin_1_char, MACHINE_GUN)
+ GIVE_WEAPON (y_m_2_assassin_2_char, PISTOL)
+ 
+ //  Add to the Loony gang
+ ADD_CHAR_TO_GANG (y_m_2_assassin_1_char, looniegang)
+ ADD_CHAR_TO_GANG (y_m_2_assassin_2_char, looniegang)
+ 
+ //  Set the two assassins to kill Gama Rei
+ SET_CHAR_OBJECTIVE (y_m_2_assassin_1_char, KILL_CHAR_ANY_MEANS, y_m_2_gama_rei_char)
+ SET_CHAR_OBJECTIVE (y_m_2_assassin_2_char, KILL_CHAR_ANY_MEANS, y_m_2_gama_rei_char)
+ 
+ //  While the medical car isn't in front of the garage door
+ WHILE_EXEC ( NOT ( IS_CAR_IN_BLOCK(y_m_2_medical_car, 35.50, 187.50, 2.00, 4.00, 2.00) ) )       
+    
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, y_m_2_medical_car) ) )          //  If the player get out of the medicar
+    
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1379)                   //  "Get back in the Medicar, Kosai!"
+       POINT_ARROW_AT (arrow1, y_m_2_medical_car)            //  Point arrow to the medicar
+       
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, y_m_2_medical_car) ) )
+          
+          IF ( HAS_CHARACTER_DIED(y_m_2_gama_rei_char) )         //  Gama Rei died
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1375)             //  "Gama Rei is dead!"
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_yaku_med_phone2_m1 = 1
+             MAKE_CHAR_DO_NOTHING (y_m_2_assassin_1_char)          //  Make the assassins do nothing
+             MAKE_CHAR_DO_NOTHING (y_m_2_assassin_2_char)          //  Make the assassins do nothing
+             RETURN
+          ENDIF
+          
+          IF ( IS_CAR_WRECKED(y_m_2_medical_car) )           //  The medical car has been destroyed
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1376)             //  "The man who destroys a Medicar, Kosai, is not a well man. Such people don't get jobs."    :X
+             DISPLAY_MESSAGE (1125)
+             SET flag_failed_mission = 1
+             SET flag_failed_yaku_med_phone2_m1 = 1
+             MAKE_CHAR_DO_NOTHING (y_m_2_assassin_1_char)          //  Make the assassins do nothing
+             MAKE_CHAR_DO_NOTHING (y_m_2_assassin_2_char)          //  Make the assassins do nothing
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+          
+       ENDWHILE
+       
+       //  Player returned to the medical car
+       
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1380)                       //  "Deliver Gama Rei to the Safehouse NOW!"
+       POINT_ARROW_AT (arrow1, 35.50, 187.50, 2.00)   //  Point arrow to the garage
+       
+    ENDIF
+    
+    //  Checking...
+    
+    //  The medical car has been destroyed
+    IF ( IS_CAR_WRECKED(y_m_2_medical_car) )           
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1376)             //  "The man who destroys a Medicar, Kosai, is not a well man. Such people don't get jobs."    :X
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone2_m1 = 1
+       MAKE_CHAR_DO_NOTHING (y_m_2_assassin_1_char)          //  Make the assassins do nothing
+       MAKE_CHAR_DO_NOTHING (y_m_2_assassin_2_char)          //  Make the assassins do nothing
+       RETURN
+    ENDIF
+    
+    //  Gama Rei died
+    IF ( HAS_CHARACTER_DIED(y_m_2_gama_rei_char) )         
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1375)             //  "Gama Rei is dead!"
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone2_m1 = 1
+       MAKE_CHAR_DO_NOTHING (y_m_2_assassin_1_char)          //  Make the assassins do nothing
+       MAKE_CHAR_DO_NOTHING (y_m_2_assassin_2_char)          //  Make the assassins do nothing
+       RETURN
+    ENDIF
+
+    
+ ENDWHILE
+ 
+ //  Medicar is in front of the garage
+ 
+ // Do the PARK as fast as possible
+ 
+ EXEC
+ 
+ REMOVE_ARROW (arrow1)
+ SET y_m_2_rdy_to_park = 1
+ MAKE_CHAR_DO_NOTHING (y_m_2_assassin_1_char)
+ MAKE_CHAR_DO_NOTHING (y_m_2_assassin_2_char)
+ 
+ IF ( ( y_m_2_rdy_to_park = 1 ) AND ( IS_CHARACTER_IN_CAR(p1, y_m_2_medical_car) ) )
+    IF ( IS_CHARACTER_IN_CAR(y_m_2_gama_rei_char, y_m_2_medical_car) )
+       PARK (y_m_2_medical_car, door7)
+    ENDIF
+ ENDIF
+ 
+ ENDEXEC
+ 
+ 
+ 
+ WHILE_EXEC ( NOT ( HAS_PARK_FINISHED() ) )
+    
+    IF ( IS_CAR_WRECKED(y_m_2_medical_car) )         //  Medicar has been destroyed
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1376)
+       DISPLAY_MESSAGE (1125)
+       SET flag_failed_mission = 1
+       SET flag_failed_yaku_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  Park has finished
+ 
+ IF ( flag_failed_mission = 0 )
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF_NOW (1381)          //  "Gama Rei is important to us, Kosai. We are most pleased by your performance. Here - have $40,000."
+    DISPLAY_MESSAGE (1124)
+    ADD_SCORE (p1, 40000)
+    ADD_MULTIPLIER (p1, 1)
+    CLEAR_WANTED_LEVEL (p1)
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (yakuzagang, p1, 1)         //  RESPECT +
+    
+    SET flag_passed_yaku_med_phone2_m1 = 1                                             //  Player passed this mission
+    
+    IF ( ( flag_passed_yaku_med_phone2_m1 = 1 ) AND ( flag_passed_yaku_med_phone1_2_m3 = 1 ) )              //  If player passed this mission and mission 3 of Yakuza Medium
+       SET_PHONE_DEAD (ph_yaku_med_phone2)                                       //  Kill the phone 2
+       SET flag_kill_yaku_med_phone2 = 1                                         //  Store that kill
+    ENDIF
+    
+ ENDIF
+
+RETURN                    //  Go to clean up
+
+
+clean_up_yaku_med_phone2_m1:               //  Clean up
+
+	REMOVE_ARROW (arrow1)
+	SET flag_failed_mission = 0
+	CLEAR_WANTED_LEVEL (p1)
+	MISSION_HAS_FINISHED ()
+ 
+ IF ( flag_passed_yaku_med_phone2_m1 = 1 )             //  If the player passed this mission
+	   ++flag_all_missions_passed                  //  Count +1 mission passed
+	   ++flag_yaku_missions_passed                  //  Count +1 yakuza mission passed
+	   MAKE_DOOR_MANUAL (door17)       //  Deactivate the door
+	   MAKE_DOOR_MANUAL (door18)       //  Deactivate the door
+	   MAKE_DOOR_MANUAL (door7)        //  Deactivate the door
+	   MAKE_DOOR_MANUAL (door6)        //  Deactivate the door
+ ENDIF
+ 
+ IF ( ( flag_failed_yaku_med_phone2_m1 = 1 ) OR ( CHECK_DEATHARREST_EXECUTED() ) )      //  If the player failed the mission
+	   ++flag_all_missions_failed                  //  Count +1 mission failed
+	   ++flag_yaku_missions_failed                  //  Count +1 yakuza mission failed
+	   MAKE_DOOR_AUTOMATIC (door17)    //  Remove "Update door" status
+	   MAKE_DOOR_AUTOMATIC (door18)    //  Remove "Update door" status
+	   MAKE_DOOR_AUTOMATIC (door7)     //  Remove "Update door" status
+	   MAKE_DOOR_AUTOMATIC (door6)     //  Remove "Update door" status
+	   CLEAR_WANTED_LEVEL (p1)
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (yakuzagang, p1, -1)
+	ENDIF
+ 
+	SET flag_on_mission = 0             //  Player isn't playing a mission anymore
+	SET flag_on_yaku_mission = 0             //  Player isn't playing a yakuza mission anymore
+ 
+RETURN
+
+MISSIONSTART
+GOSUB yaku_med_phone2_m1:
+GOSUB clean_up_yaku_med_phone2_m1:
+MISSIONEND

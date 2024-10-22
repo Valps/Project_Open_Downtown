@@ -1,0 +1,309 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX WHEELER-DEALING! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_ze2.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD zaib_easy_phone2_m1:
+//FORWARD clean_up_zaib_easy_phone2_m1:
+
+CHAR_DATA z_e_2_dealer_1_char
+CHAR_DATA z_e_2_dealer_2_char
+CHAR_DATA z_e_2_dealer_3_char
+CHAR_DATA z_e_2_dealer_4_char
+
+OBJ_DATA z_e_2_briefcase
+
+TIMER_DATA z_e_2_timer
+
+COUNTER z_e_2_internal_counter = 5399      //  3 min in game cycles (30 FPS, 1 cycle per frame in WHILE_EXEC)
+
+COUNTER z_e_2_deal_1_died = 0
+COUNTER z_e_2_deal_2_died = 0
+COUNTER z_e_2_deal_3_died = 0
+COUNTER z_e_2_deal_4_died = 0
+COUNTER z_e_2_is_timer_on_screen = 0
+
+zaib_easy_phone2_m1:
+
+	SET flag_on_mission = 1
+	SET flag_on_zaib_mission = 1
+ 
+	SET flag_failed_zaib_easy_phone2_m1 = 0
+ 
+	DISPLAY_MESSAGE (1983) //  WHEELER-DEALING!
+	DISPLAY_BRIEF (1161)   //  "Hey, Gecko! Trey Welsh here. [...] I need you to supply my dealers - FAST. Collect the new shipment and get moving!"
+ 
+	z_e_2_briefcase = CREATE_OBJ (242.50, 39.50, 2.00) 90 BRIEFCASE END
+	POINT_ARROW_AT (arrow1, z_e_2_briefcase)
+ 
+ //  While the player does not get the briefcase, do nothing
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 242.50, 39.50, 2.00, 0.50, 0.50) ) )
+    DO_NOWT
+ ENDWHILE
+	
+	REMOVE_ARROW (arrow1)
+	DELETE_ITEM (z_e_2_briefcase)      //  Delete briefcase
+ 
+	DISPLAY_BRIEF (1162)      //  "Move swiftly, Gecko, and watch the clock! You only have THREE minutes to get this shit on the street!"
+ 
+ EXEC
+ 
+     //  Dealer 1
+	    z_e_2_dealer_1_char = CREATE_CHAR (226.50, 82.50, 255.00) 8 0 CRIMINAL END
+	    SET_CHAR_OBJECTIVE (z_e_2_dealer_1_char, WAIT_ON_FOOT)
+	    SET_CHAR_THREAT_REACTION (z_e_2_dealer_1_char, NO_REACTION)
+ 
+	    POINT_ARROW_AT (arrow1, z_e_2_dealer_1_char)
+ 
+	    DISPLAY_TIMER (z_e_2_timer, 180)
+	    SET z_e_2_is_timer_on_screen = 1                 //  Timer is on screen
+ 
+ ENDEXEC
+ 
+ //  While the player does not reach Dealer 1
+ WHILE_EXEC ( NOT ( LOCATE_ANOTHER_CHARACTER_ON_FOOT(p1, z_e_2_dealer_1_char, 1.00, 1.00) ) )
+ 
+    --z_e_2_internal_counter                    //  Decrease counter
+    
+    //  Time out
+    IF ( z_e_2_internal_counter = 0 )           
+       DISPLAY_BRIEF (1163)      //  "Too slow, Gecko. Too slow. Did you take some of the stash?"
+	      DISPLAY_MESSAGE (1125)    //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_zaib_easy_phone2_m1 = 1
+	      SET z_e_2_is_timer_on_screen = 0           //  Timer is not on the screen anymore
+       RETURN
+    ENDIF
+    
+    //  Dealer 1 died
+    IF ( HAS_CHARACTER_DIED(z_e_2_dealer_1_char) )     
+       DISPLAY_BRIEF (1164)             //  "What a mess, Gecko. I think pizza deliveries are more your style."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone2_m1 = 1
+       SET z_e_2_deal_1_died = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player reached Dealer 1 on foot
+ 
+ EXEC
+	
+     //  If the Dealer 1 is alive
+	    IF ( z_e_2_deal_1_died = 0 )
+        SET_CHAR_OBJECTIVE (z_e_2_dealer_1_char, NO_OBJ)
+     ENDIF
+
+ 
+ 
+     REMOVE_ARROW (arrow1)
+     DISPLAY_BRIEF (1165)            //  "Faster, Gecko! Three to go and people need blow."
+     
+     //  Creating Dealer 2
+     z_e_2_dealer_2_char = CREATE_CHAR (245.50, 132.50, 255.00) 8 0 CRIMINAL END
+     SET_CHAR_OBJECTIVE (z_e_2_dealer_2_char, WAIT_ON_FOOT)
+     SET_CHAR_THREAT_REACTION (z_e_2_dealer_2_char, NO_REACTION)
+     
+     POINT_ARROW_AT (arrow1, z_e_2_dealer_2_char)
+     
+     --z_e_2_internal_counter               //   1 frame in EXEC block, decrease 1
+     
+ ENDEXEC
+ 
+ //  While the player does not reach Dealer 2
+ WHILE_EXEC ( NOT ( LOCATE_ANOTHER_CHARACTER_ON_FOOT(p1, z_e_2_dealer_2_char, 1.00, 1.00) ) )
+ 
+    --z_e_2_internal_counter                //  Decrease counter
+    
+    //  Time out
+    IF ( z_e_2_internal_counter = 0 )           
+       DISPLAY_BRIEF (1163)      //  "Too slow, Gecko. Too slow. Did you take some of the stash?"
+	      DISPLAY_MESSAGE (1125)    //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_zaib_easy_phone2_m1 = 1
+	      SET z_e_2_is_timer_on_screen = 0           //  Timer is not on the screen anymore
+       RETURN
+    ENDIF
+    
+    //  Dealer 2 died
+    IF ( HAS_CHARACTER_DIED(z_e_2_dealer_2_char) )     
+       DISPLAY_BRIEF (1166)             //  "Dead Dealers are no use to anyone - least of all me, Gecko."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone2_m1 = 1
+       SET z_e_2_deal_2_died = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player reached Dealer 2 on foot
+ 
+ EXEC
+     
+     //  If the Dealer 2 is alive
+     IF ( z_e_2_deal_2_died = 0 )
+        SET_CHAR_OBJECTIVE (z_e_2_dealer_2_char, NO_OBJ)
+     ENDIF
+ 
+     REMOVE_ARROW (arrow1)
+     DISPLAY_BRIEF (1167)     //  "Tick tock goes the clock, two deals to go on this block."
+     
+     //  Create Dealer 3
+     z_e_2_dealer_3_char = CREATE_CHAR (214.50, 211.50, 255.00) 8 0 CRIMINAL END
+     SET_CHAR_OBJECTIVE (z_e_2_dealer_3_char, WAIT_ON_FOOT)
+     SET_CHAR_THREAT_REACTION (z_e_2_dealer_3_char, NO_REACTION)
+     
+     POINT_ARROW_AT (arrow1, z_e_2_dealer_3_char)
+     
+     --z_e_2_internal_counter               //   1 frame in EXEC block, decrease 1
+     
+ ENDEXEC
+ 
+ //  While the player does not reach Dealer 3
+ WHILE_EXEC ( NOT ( LOCATE_ANOTHER_CHARACTER_ON_FOOT(p1, z_e_2_dealer_3_char, 1.00, 1.00) ) )
+ 
+    --z_e_2_internal_counter                //  Decrease counter
+    
+    //  Time out
+    IF ( z_e_2_internal_counter = 0 )           
+       DISPLAY_BRIEF (1163)      //  "Too slow, Gecko. Too slow. Did you take some of the stash?"
+	      DISPLAY_MESSAGE (1125)    //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_zaib_easy_phone2_m1 = 1
+	      SET z_e_2_is_timer_on_screen = 0           //  Timer is not on the screen anymore
+       RETURN
+    ENDIF
+    
+    //  Dealer 3 died
+    IF ( HAS_CHARACTER_DIED(z_e_2_dealer_3_char) )     
+       DISPLAY_BRIEF (1168)             //  "If I wanted dead Dealers I would have hired Hitmen. Your number's up, Gecko."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone2_m1 = 1
+       SET z_e_2_deal_3_died = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player reached Dealer 3 on foot
+ 
+ EXEC
+	
+     //  If the Dealer 3 is alive
+     IF ( z_e_2_deal_3_died = 0 )
+        SET_CHAR_OBJECTIVE (z_e_2_dealer_3_char, NO_OBJ)
+     ENDIF
+ 
+     REMOVE_ARROW (arrow1)
+     DISPLAY_BRIEF (1169)            //  "Three down, one to go. Come on, Gecko - move it!"
+     
+     //  Creating Dealer 4
+     z_e_2_dealer_4_char = CREATE_CHAR (164.50, 125.50, 2.00) 8 0 CRIMINAL END
+     SET_CHAR_OBJECTIVE (z_e_2_dealer_4_char, WAIT_ON_FOOT)
+     SET_CHAR_THREAT_REACTION (z_e_2_dealer_4_char, NO_REACTION)
+     
+     POINT_ARROW_AT (arrow1, z_e_2_dealer_4_char)
+     
+     --z_e_2_internal_counter              //   1 frame in EXEC block, decrease 1
+     
+ ENDEXEC
+ 
+ //  While the player does not reach Dealer 4
+ WHILE_EXEC ( NOT ( LOCATE_ANOTHER_CHARACTER_ON_FOOT(p1, z_e_2_dealer_4_char, 1.00, 1.00) ) )
+ 
+    --z_e_2_internal_counter                //  Decrease counter
+    
+    //  Time out
+    IF ( z_e_2_internal_counter = 0 )           
+       DISPLAY_BRIEF (1163)      //  "Too slow, Gecko. Too slow. Did you take some of the stash?"
+	      DISPLAY_MESSAGE (1125)    //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_zaib_easy_phone2_m1 = 1
+	      SET z_e_2_is_timer_on_screen = 0           //  Timer is not on the screen anymore
+       RETURN
+    ENDIF
+    
+    //  Dealer 4 died
+    IF ( HAS_CHARACTER_DIED(z_e_2_dealer_4_char) )     
+       DISPLAY_BRIEF (1170)             //  "Putting dealers in bodybags wasn't your job, Gecko."
+       DISPLAY_MESSAGE (1125)           //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone2_m1 = 1
+       SET z_e_2_deal_4_died = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player reached Dealer 4 on foot at time
+ 
+ REMOVE_ARROW (arrow1)
+ 
+ //  If the Dealer 4 is alive
+ IF ( z_e_2_deal_4_died = 0 )
+    SET_CHAR_OBJECTIVE (z_e_2_dealer_4_char, NO_OBJ)
+ ENDIF
+
+ IF ( flag_failed_mission = 0 )            //  If the player didn't fail the mission
+ 
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF_NOW (1171)
+    DISPLAY_MESSAGE (1124)    //  JOB COMPLETE!
+    ADD_SCORE (p1, 20000)
+    ADD_MULTIPLIER (p1, 1)
+    CLEAR_WANTED_LEVEL (p1)
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (zaibatsugang, p1, 1)   //  RESPECT +
+    
+    SET flag_passed_zaib_easy_phone2_m1 = 1            //  The player passed this mission
+    
+    IF ( flag_passed_zaib_easy_phone2_m1 = 1 )         //  If the player passed this mission
+       SET_PHONE_DEAD (ph_zaib_easy_phone2)      //  Kill the zaibatsu easy phone 2
+       SET flag_kill_zaib_easy_phone2 = 1        //  Store that kill
+    ENDIF
+    
+ ENDIF
+ 
+RETURN
+
+
+clean_up_zaib_easy_phone2_m1:             //  Clean up
+
+	REMOVE_ARROW (arrow1)
+ 
+ IF ( z_e_2_is_timer_on_screen = 1 )
+	   CLEAR_TIMER (z_e_2_timer)
+	ENDIF
+ 
+	SET flag_failed_mission = 0
+ 
+	CLEAR_WANTED_LEVEL (p1)
+	MISSION_HAS_FINISHED ()
+ 
+ IF ( flag_passed_zaib_easy_phone2_m1 = 1 )     //  If the player completed this mission, count +1 (zaibatsu) mission passed
+	   ++flag_all_missions_passed
+	   ++flag_zaib_missions_passed
+	ENDIF
+ 
+ IF ( ( flag_failed_zaib_easy_phone2_m1 = 1 ) OR ( CHECK_DEATHARREST_EXECUTED() ) )      //  If the player failed this mission, count +1 (zaibatsu) mission failed
+    ++flag_all_missions_failed
+	   ++flag_zaib_missions_failed
+	   CLEAR_WANTED_LEVEL (p1)
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (zaibatsugang, p1, -1)
+ ENDIF
+
+	SET flag_on_mission = 0
+	SET flag_on_zaib_mission = 0
+ 
+RETURN
+
+MISSIONSTART
+GOSUB zaib_easy_phone2_m1:
+GOSUB clean_up_zaib_easy_phone2_m1:
+MISSIONEND

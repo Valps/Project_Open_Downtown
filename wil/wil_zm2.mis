@@ -1,0 +1,1150 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX YUTES MUST DIE! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_zm2.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD zaib_med_phone2_m1:
+//FORWARD clean_up_zaib_med_phone2_m1:
+
+CAR_DATA z_m_2_yute_car
+
+CHAR_DATA z_m_2_lefty_char
+
+CHAR_DATA z_m_2_zaib_man_1
+CHAR_DATA z_m_2_zaib_man_2
+CHAR_DATA z_m_2_zaib_man_3
+
+CHAR_DATA z_m_2_yute_boss_char
+
+CHAR_DATA z_m_2_guard_1_char
+CHAR_DATA z_m_2_guard_2_char
+
+COUNTER z_m_2_lefty_spotted_player = 0
+
+COUNTER z_m_2_lefty_punched = 0
+
+COUNTER z_m_2_yute_ofs_1 = 0			//  ofs = out of screen
+
+//COUNTER count30 = 0            not useful
+
+COUNTER z_m_2_player_fit_conditions_1 = 0
+COUNTER z_m_2_yute_ofs_2 = 0
+COUNTER z_m_2_yute_ofs_3 = 0
+
+COUNTER z_m_2_yute_ofs_4 = 0
+COUNTER z_m_2_yute_ofs_5 = 0
+
+COUNTER z_m_2_player_ofp_1_flag = 0		//  ofp = out of position
+COUNTER z_m_2_player_ofc_1 = 0			//  ofc = out of car
+COUNTER z_m_2_player_ofc_2 = 0
+COUNTER z_m_2_player_ofp_2_flag = 0
+
+COUNTER z_m_2_car_correct_position = 0
+COUNTER z_m_2_player_fit_conditions_2 = 0
+
+COUNTER z_m_2_zaib_1_died = 0
+COUNTER z_m_2_zaib_2_died = 0
+COUNTER z_m_2_zaib_3_died = 0
+
+COUNTER z_m_2_scream_flag = 0
+
+SOUND z_m_2_scream_sound
+
+zaib_med_phone2_m1:
+
+	SET flag_on_mission = 1
+	SET flag_on_zaib_mission = 1
+ 
+	SET flag_failed_zaib_med_phone2_m1 = 0
+ 
+	DISPLAY_MESSAGE (1985)          //  YUTES MUST DIE!
+ 
+ //  "Trey Welsh here. The small-time Yute gang is getting cocky, crushing our new Zaibatsu cars for scrap. 
+ //  I want answers. There's a snitch called Lefty by the Casino. Find out what he knows."
+	DISPLAY_BRIEF (1251)            
+ 
+	POINT_ARROW_AT (arrow1, 69.50, 219.50, 2.00)      //  Point at the Casino
+ 
+ //  While the player does not reach the casino
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ANY_MEANS(p1, 69.00, 219.00, 2.00, 4.00, 1.00) ) )
+    DO_NOWT
+ ENDWHILE
+ 
+	REMOVE_ARROW (arrow1)
+ 
+ //  Create Lefty
+	z_m_2_lefty_char = CREATE_CHAR (59.50, 219.50, 2.00) 11 0 CRIMINAL_TYPE1 END
+	SET_CHAR_THREAT_REACTION (z_m_2_lefty_char, NO_REACTION)
+	SET_CHAR_THREAT_SEARCH (z_m_2_lefty_char, LINE_OF_SIGHT_PLAYER_ONLY)
+ 
+	DISPLAY_BRIEF (1255)            //  "That's Lefty! Beat the son-of-a-bitch until he tells us where his Boss is hiding. But don't kill him until he talks, Gecko!"
+	POINT_ARROW_AT (arrow1, z_m_2_lefty_char)   //  Point at Lefty
+ 
+ //  While the player does not punch Lefty
+ WHILE_EXEC ( NOT ( CHECK_CHAR_BEEN_PUNCHED_BY(z_m_2_lefty_char, p1) ) )
+ 
+    IF ( HAS_CHARACTER_DIED(z_m_2_lefty_char) )      //  If Lefty died
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1253)          //  "You killed Lefty! Find yourself a new employer and a new job."
+	      DISPLAY_MESSAGE (1125)            //  JOB FAILED!
+	      SET flag_failed_mission = 1
+	      SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  If Lefty has spotted the player
+    IF ( ( HAS_CHAR_SPOTTED_PLAYER(z_m_2_lefty_char) ) AND ( z_m_2_lefty_spotted_player = 0 ) )
+       DISPLAY_BRIEF (1256)              //  "Hey, I don't know shit. Even if I did, I wouldn't tell you or Trey Welsh."
+       SET z_m_2_lefty_spotted_player = 1                   //  Lock this IF
+    ENDIF
+ 
+ ENDWHILE
+
+	//  The player punched Lefty
+
+ REMOVE_ARROW (arrow1)
+ CLEAR_ALL_BRIEFS ()
+ DISPLAY_BRIEF_NOW (1262)                //  "Settle down, tough guy! The bloke you need is relaxing at the Easy Rider Whore House."
+ 
+ SET z_m_2_lefty_punched = 1
+ 
+ IF ( z_m_2_lefty_punched = 1 )
+    SET_CHAR_THREAT_REACTION (z_m_2_lefty_char, NO_REACTION)
+    SET_CHAR_THREAT_SEARCH (z_m_2_lefty_char, NO_THREATS)
+    SET_CHAR_OBJECTIVE (z_m_2_lefty_char, WAIT_ON_FOOT)
+ ENDIF
+
+ DISPLAY_BRIEF (1258)                    //  "Steal a Yute Car from the South Docks, Gecko - and don't take no shit."
+ 
+ 
+ //  Create the guards
+ z_m_2_guard_1_char = CREATE_CHAR (245.50, 237.50, 2.00) 11 0 CRIMINAL_TYPE1 END
+ z_m_2_guard_2_char = CREATE_CHAR (239.50, 237.50, 2.00) 11 0 CRIMINAL_TYPE1 END
+ 
+ SET_CHAR_OBJECTIVE (z_m_2_guard_1_char, GUARD_AREA)
+ SET_CHAR_OBJECTIVE (z_m_2_guard_2_char, GUARD_AREA)
+ 
+ ADD_PATROL_POINT (z_m_2_guard_1_char, 235.50, 237.50, 2.00)
+ ADD_PATROL_POINT (z_m_2_guard_1_char, 245.50, 237.50, 2.00)
+ ADD_PATROL_POINT (z_m_2_guard_2_char, 239.50, 237.50, 2.00)
+ ADD_PATROL_POINT (z_m_2_guard_2_char, 239.50, 233.50, 2.00)
+ 
+ SET_CHAR_THREAT_SEARCH (z_m_2_guard_1_char, LINE_OF_SIGHT_PLAYER_ONLY)
+ SET_CHAR_THREAT_SEARCH (z_m_2_guard_2_char, LINE_OF_SIGHT_PLAYER_ONLY)
+ 
+ SET_CHAR_THREAT_REACTION (z_m_2_guard_1_char, REACT_AS_NORMAL)
+ SET_CHAR_THREAT_REACTION (z_m_2_guard_2_char, REACT_AS_NORMAL)
+ 
+ GIVE_WEAPON (z_m_2_guard_1_char, PISTOL)
+ GIVE_WEAPON (z_m_2_guard_2_char, PISTOL)
+ 
+ //  A Yute car
+ z_m_2_yute_car = CREATE_CAR (243.50, 236.50, 2.00) 1 0 GRAHAM END
+ 
+ POINT_ARROW_AT (arrow1, z_m_2_yute_car)      //  Point arrow at the Yute car
+ 
+ //  While the player does not get into the Yute car
+ WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_2_yute_car) ) )
+    
+    //  The Yute car has just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1260)        //  "The anti-corrosion warranty is void, Gecko. Consider your employment terminated."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  The Yute car has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1257)        //  "You needed that Yute Car, Gecko! Go home and pack your bags."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player entered at the Yute Car
+
+ REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF (1277)      //  "Was that fun? Now move it to the Easy Rider Whore House!"
+ 
+ POINT_ARROW_AT (arrow1, 133.50, 223.50, 2.00)    //  Point arrow at Easy Rider Whore House
+ 
+ //  While the player does not reach at Easy Rider Whore House
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 133.50, 223.50, 2.00, 2.00, 2.00) ) )
+    
+    //  If the player leaves the car
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_2_yute_car) ) )
+    
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1272)                //  "Back in the car, Gecko!"
+       POINT_ARROW_AT (arrow1, z_m_2_yute_car)
+       
+       //  While the player does not return to the car
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_2_yute_car) ) )
+          
+          //  Checking...
+          
+          //  The Yute car has just sunk
+          IF ( HAS_CAR_JUST_SUNK(z_m_2_yute_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1260)        //  "The anti-corrosion warranty is void, Gecko. Consider your employment terminated."
+             DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone2_m1 = 1
+             RETURN
+          ENDIF
+    
+          //  The Yute car has been destroyed
+          IF ( IS_CAR_WRECKED(z_m_2_yute_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1257)        //  "You needed that Yute Car, Gecko! Go home and pack your bags."
+             DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone2_m1 = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+       
+       ENDWHILE
+       
+       //  The player returned to the Yute car
+       
+       DISPLAY_BRIEF_NOW (1277)                       //  "Was that fun? Now move it to the Easy Rider Whore House!"
+       POINT_ARROW_AT (arrow1, 133.50, 223.50, 2.00)  //  Point arrow at the Easy Rider Whore House again
+       
+    ENDIF
+    
+    //  Checking...
+    
+    //  The Yute car has just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1260)        //  "The anti-corrosion warranty is void, Gecko. Consider your employment terminated."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  The Yute car has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1257)        //  "You needed that Yute Car, Gecko! Go home and pack your bags."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player reached at the Easy Rider Whore House
+ 
+ REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF (1264)               //  "Sound the horn, Gecko. The dumb Yute will think his driver has come to collect him."
+ 
+ //  While the player isn't pressing horn at the right place and using the Yute car
+ WHILE_EXEC ( ( NOT ( IS_CHAR_PRESSING_HORN(p1) ) ) OR ( z_m_2_player_fit_conditions_1 = 0 ) )
+ 
+    IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 133.50, 223.50, 2.00, 2.00, 2.00) ) AND ( IS_CHARACTER_IN_CAR(p1, z_m_2_yute_car) ) )
+       SET z_m_2_player_fit_conditions_1 = 1
+    ELSE
+       SET z_m_2_player_fit_conditions_1 = 0
+    ENDIF
+    
+    //  The player leaves the place but still using the Yute car
+    IF ( ( z_m_2_player_fit_conditions_1 = 0 ) AND ( IS_CHARACTER_IN_CAR(p1, z_m_2_yute_car) ) )
+       IF ( z_m_2_player_ofp_1_flag = 0 )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF (7011)                                 //  "How can you sound the horn from there?"
+          POINT_ARROW_AT (arrow1, 133.50, 223.50, 2.00)        //  Point arrow at the place again
+          //SET count30 = 1
+          SET z_m_2_player_ofp_1_flag = 1                         //  Lock this IF
+       ENDIF
+    ENDIF
+    
+    //  The player left the car
+    IF ( ( z_m_2_player_ofc_1 = 0 ) AND ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_2_yute_car) ) ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1272)                       //  "Back in the car, Gecko!"
+       POINT_ARROW_AT (arrow1, z_m_2_yute_car)            //  Point arrow at the Yute car
+       SET z_m_2_player_ofc_1 = 1                            //  Lock this IF
+       SET z_m_2_player_ofp_1_flag = 0                            //  Unlocks the previous IF
+    ELSE
+    
+        //  The player is in the car but the flag has not be updated yet
+        IF ( IS_CHARACTER_IN_CAR(p1, z_m_2_yute_car) )
+           SET z_m_2_player_ofc_1 = 0
+        ENDIF
+        
+    ENDIF
+    
+    //  If the player is on the right place
+    IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 133.50, 223.50, 2.00, 2.00, 2.00) ) AND ( IS_CHARACTER_IN_CAR(p1, z_m_2_yute_car) ) )
+       REMOVE_ARROW (arrow1)
+       SET z_m_2_player_ofp_1_flag = 0
+    ENDIF
+    
+    //  Checking...
+    
+    //  The Yute car has just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1260)        //  "The anti-corrosion warranty is void, Gecko. Consider your employment terminated."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  The Yute car has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1257)        //  "You needed that Yute Car, Gecko! Go home and pack your bags."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player pressed the horn in the correct place and using the correct car
+
+ DISPLAY_BRIEF (1261)  //  "It seems someone bigger is behind the car crushing, Gecko. Bring the Yute Boss to Zaibatsu HQ and we will use electrode therapy to find out what he knows."
+ 
+ //  Create the Yute Boss
+ z_m_2_yute_boss_char = CREATE_CHAR (136.50, 223.50, 2.00) 11 0 CRIMINAL END
+ SET_CHAR_THREAT_SEARCH (z_m_2_yute_boss_char, NO_THREATS)
+ SET_CHAR_THREAT_REACTION (z_m_2_yute_boss_char, NO_REACTION)
+ ADD_CHAR_TO_GANG (z_m_2_yute_boss_char, zaibatsugang)
+ 
+ UPDATE_DOOR_TARGET (door14, z_m_2_yute_boss_char)           //  Set the Whore House door to open to the Yute boss
+ 
+ SET_CHAR_OBJECTIVE (z_m_2_yute_boss_char, GOTO_AREA_ON_FOOT, 133.50, 222.50, 2.00)       //  Set him to go outside the building
+ 
+ //  While the Yute boss does not reach the outside of the building
+ WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(z_m_2_yute_boss_char) ) )
+    
+    //  If the Yute boss died
+    IF ( HAS_CHARACTER_DIED(z_m_2_yute_boss_char) )           
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1259)               //  "You barbecued the Yute Boss! It's back to the phones for you, Gecko."
+       DISPLAY_MESSAGE (1125)                 //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  If the Yute boss isn't on the player screen
+    IF ( ( NOT ( IS_ITEM_ONSCREEN(z_m_2_yute_boss_char) ) ) AND ( z_m_2_yute_ofs_1 = 0 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1271)               //  "Hey, wait for me!"
+       POINT_ARROW_AT (arrow1, z_m_2_yute_boss_char)      //  Point arrow at him
+       SET z_m_2_yute_ofs_1 = 1                    //  Lock this IF
+    ENDIF
+    
+    //  If the Yute boss returned to the player screen
+    IF ( ( IS_ITEM_ONSCREEN(z_m_2_yute_boss_char) ) AND ( z_m_2_yute_ofs_1 = 1 ) )
+       REMOVE_ARROW (arrow1)              //  Remove the arrow from him
+       SET z_m_2_yute_ofs_1 = 0                    //  Lock this IF and unlocks the previous IF
+    ENDIF
+    
+    //  Checking...
+    
+    //  The Yute car has just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1260)        //  "The anti-corrosion warranty is void, Gecko. Consider your employment terminated."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  The Yute car has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1257)        //  "You needed that Yute Car, Gecko! Go home and pack your bags."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The Yute boss reached the outside of the building
+ 
+ //  Set him to get into the player's car
+ SET_CHAR_OBJECTIVE (z_m_2_yute_boss_char, ENTER_CAR_AS_PASSENGER, z_m_2_yute_car)
+ 
+ //  While the Yute boss does not enter the player's car
+ WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(z_m_2_yute_boss_char) ) )
+    
+    //  If the Yute boss died
+    IF ( HAS_CHARACTER_DIED(z_m_2_yute_boss_char) )           
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1259)               //  "You barbecued the Yute Boss! It's back to the phones for you, Gecko."
+       DISPLAY_MESSAGE (1125)                 //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  If the Yute boss isn't on the player screen
+    IF ( ( NOT ( IS_ITEM_ONSCREEN(z_m_2_yute_boss_char) ) ) AND ( z_m_2_yute_ofs_3 = 0 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1271)               //  "Hey, wait for me!"
+       POINT_ARROW_AT (arrow1, z_m_2_yute_boss_char)      //  Point arrow at him
+       SET z_m_2_yute_ofs_3 = 1                    //  Lock this IF
+    ENDIF
+    
+    //  If the Yute boss returned to the player screen
+    IF ( ( IS_ITEM_ONSCREEN(z_m_2_yute_boss_char) ) AND ( z_m_2_yute_ofs_3 = 1 ) )
+       REMOVE_ARROW (arrow1)              //  Remove the arrow from him
+       SET z_m_2_yute_ofs_3 = 0                    //  Lock this IF and unlocks the previous IF
+    ENDIF
+    
+    //  Checking...
+    
+    //  The Yute car has just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1260)        //  "The anti-corrosion warranty is void, Gecko. Consider your employment terminated."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  The Yute car has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1257)        //  "You needed that Yute Car, Gecko! Go home and pack your bags."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The Yute boss entered the player's car
+ 
+ DISPLAY_BRIEF_NOW (1266)      //  "Good work, Gecko - you got the Yute Boss! Now bring him and the Yute Car to Zaibatsu headquarters. And make sure they both stay in one piece."
+ 
+ POINT_ARROW_AT (arrow1, 233.50, 114.50, 3.00)     //  Point arrow at the Zaibatsu HQ
+ 
+ //  Creating the Zaibatsu men
+ z_m_2_zaib_man_1 = CREATE_CHAR (231.50, 116.50, 3.00) 8 180 CRIMINAL END
+ z_m_2_zaib_man_2 = CREATE_CHAR (232.50, 116.50, 3.00) 8 180 CRIMINAL END
+ z_m_2_zaib_man_3 = CREATE_CHAR (233.50, 116.50, 3.00) 8 180 CRIMINAL END
+ 
+ SET_CHAR_OBJECTIVE (z_m_2_zaib_man_1, WAIT_ON_FOOT)
+ SET_CHAR_OBJECTIVE (z_m_2_zaib_man_2, WAIT_ON_FOOT)
+ SET_CHAR_OBJECTIVE (z_m_2_zaib_man_3, WAIT_ON_FOOT)
+ 
+ SET_CHAR_THREAT_REACTION (z_m_2_zaib_man_1, NO_REACTION)
+ SET_CHAR_THREAT_REACTION (z_m_2_zaib_man_2, NO_REACTION)
+ SET_CHAR_THREAT_REACTION (z_m_2_zaib_man_3, NO_REACTION)
+ 
+ SET_CHAR_THREAT_SEARCH (z_m_2_zaib_man_1, NO_THREATS)
+ SET_CHAR_THREAT_SEARCH (z_m_2_zaib_man_2, NO_THREATS)
+ SET_CHAR_THREAT_SEARCH (z_m_2_zaib_man_3, NO_THREATS)
+ 
+ ADD_CHAR_TO_GANG (z_m_2_zaib_man_1, zaibatsugang)
+ ADD_CHAR_TO_GANG (z_m_2_zaib_man_2, zaibatsugang)
+ ADD_CHAR_TO_GANG (z_m_2_zaib_man_3, zaibatsugang)
+ 
+ //  While the player does not reach the Zaibatsu HQ
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 233.50, 114.50, 3.00, 2.00, 2.00) ) )
+    
+    //  If the player leaves the car
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_2_yute_car) ) )
+    
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1272)                //  "Back in the car, Gecko!"
+       POINT_ARROW_AT (arrow1, z_m_2_yute_car)         //  Point at the car
+       
+       //  While the player does not return to the car
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_2_yute_car) ) )
+          
+          //  If the Yute boss died
+          IF ( HAS_CHARACTER_DIED(z_m_2_yute_boss_char) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1259)          //  "You barbecued the Yute Boss! It's back to the phones for you, Gecko."
+             DISPLAY_MESSAGE (1125)            //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone2_m1 = 1
+             RETURN
+          ENDIF
+          
+          //  The Yute car has just sunk
+          IF ( HAS_CAR_JUST_SUNK(z_m_2_yute_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1260)        //  "The anti-corrosion warranty is void, Gecko. Consider your employment terminated."
+             DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone2_m1 = 1
+             RETURN
+          ENDIF
+    
+          //  The Yute car has been destroyed
+          IF ( IS_CAR_WRECKED(z_m_2_yute_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1268)        //  "I told you to be careful, Gecko. You lost the car AND the job."
+             DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone2_m1 = 1
+             RETURN
+          ENDIF
+          
+          //  The Zaibatsu man 1 died
+          IF ( HAS_CHARACTER_DIED(z_m_2_zaib_man_1) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1269)        //  "No Zaibatsu were meant to die. Take a holiday, Gecko. You are in deep shit!"
+             DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone2_m1 = 1
+             SET z_m_2_zaib_1_died = 1
+             RETURN
+          ENDIF
+          
+          //  The Zaibatsu man 2 died
+          IF ( HAS_CHARACTER_DIED(z_m_2_zaib_man_2) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1269)        //  "No Zaibatsu were meant to die. Take a holiday, Gecko. You are in deep shit!"
+             DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone2_m1 = 1
+             SET z_m_2_zaib_2_died = 1
+             RETURN
+          ENDIF
+          
+          //  The Zaibatsu man 3 died
+          IF ( HAS_CHARACTER_DIED(z_m_2_zaib_man_3) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1269)        //  "No Zaibatsu were meant to die. Take a holiday, Gecko. You are in deep shit!"
+             DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone2_m1 = 1
+             SET z_m_2_zaib_3_died = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+       
+       ENDWHILE
+       
+       //  The player returned to the vehicle
+       
+       DISPLAY_BRIEF (1266)   //  "Good work, Gecko - you got the Yute Boss! Now bring him and the Yute Car to Zaibatsu headquarters. And make sure they both stay in one piece."
+       POINT_ARROW_AT (arrow1, 233.50, 114.50, 3.00)  //  Point at the Zaibatsu HQ again
+       
+    ENDIF
+    
+    //  Checking again...
+    
+    //  If the Yute boss died
+    IF ( HAS_CHARACTER_DIED(z_m_2_yute_boss_char) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1259)          //  "You barbecued the Yute Boss! It's back to the phones for you, Gecko."
+       DISPLAY_MESSAGE (1125)            //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+          
+    //  The Yute car has just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1260)        //  "The anti-corrosion warranty is void, Gecko. Consider your employment terminated."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  The Yute car has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1268)        //  "I told you to be careful, Gecko. You lost the car AND the job."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+          
+    //  The Zaibatsu man 1 died
+    IF ( HAS_CHARACTER_DIED(z_m_2_zaib_man_1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1269)        //  "No Zaibatsu were meant to die. Take a holiday, Gecko. You are in deep shit!"
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       SET z_m_2_zaib_1_died = 1
+       RETURN
+    ENDIF
+          
+    //  The Zaibatsu man 2 died
+    IF ( HAS_CHARACTER_DIED(z_m_2_zaib_man_2) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1269)        //  "No Zaibatsu were meant to die. Take a holiday, Gecko. You are in deep shit!"
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       SET z_m_2_zaib_2_died = 1
+       RETURN
+    ENDIF
+          
+    //  The Zaibatsu man 3 died
+    IF ( HAS_CHARACTER_DIED(z_m_2_zaib_man_3) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1269)        //  "No Zaibatsu were meant to die. Take a holiday, Gecko. You are in deep shit!"
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       SET z_m_2_zaib_3_died = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  The player arrived at the Zaibatsu HQ
+ 
+ REMOVE_ARROW (arrow1)
+ ADD_CHAR_TO_GANG (z_m_2_yute_boss_char, zaibatsugang)
+ 
+ DISPLAY_BRIEF (1267)          //  "Stay in the car, Gecko, while our friend gets out to talk."
+ SET_CHAR_OBJECTIVE (z_m_2_yute_boss_char, LEAVE_CAR, z_m_2_yute_car)        //  Set the Yute boss to get out of the car
+ 
+ //  While the Yute boss does not get out of the car
+ WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(z_m_2_yute_boss_char) ) )
+ 
+    //  If the Yute boss died
+    IF ( HAS_CHARACTER_DIED(z_m_2_yute_boss_char) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1259)          //  "You barbecued the Yute Boss! It's back to the phones for you, Gecko."
+       DISPLAY_MESSAGE (1125)            //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  If the Yute boss isn't on player screen
+    IF ( ( NOT ( IS_ITEM_ONSCREEN(z_m_2_yute_boss_char) ) ) AND ( z_m_2_yute_ofs_2 = 0 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (7013)             //  "Get back and watch what's going down!"
+       POINT_ARROW_AT (arrow1, z_m_2_yute_boss_char)    //  Point at the Yute boss
+       SET z_m_2_yute_ofs_2 = 1                  //  Lock this IF
+    ENDIF
+    
+    //  If the Yute boss returned to the player screen
+    IF ( ( IS_ITEM_ONSCREEN(z_m_2_yute_boss_char) ) AND ( z_m_2_yute_ofs_2 = 1 ) )
+       REMOVE_ARROW (arrow1)            //  Remove the arrow from him
+       SET z_m_2_yute_ofs_2 = 0                  //  Lock this IF and unlocks the previous IF
+    ENDIF
+    
+    //  The Yute car has just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1260)        //  "The anti-corrosion warranty is void, Gecko. Consider your employment terminated."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  The Yute car has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1268)        //  "I told you to be careful, Gecko. You lost the car AND the job."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  The Zaibatsu man 1 died
+    IF ( HAS_CHARACTER_DIED(z_m_2_zaib_man_1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1269)        //  "No Zaibatsu were meant to die. Take a holiday, Gecko. You are in deep shit!"
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       SET z_m_2_zaib_1_died = 1
+       RETURN
+    ENDIF
+          
+    //  The Zaibatsu man 2 died
+    IF ( HAS_CHARACTER_DIED(z_m_2_zaib_man_2) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1269)        //  "No Zaibatsu were meant to die. Take a holiday, Gecko. You are in deep shit!"
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       SET z_m_2_zaib_2_died = 1
+       RETURN
+    ENDIF
+          
+    //  The Zaibatsu man 3 died
+    IF ( HAS_CHARACTER_DIED(z_m_2_zaib_man_3) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1269)        //  "No Zaibatsu were meant to die. Take a holiday, Gecko. You are in deep shit!"
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       SET z_m_2_zaib_3_died = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The Yute boss left the car
+ 
+ //  Set him to get in front of the Zaibatsu men
+ SET_CHAR_OBJECTIVE (z_m_2_yute_boss_char, GOTO_AREA_ON_FOOT, 232.50, 116.00, 3.00)
+
+ //  While the Yute boss does not reach the Zaibatsu men
+ WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(z_m_2_yute_boss_char) ) )
+ 
+    //  If the Yute boss died
+    IF ( HAS_CHARACTER_DIED(z_m_2_yute_boss_char) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1259)          //  "You barbecued the Yute Boss! It's back to the phones for you, Gecko."
+       DISPLAY_MESSAGE (1125)            //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  If the Yute boss isn't on player screen
+    IF ( ( NOT ( IS_ITEM_ONSCREEN(z_m_2_yute_boss_char) ) ) AND ( z_m_2_yute_ofs_4 = 0 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (7013)             //  "Get back and watch what's going down!"
+       POINT_ARROW_AT (arrow1, z_m_2_yute_boss_char)    //  Point at the Yute boss
+       SET z_m_2_yute_ofs_4 = 1                  //  Lock this IF
+    ENDIF
+    
+    //  If the Yute boss returned to the player screen
+    IF ( ( IS_ITEM_ONSCREEN(z_m_2_yute_boss_char) ) AND ( z_m_2_yute_ofs_4 = 1 ) )
+       REMOVE_ARROW (arrow1)            //  Remove the arrow from him
+       SET z_m_2_yute_ofs_4 = 0                  //  Lock this IF and unlocks the previous IF
+    ENDIF
+    
+    //  The Yute car has just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1260)        //  "The anti-corrosion warranty is void, Gecko. Consider your employment terminated."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  The Yute car has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1268)        //  "I told you to be careful, Gecko. You lost the car AND the job."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  The Zaibatsu man 1 died
+    IF ( HAS_CHARACTER_DIED(z_m_2_zaib_man_1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1269)        //  "No Zaibatsu were meant to die. Take a holiday, Gecko. You are in deep shit!"
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       SET z_m_2_zaib_1_died = 1
+       RETURN
+    ENDIF
+          
+    //  The Zaibatsu man 2 died
+    IF ( HAS_CHARACTER_DIED(z_m_2_zaib_man_2) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1269)        //  "No Zaibatsu were meant to die. Take a holiday, Gecko. You are in deep shit!"
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       SET z_m_2_zaib_2_died = 1
+       RETURN
+    ENDIF
+          
+    //  The Zaibatsu man 3 died
+    IF ( HAS_CHARACTER_DIED(z_m_2_zaib_man_3) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1269)        //  "No Zaibatsu were meant to die. Take a holiday, Gecko. You are in deep shit!"
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       SET z_m_2_zaib_3_died = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The Yute boss is in front of the Zaibatsu men
+ 
+ //  Set him to wait on foot
+ SET_CHAR_OBJECTIVE (z_m_2_yute_boss_char, WAIT_ON_FOOT)
+ 
+ //  Wait some time
+ DELAY_HERE (90)
+ 
+ //  Set him to get back to the vehicle
+ SET_CHAR_OBJECTIVE (z_m_2_yute_boss_char, ENTER_CAR_AS_PASSENGER, z_m_2_yute_car)
+ 
+ //  While the Yute boss does not get back to the car
+ WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(z_m_2_yute_boss_char) ) )
+ 
+    //  If the Yute boss died
+    IF ( HAS_CHARACTER_DIED(z_m_2_yute_boss_char) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1259)          //  "You barbecued the Yute Boss! It's back to the phones for you, Gecko."
+       DISPLAY_MESSAGE (1125)            //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  The Yute car has just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1260)        //  "The anti-corrosion warranty is void, Gecko. Consider your employment terminated."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  The Yute car has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1268)        //  "I told you to be careful, Gecko. You lost the car AND the job."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  If the Yute boss isn't on player screen
+    IF ( ( NOT ( IS_ITEM_ONSCREEN(z_m_2_yute_boss_char) ) ) AND ( z_m_2_yute_ofs_5 = 0 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1271)             //  "Hey, wait for me!"
+       POINT_ARROW_AT (arrow1, z_m_2_yute_boss_char)    //  Point at the Yute boss
+       SET z_m_2_yute_ofs_5 = 1                  //  Lock this IF
+    ENDIF
+    
+    //  If the Yute boss returned to the player screen
+    IF ( ( IS_ITEM_ONSCREEN(z_m_2_yute_boss_char) ) AND ( z_m_2_yute_ofs_5 = 1 ) )
+       REMOVE_ARROW (arrow1)            //  Remove the arrow from him
+       SET z_m_2_yute_ofs_5 = 0                  //  Lock this IF and unlocks the previous IF
+    ENDIF
+    
+    //  The Zaibatsu man 1 died
+    IF ( HAS_CHARACTER_DIED(z_m_2_zaib_man_1) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1269)        //  "No Zaibatsu were meant to die. Take a holiday, Gecko. You are in deep shit!"
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       SET z_m_2_zaib_1_died = 1
+       RETURN
+    ENDIF
+          
+    //  The Zaibatsu man 2 died
+    IF ( HAS_CHARACTER_DIED(z_m_2_zaib_man_2) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1269)        //  "No Zaibatsu were meant to die. Take a holiday, Gecko. You are in deep shit!"
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       SET z_m_2_zaib_2_died = 1
+       RETURN
+    ENDIF
+          
+    //  The Zaibatsu man 3 died
+    IF ( HAS_CHARACTER_DIED(z_m_2_zaib_man_3) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1269)        //  "No Zaibatsu were meant to die. Take a holiday, Gecko. You are in deep shit!"
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       SET z_m_2_zaib_3_died = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The Yute boss returned to the vehicle
+
+ DISPLAY_BRIEF (1270)                             //  "We got what we wanted. Take our friend to the South Docks and show him how his Car Crusher works first-hand."
+ POINT_ARROW_AT (arrow1, 246.50, 238.50, 2.00)    //  Point arrow at the car crusher
+ 
+ //  If the Zaibatsu man 1 is alive
+ IF ( z_m_2_zaib_1_died = 0 )
+    MAKE_CHAR_DO_NOTHING (z_m_2_zaib_man_1)
+ ENDIF
+ 
+ //  If the Zaibatsu man 2 is alive
+ IF ( z_m_2_zaib_2_died = 0 )
+    MAKE_CHAR_DO_NOTHING (z_m_2_zaib_man_2)
+ ENDIF
+ 
+ //  If the Zaibatsu man 3 is alive
+ IF ( z_m_2_zaib_3_died = 0 )
+    MAKE_CHAR_DO_NOTHING (z_m_2_zaib_man_3)
+ ENDIF
+ 
+ //  While the player does not reach the car crusher
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 246.50, 238.50, 2.00, 10.00, 4.00) ) )
+    
+    //  If the player leaves the car
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_2_yute_car) ) )
+    
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1272)                //  "Back in the car, Gecko!"
+       POINT_ARROW_AT (arrow1, z_m_2_yute_car)         //  Point arrow at the car
+       
+       //  While the player does not get back to the car
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_2_yute_car) ) )
+       
+          //  If the Yute boss died
+          IF ( HAS_CHARACTER_DIED(z_m_2_yute_boss_char) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1259)          //  "You barbecued the Yute Boss! It's back to the phones for you, Gecko."
+             DISPLAY_MESSAGE (1125)            //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone2_m1 = 1
+             RETURN
+          ENDIF
+          
+          //  The Yute car has just sunk
+          IF ( HAS_CAR_JUST_SUNK(z_m_2_yute_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1260)        //  "The anti-corrosion warranty is void, Gecko. Consider your employment terminated."
+             DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone2_m1 = 1
+             RETURN
+          ENDIF
+    
+          //  The Yute car has been destroyed
+          IF ( IS_CAR_WRECKED(z_m_2_yute_car) )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1268)        //  "I told you to be careful, Gecko. You lost the car AND the job."
+             DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_med_phone2_m1 = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+       
+       ENDWHILE
+       
+       //  The player returned to the car
+       
+       DISPLAY_BRIEF (1273)                            //  "The South Dock Car Crusher - remember?"
+       POINT_ARROW_AT (arrow1, 246.50, 238.50, 2.00)   //  Point at the car crusher again
+    
+    ENDIF
+    
+    //  Checking...
+    
+    //  If the Yute boss died
+    IF ( HAS_CHARACTER_DIED(z_m_2_yute_boss_char) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1259)          //  "You barbecued the Yute Boss! It's back to the phones for you, Gecko."
+       DISPLAY_MESSAGE (1125)            //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  The Yute car has just sunk
+    IF ( HAS_CAR_JUST_SUNK(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1260)        //  "The anti-corrosion warranty is void, Gecko. Consider your employment terminated."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  The Yute car has been destroyed
+    IF ( IS_CAR_WRECKED(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1268)        //  "I told you to be careful, Gecko. You lost the car AND the job."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player arrived at the car crusher
+ 
+ REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF (1274)    //  "Get out of the car and let the crane do the work, Gecko. But don't go anywhere. Watch and learn how Zaibatsu recycle their waste."
+ 
+ WHILE_EXEC ( NOT ( IS_CAR_CRUSHED(z_m_2_yute_car) ) )
+ 
+    //  The Yute car has been destroyed  (by other means)
+    IF ( IS_CAR_WRECKED(z_m_2_yute_car) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1268)        //  "I told you to be careful, Gecko. You lost the car AND the job."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    //  If the Yute boss died
+    IF ( HAS_CHARACTER_DIED(z_m_2_yute_boss_char) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1259)          //  "You barbecued the Yute Boss! It's back to the phones for you, Gecko."
+       DISPLAY_MESSAGE (1125)            //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_med_phone2_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 246.50, 238.50, 2.00, 10.00, 4.00) ) AND ( IS_CHARACTER_IN_CAR(p1, z_m_2_yute_car) ) )
+       SET z_m_2_player_fit_conditions_2 = 1
+    ELSE
+       SET z_m_2_player_fit_conditions_2 = 0
+    ENDIF
+    
+    //  If the player leaves the car crusher but still in the car
+    IF ( ( z_m_2_player_fit_conditions_2 = 0 ) AND ( IS_CHARACTER_IN_CAR(p1, z_m_2_yute_car) ) )
+       IF ( z_m_2_player_ofp_2_flag = 0 )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF (7014)                               //  "Hey, get back to the Crusher!"
+          POINT_ARROW_AT (arrow1, 246.50, 238.50, 2.00)      //  Point at the car crusher
+          SET z_m_2_player_ofp_2_flag = 1                                 //  Lock this IF
+       ENDIF
+    ENDIF
+    
+    
+    IF ( ( z_m_2_player_ofc_2 = 0 ) AND ( z_m_2_car_correct_position = 0 ) )
+       
+       //  If the player leaves the vehicle
+       IF ( NOT ( IS_CHARACTER_IN_CAR(p1, z_m_2_yute_car) ) )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1272)                //  "Back in the car, Gecko!"
+          POINT_ARROW_AT (arrow1, z_m_2_yute_car)         //  Point arrow at the car
+          SET z_m_2_player_ofc_2 = 1                         //  Lock this IF
+          SET z_m_2_player_ofp_2_flag = 0                         //  Unlock the previous IF
+       ELSE
+          
+          //  If the player is in the car but the flag hasn't be updated
+          IF ( IS_CHARACTER_IN_CAR(p1, z_m_2_yute_car) )
+             SET z_m_2_player_ofc_2 = 0
+          ENDIF
+          
+       ENDIF
+       
+    ENDIF
+    
+    //  If the player is on the right place and in the Yute car
+    IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 246.50, 238.50, 2.00, 10.00, 4.00) ) AND ( IS_CHARACTER_IN_CAR(p1, z_m_2_yute_car) ) )
+       REMOVE_ARROW (arrow1)
+       SET z_m_2_player_ofp_2_flag = 0
+    ENDIF
+    
+    //  If the car is on the correct position
+    IF ( IS_CAR_IN_BLOCK(z_m_2_yute_car, 246.50, 238.50, 2.00, 10.00, 4.00) )
+       SET z_m_2_car_correct_position = 1
+    ELSE
+       SET z_m_2_car_correct_position = 0
+    ENDIF
+    
+    //  If the car is on the crusher
+    IF ( ( z_m_2_scream_flag = 0 ) AND ( IS_CAR_IN_BLOCK(z_m_2_yute_car, 244.00, 243.00, 3.00) ) )
+       z_m_2_scream_sound = CREATE_SOUND (244.50, 243.50, 3.00) SCREAM PLAY_INSTANT END        //  Waahhhh!!
+       SET z_m_2_scream_flag = 1                               //  Lock this IF
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  Finally...
+ 
+ //  The car was crushed
+ 
+ //  If the player didn't fail the mission
+ IF ( flag_failed_mission = 0 )
+ 
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF_NOW (1007)
+    DISPLAY_MESSAGE (1124)         //  JOB COMPLETE!
+    ADD_SCORE (p1, 40000)
+    ADD_MULTIPLIER (p1, 1)
+    CLEAR_WANTED_LEVEL (p1)
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (zaibatsugang, p1, 1)      //  RESPECT +
+    
+    SET flag_passed_zaib_med_phone2_m1 = 1            //  The player passed this mission
+    
+    //  If the player passed this mission and the Zaibatsu Medium Mission 3
+    IF ( ( flag_passed_zaib_med_phone2_m1 = 1 ) AND ( flag_passed_zaib_med_phone1_2_m3 = 1 ) )
+       SET_PHONE_DEAD (ph_zaib_med_phone2)                  //  Kill the Zaibatsu Medium Phone 2
+       SET flag_kill_zaib_med_phone2 = 1                    //  Store that kill
+    ENDIF
+    
+ ENDIF
+
+RETURN
+
+
+
+clean_up_zaib_med_phone2_m1:               //  Clean up
+
+	REMOVE_ARROW (arrow1)
+ 
+	SET flag_failed_mission = 0
+ 
+	CLEAR_WANTED_LEVEL (p1)
+	DELETE_ITEM (z_m_2_scream_sound)
+	MISSION_HAS_FINISHED ()
+ 
+ //  If the player completed this mission, count +1 (zaibatsu) mission passed
+ IF ( flag_passed_zaib_med_phone2_m1 = 1 )         
+	   ++flag_all_missions_passed
+	   ++flag_zaib_missions_passed
+	   MAKE_DOOR_MANUAL (door14)              //  Keep it shutted
+	ENDIF
+ 
+ //  If the player failed this mission, count +1 (zaibatsu) mission failed
+ IF ( ( flag_failed_zaib_med_phone2_m1 = 1 ) OR ( CHECK_DEATHARREST_EXECUTED() ) )
+    ++flag_all_missions_failed
+	   ++flag_zaib_missions_failed
+	   CLEAR_WANTED_LEVEL (p1)
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (zaibatsugang, p1, -1)    //  Lose respect
+	   MAKE_DOOR_AUTOMATIC (door14)                                  //  Return to the initial state, before the mission
+ ENDIF
+ 
+	SET flag_on_mission = 0
+	SET flag_on_zaib_mission = 0
+ 
+RETURN
+
+MISSIONSTART
+GOSUB zaib_med_phone2_m1:
+GOSUB clean_up_zaib_med_phone2_m1:
+MISSIONEND

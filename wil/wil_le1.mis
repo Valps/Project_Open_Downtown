@@ -1,0 +1,277 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX RADIO ZA-ZA! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_le1.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD function43:
+//FORWARD function44:
+
+
+// l_e_1 = loonies easy mission 1
+
+CHAR_DATA l_e_1_guard_1				
+CHAR_DATA l_e_1_guard_2
+
+OBJ_DATA l_e_1_molotov_1
+OBJ_DATA l_e_1_briefcase_1
+
+COUNTER l_e_1_kill_brief_1 = 0
+COUNTER l_e_1_kill_brief_2 = 0
+
+COUNTER l_e_1_internal_timer_1 = 149
+
+TIMER_DATA l_e_1_timer_1
+
+COUNTER l_e_1_on_screen_timer = 0
+
+loon_easy_phone1_m1:                  //  Mission Script
+
+	EXEC
+    SET flag_on_mission = 1                    //  Player is playing a mission
+    SET flag_on_loon_mission = 1                    //  Player is playing a loonies mission
+    
+	   SET flag_failed_loon_easy_phone1_m1 = 0
+    
+	   SET_DEATHARREST_STATE (p1, OFF)      //  Handle deaths and arrests manually
+    
+	   DISPLAY_MESSAGE (1954)               //  RADIO ZA-ZA!
+    
+	   l_e_1_molotov_1 = CREATE_OBJ (160.50, 11.50, 3.00) 0 COLLECT_04 10 END
+    
+	   MAKE_ALL_CHARS_MUGGERS (ON)          //  Make all NPCs to be crazy
+    
+    //  Creating the guards
+	   l_e_1_guard_1 = CREATE_CHAR (157.50, 9.50, 3.00) 8 0 CRIMINAL END
+	   l_e_1_guard_2 = CREATE_CHAR (154.50, 10.50, 3.00) 8 0 CRIMINAL END
+    
+	   SET_CHAR_THREAT_SEARCH (l_e_1_guard_1, AREA_PLAYER_ONLY)
+	   SET_CHAR_THREAT_REACTION (l_e_1_guard_1, REACT_AS_NORMAL)
+    
+	   ADD_CHAR_TO_GANG (l_e_1_guard_1, zaibatsugang)
+    ADD_CHAR_TO_GANG (l_e_1_guard_2, zaibatsugang)
+    
+	   GIVE_WEAPON (l_e_1_guard_1, MOLOTOV)
+    GIVE_WEAPON (l_e_1_guard_2, MOLOTOV)
+    
+	   SET_CHAR_THREAT_SEARCH (l_e_1_guard_2, AREA_PLAYER_ONLY)
+	   SET_CHAR_THREAT_REACTION (l_e_1_guard_2, REACT_AS_NORMAL)
+	   
+	   SET_CHAR_OBJECTIVE (l_e_1_guard_1, GUARD_SPOT, 157.50, 9.50, 3.00)
+	   SET_CHAR_OBJECTIVE (l_e_1_guard_2, GUARD_SPOT, 157.50, 11.50, 3.00)
+	ENDEXEC
+ 
+	DISPLAY_BRIEF (1772)                              //  "Hey, Jumbo, it's Elmo. A new Zaibatsu drug mixed with Futuro FM's music is sending people CRAZY. [...]"
+	POINT_ARROW_AT (arrow1, 154.50, 17.50, 2.00)
+ 
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ANY_MEANS(p1, 154.50, 17.50, 2.00, 3.00, 1.00) ) )       //  While player does not arrive at the radio station
+ 
+    IF ( HAS_CHARACTER_DIED(p1) )            // Player died?
+	      CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF (1776)                  // "That was your last chance, Jumbo. I'm sure I can never work with you again. Sob."
+	      DISPLAY_MESSAGE (1125)                // JOB FAILED!
+	      SET flag_failed_mission = 1                        // Store: player failed a mission
+	      SET flag_failed_loon_easy_phone1_m1 = 1                    // Store in flag: player failed a loonies mission
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player arrived at the radio station
+ 
+ REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF (1778)                        //  "The Zaibatsu are expecting you, Jumbo, so avoid the main gates. Find a back door and dump the explosives by the generator."
+ l_e_1_briefcase_1 = CREATE_OBJ (163.50, 13.50, 3.00) 0 BRIEFCASE END
+ POINT_ARROW_AT (arrow1, 163.50, 13.50, 3.00)
+ 
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 163.50, 13.50, 3.00, 0.40, 0.40) ) )    //  While player does not catch the briefcase
+ 
+    IF ( HAS_CHARACTER_DIED(p1) )            // Player died?
+	      CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF (1776)                  // "That was your last chance, Jumbo. I'm sure I can never work with you again. Sob."
+	      DISPLAY_MESSAGE (1125)                // JOB FAILED!
+	      SET flag_failed_mission = 1                        // Store: player failed a mission
+	      SET flag_failed_loon_easy_phone1_m1 = 1                    // Store in flag: player failed a loonies mission
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )            // Player arrested?
+	      CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (7076)                  // "You are CRAZY, Jumbo! Have fun on the inside... And don't forget to write!"
+	      DISPLAY_MESSAGE (1125)                // JOB FAILED!
+	      SET flag_failed_mission = 1                        // Store: player failed a mission
+	      SET flag_failed_loon_easy_phone1_m1 = 1                    // Store in flag: player failed a loonies mission
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  The player got the briefcase
+
+ REMOVE_ARROW (arrow1)
+ DELETE_ITEM (l_e_1_briefcase_1)
+ DISPLAY_BRIEF (1775)                        //  "Cool, you got the explosives. It's a RIOT at Futuro FM, pay them a visit Jumbo and crisp the DJ."
+ POINT_ARROW_AT (arrow1, 159.50, 5.50, 2.00)
+ 
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_ON_FOOT(p1, 159.50, 5.50, 2.00, 1.00, 1.00) ) )   //  While the player does not reach the radio antenna
+ 
+    IF ( HAS_CHARACTER_DIED(p1) )            // Player died?
+	      CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF (1776)                  // "That was your last chance, Jumbo. I'm sure I can never work with you again. Sob."
+	      DISPLAY_MESSAGE (1125)                // JOB FAILED!
+	      SET flag_failed_mission = 1                        // Store: player failed a mission
+	      SET flag_failed_loon_easy_phone1_m1 = 1                    // Store in flag: player failed a loonies mission
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHAR_BEEN_ARRESTED(p1) )            // Player arrested?
+	      CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (7076)                  // "You are CRAZY, Jumbo! Have fun on the inside... And don't forget to write!"
+	      DISPLAY_MESSAGE (1125)                // JOB FAILED!
+	      SET flag_failed_mission = 1                        // Store: player failed a mission
+	      SET flag_failed_loon_easy_phone1_m1 = 1                    // Store in flag: player failed a loonies mission
+       RETURN
+    ENDIF
+    
+    IF ( ( l_e_1_kill_brief_1 = 0 ) AND ( HAS_CHARACTER_DIED(l_e_1_guard_1) ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1777)                  // "Nice shooting, Jumbo. You nailed a Zaibatsu guard!"
+       SET l_e_1_kill_brief_1 = 1                       // Lock this IF
+    ENDIF
+    
+    IF ( ( l_e_1_kill_brief_2 = 0 ) AND ( HAS_CHARACTER_DIED(l_e_1_guard_2) ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1777)                  // "Nice shooting, Jumbo. You nailed a Zaibatsu guard!"
+       SET l_e_1_kill_brief_2 = 1                       // Lock this IF
+    ENDIF
+    
+ ENDWHILE
+ 
+ //  The player arrived at the antenna
+
+ REMOVE_ARROW (arrow1)
+ l_e_1_briefcase_1 = CREATE_OBJ (159.50, 5.50, 2.00) 0 BRIEFCASE END       //  Plant the bomb
+ 
+ EXEC
+ 
+     DISPLAY_BRIEF (1779)                    //  "Shift ass, Jumbo. You got FIVE seconds till she blows!"
+     DISPLAY_TIMER (l_e_1_timer_1, 5)
+     SET l_e_1_on_screen_timer = 1
+ 
+ ENDEXEC
+ 
+ WHILE_EXEC ( NOT ( l_e_1_internal_timer_1 = 0 ) )    // In the beginning:   l_e_1_internal_timer_1 = 149
+    --l_e_1_internal_timer_1                          // Decrease internal (in-code) count timer
+    
+    IF ( ( l_e_1_kill_brief_1 = 0 ) AND ( HAS_CHARACTER_DIED(l_e_1_guard_1) ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1777)             // "Nice shooting, Jumbo. You nailed a Zaibatsu guard!"
+       SET l_e_1_kill_brief_1 = 1       // Lock this IF
+       --l_e_1_internal_timer_1         //  Why?
+    ENDIF
+    
+    IF ( ( l_e_1_kill_brief_2 = 0 ) AND ( HAS_CHARACTER_DIED(l_e_1_guard_2) ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1777)             // "Nice shooting, Jumbo. You nailed a Zaibatsu guard!"
+       SET l_e_1_kill_brief_1 = 1       // Lock this IF
+       --l_e_1_internal_timer_1         //  Why?
+    ENDIF
+    
+ ENDWHILE
+ 
+ SET l_e_1_on_screen_timer = 0
+ 
+ EXEC
+   EXPLODE_LARGE (l_e_1_briefcase_1)
+   DELETE_ITEM (l_e_1_briefcase_1)
+   EXPLODE_LARGE (158.50, 5.50, 5.00)
+   REMOVE_BLOCK (158, 5, 2, DONT_DROP)
+   REMOVE_BLOCK (158, 5, 4, DONT_DROP)
+   REMOVE_BLOCK (158, 5, 3, DONT_DROP)
+   REMOVE_BLOCK (157, 5, 3, DONT_DROP)
+   REMOVE_BLOCK (156, 5, 3, DONT_DROP)
+   REMOVE_BLOCK (155, 5, 4, DONT_DROP)
+   REMOVE_BLOCK (154, 5, 4, DONT_DROP)
+   CHANGE_BLOCK LID (158, 5, 1) NOT_FLAT NOT_FLIP 0 0 509
+   CHANGE_BLOCK LID (157, 5, 1) NOT_FLAT NOT_FLIP 0 0 508
+   CHANGE_BLOCK LID (157, 4, 1) NOT_FLAT NOT_FLIP 0 0 503
+   CHANGE_BLOCK LID (158, 4, 1) NOT_FLAT NOT_FLIP 0 90 508
+   CHANGE_BLOCK LID (158, 6, 1) NOT_FLAT NOT_FLIP 0 270 508
+   CHANGE_BLOCK LID (157, 6, 1) NOT_FLAT NOT_FLIP 0 270 503
+   CHANGE_BLOCK LID (159, 4, 1) NOT_FLAT NOT_FLIP 0 90 503
+   CHANGE_BLOCK LID (159, 5, 1) NOT_FLAT NOT_FLIP 0 180 508
+   CHANGE_BLOCK LID (159, 6, 1) NOT_FLAT NOT_FLIP 0 180 503
+   CHANGE_BLOCK TYPE (158, 5, 2) FIELD 0
+   CHANGE_BLOCK TYPE (157, 5, 1) FIELD 0
+   CHANGE_BLOCK TYPE (157, 4, 1) FIELD 0
+   CHANGE_BLOCK TYPE (158, 4, 1) FIELD 0
+   CHANGE_BLOCK TYPE (158, 6, 1) FIELD 0
+   CHANGE_BLOCK TYPE (157, 6, 1) FIELD 0
+   CHANGE_BLOCK TYPE (159, 4, 1) FIELD 0
+   CHANGE_BLOCK TYPE (159, 5, 1) FIELD 0
+   CHANGE_BLOCK TYPE (159, 6, 1) FIELD 0
+   DELETE_ITEM (radio1)
+   DELETE_ITEM (sound6)
+   DELETE_ITEM (obj129)
+   DELETE_ITEM (obj130)
+ ENDEXEC
+
+ IF ( flag_failed_mission = 0 )          // Player not failed the mission?   (Is this necessary?)
+    MAKE_ALL_CHARS_MUGGERS (OFF)          // Now everyone is "normal"
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF (1780)                  // "Drug-induced madness was a cheap corporate cash-in but you saw through it, Jumbo. Here's $20,000. Let's get wasted!"
+    DISPLAY_MESSAGE (1124)                // JOB COMPLETE!
+    ADD_SCORE (p1, 20000)
+    CLEAR_WANTED_LEVEL (p1)
+    SET flag_passed_loon_easy_phone1_m1 = 1                   // set "flag_passed_loon_easy_phone1_m1" = 1  (loonies mission passed)
+    ADD_MULTIPLIER (p1, 1)
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (looniegang, p1, 1)         // RESPECT +        (play the GTA SA music)
+    
+    IF ( flag_passed_loon_easy_phone1_m1 = 1 )                // As is it coded, it will always be true
+       SET_PHONE_DEAD (ph_loon_easy_phone1)             // Kill the loonies easy phone 1
+       SET flag_kill_loon_easy_phone1 = 1               // Store that kill
+    ENDIF
+    
+ ENDIF
+
+RETURN                                    // Finish Mission Script
+
+
+
+clean_up_loon_easy_phone1_m1:             // Clean Up
+
+	MAKE_ALL_CHARS_MUGGERS (OFF)             // Now everyone is "normal"
+	SET flag_failed_mission = 0                           // Turn off the "failed mission" flag, if it is on
+	REMOVE_ARROW (arrow1)                    // remove arrows
+	CLEAR_WANTED_LEVEL (p1)
+ 
+ IF ( l_e_1_on_screen_timer = 1 )                       // If the mission was aborted after planting the bomb and before it explodes
+	   CLEAR_TIMER (l_e_1_timer_1)                  // Delete the timer
+ ENDIF
+
+	SET_DEATHARREST_STATE (p1, ON)
+	MISSION_HAS_FINISHED ()
+ 
+ IF ( flag_passed_loon_easy_phone1_m1 = 1 )     // Player passed the loony mission?
+	   ++flag_all_missions_passed          // Count +1 mission passed
+	   ++flag_loon_missions_passed          // Count +1 loonies mission passed
+ ENDIF
+	
+ IF ( flag_failed_loon_easy_phone1_m1 = 1 )      // Player died or busted WHILE_EXEC performing the mission
+	   ++flag_loon_missions_failed          // Count +1 loonies mission failed
+	   ++flag_all_missions_failed          // Count +1 mission failed
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (looniegang, p1, -1)      // Respect -
+	   CLEAR_WANTED_LEVEL (p1)
+	ENDIF
+ 
+	SET flag_on_mission = 0        // Player isn't inside a mission anymore
+	SET flag_on_loon_mission = 0        // Player isn't inside a loony mission anymore
+ 
+RETURN
+
+MISSIONSTART
+GOSUB loon_easy_phone1_m1:
+GOSUB clean_up_loon_easy_phone1_m1:
+MISSIONEND

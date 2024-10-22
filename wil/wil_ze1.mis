@@ -1,0 +1,511 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX COP CAR CRUSH! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_ze1.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD zaib_easy_phone1_m1:
+//FORWARD clean_up_zaib_easy_phone1_m1:
+
+CAR_DATA z_e_1_cop_car
+
+CHAR_DATA z_e_1_shady_char
+
+COUNTER z_e_1_out_of_screen_shady = 0
+COUNTER z_e_1_fit_conditions_horn = 0
+
+COUNTER z_e_1_return_place_flag = 0
+COUNTER z_e_1_player_out_of_car = 0
+COUNTER z_e_1_player_out_of_car_2 = 0
+COUNTER z_e_1_return_place_flag_2 = 0
+COUNTER z_e_1_fit_conditions_crusher = 0
+COUNTER z_e_1_car_correct_place = 0
+COUNTER z_e_1_played_scream_sound = 0
+
+SOUND z_e_1_scream_sound
+
+zaib_easy_phone1_m1:
+
+	SET flag_on_mission = 1
+	SET flag_on_zaib_mission = 1
+ 
+	SET flag_failed_zaib_easy_phone1_m1 = 0
+ 
+	DISPLAY_MESSAGE (1982) //  COP CAR CRUSH!
+	DISPLAY_BRIEF (1681)   //  "Hey, Gecko, it's Trey Welsh. An informer is selling Zaibatsu secrets to the Cops. There's a Cop Car parked down at the Cop Station in Zarelli. Steal it."
+ 
+	z_e_1_cop_car = CREATE_CAR (206.50, 38.50, 2.00) 1 0 COPCAR END
+	POINT_ARROW_AT (arrow1, z_e_1_cop_car)
+ 
+ WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_e_1_cop_car) ) )     //  While the player does not enter the cop car
+    
+    IF ( HAS_CAR_JUST_SUNK(z_e_1_cop_car) )      //  The cop car just sunk
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1684)        //  "This ain't no submarine, Gecko. You blew it."
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(z_e_1_cop_car) )      //  The cop car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1683)        //  "You needed that Cop Car, Gecko. Resignation accepted."
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+ ENDWHILE
+	
+ //  The player entered the cop car
+
+ REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF (1685)       //  "Good work, Gecko. Get your ass over to the Train Station in Avalon and meet Shady, the soon-to-be-dead snitch."
+ 
+ //  Create Shady
+ z_e_1_shady_char = CREATE_CHAR (97.50, 89.50, 3.00) 8 0 CRIMINAL END
+ SET_CHAR_THREAT_SEARCH (z_e_1_shady_char, NO_THREATS)
+ SET_CHAR_THREAT_REACTION (z_e_1_shady_char, NO_REACTION)
+ 
+ POINT_ARROW_AT (arrow1, 94.50, 95.50, 2.00)          //  Point at the train station
+ 
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 94.50, 95.50, 2.00, 2.00, 2.00) ) )  //  While the player does not reach at the train station
+ 
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, z_e_1_cop_car) ) )       //  If the player leaves the cop car
+    
+       DISPLAY_BRIEF_NOW (1686)                //  "Get back in the Cop Car and drive to the Train Station. Shady's waiting!"
+       POINT_ARROW_AT (arrow1, z_e_1_cop_car)         //  Point at the cop car
+       
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_e_1_cop_car) ) )   //  While the player does not get back to the cop car
+          
+          IF ( HAS_CAR_JUST_SUNK(z_e_1_cop_car) )      //  The cop car just sunk
+             CLEAR_ALL_BRIEFS ()
+	            DISPLAY_BRIEF_NOW (1684)        //  "This ain't no submarine, Gecko. You blew it."
+	            DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	            SET flag_failed_mission = 1
+             SET flag_failed_zaib_easy_phone1_m1 = 1
+             RETURN
+          ENDIF
+    
+          IF ( IS_CAR_WRECKED(z_e_1_cop_car) )      //  The cop car has been destroyed
+             CLEAR_ALL_BRIEFS ()
+	            DISPLAY_BRIEF_NOW (1683)        //  "You needed that Cop Car, Gecko. Resignation accepted."
+	            DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	            SET flag_failed_mission = 1
+             SET flag_failed_zaib_easy_phone1_m1 = 1
+             RETURN
+          ENDIF
+          
+          IF ( HAS_CHARACTER_DIED(z_e_1_shady_char) )    //  If Shady died
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1687)        //  "Shit! That's Shady gone for good. And you just lost the job, Gecko."
+             DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_easy_phone1_m1 = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+          
+       ENDWHILE
+       
+       //  The player returned to the cop car
+       
+       DISPLAY_BRIEF_NOW (1688)                     //  "Now drive to the Train Station!"
+       POINT_ARROW_AT (arrow1, 94.50, 95.50, 2.00)  //  Point at the train station again
+       
+    ENDIF
+    
+    //  Checking...
+    
+    IF ( HAS_CAR_JUST_SUNK(z_e_1_cop_car) )      //  The cop car just sunk
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1684)        //  "This ain't no submarine, Gecko. You blew it."
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(z_e_1_cop_car) )      //  The cop car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1683)        //  "You needed that Cop Car, Gecko. Resignation accepted."
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(z_e_1_shady_char) )    //  If Shady died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1687)        //  "Shit! That's Shady gone for good. And you just lost the job, Gecko."
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone1_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player reached at the train station
+
+ REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF (1690)          //  "Use the horn, Gecko. He doesn't know it's you."
+ 
+ //  While the player does not press the horn or have the cop car sirens on
+ WHILE_EXEC ( ( NOT ( IS_CHAR_PRESSING_HORN(p1) ) ) AND ( NOT ( ARE_EMERG_LIGHTS_ON(z_e_1_cop_car) ) ) )
+ 
+    //IF ( z_e_1_fit_conditions_horn = 0 )
+       
+       IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 94.50, 95.50, 2.00, 2.00, 2.00) ) AND ( IS_CHARACTER_IN_CAR(p1, z_e_1_cop_car) ) )
+          SET z_e_1_fit_conditions_horn = 1
+       ELSE
+          SET z_e_1_fit_conditions_horn = 0
+       ENDIF
+       
+       //  If the player leaves the train station but still in the cop car
+       IF ( ( z_e_1_fit_conditions_horn = 0 ) AND ( IS_CHARACTER_IN_CAR(p1, z_e_1_cop_car) ) )     
+          IF ( z_e_1_return_place_flag = 0 )
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF (7007)                              //  "Where are you going? Get back to Central Station!"
+             POINT_ARROW_AT (arrow1, 94.50, 95.50, 2.00)
+             //SET count27 = 1
+             SET z_e_1_return_place_flag = 1                                   //  Lock this IF
+          ENDIF
+       ENDIF
+       
+       //  If the player leaves the cop car
+       IF ( ( z_e_1_player_out_of_car = 0 ) AND ( NOT ( IS_CHARACTER_IN_CAR(p1, z_e_1_cop_car) ) ) )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1691)                    //  "I think you will find the horn easier to activate from inside the Cop Car, Gecko."
+          POINT_ARROW_AT (arrow1, z_e_1_cop_car)             //  Point arrow to the cop car
+          SET z_e_1_player_out_of_car = 1                             //  Lock this IF
+          SET z_e_1_return_place_flag = 0                             //  Unlocks the previous IF
+       ENDIF
+       
+       //  If the player is in the cop car
+       IF ( IS_CHARACTER_IN_CAR(p1, z_e_1_cop_car) )
+          SET z_e_1_player_out_of_car = 0
+       ENDIF
+       
+    //ENDIF
+    
+    IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 94.50, 95.50, 2.00, 2.00, 2.00) ) AND ( IS_CHARACTER_IN_CAR(p1, z_e_1_cop_car) ) )
+       REMOVE_ARROW (arrow1)
+       SET z_e_1_return_place_flag = 0
+       //SET count27 = 0
+    ENDIF
+    
+    //  Checking...
+    
+    IF ( HAS_CAR_JUST_SUNK(z_e_1_cop_car) )      //  The cop car just sunk
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1684)        //  "This ain't no submarine, Gecko. You blew it."
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(z_e_1_cop_car) )      //  The cop car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1683)        //  "You needed that Cop Car, Gecko. Resignation accepted."
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(z_e_1_shady_char) )    //  If Shady died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1692)        //  "Shady's dead ahead of schedule and that makes me look stupid, Gecko. Disappear!"
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone1_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  If the player pressed the horn or if he had already set the sirens on
+ 
+ //  (yes, after arriving at the train station, you can drive around and, despite Trey Welsh complaints, you can sound the horn to call Shady, wherever you are)
+
+ SET_CHAR_OBJECTIVE (z_e_1_shady_char, ENTER_CAR_AS_PASSENGER, z_e_1_cop_car)    //  Set Shady to enter the cop car
+ 
+ WHILE_EXEC ( NOT ( IS_CHAR_OBJECTIVE_PASSED(z_e_1_shady_char) ) )      //  While Shady does not enter the car
+    
+    //  If Shady is not on player screen
+    IF ( ( NOT ( IS_ITEM_ONSCREEN(z_e_1_shady_char) ) ) AND ( z_e_1_out_of_screen_shady = 0 ) )
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF (1699)             //  "Hey, wait for me!"
+       POINT_ARROW_AT (arrow1, z_e_1_shady_char)    //  Point arrow at Shady
+       SET z_e_1_out_of_screen_shady = 1                  //  Lock this IF
+    ENDIF
+    
+    //  If Shady returned to the player screen
+    IF ( ( IS_ITEM_ONSCREEN(z_e_1_shady_char) ) AND ( z_e_1_out_of_screen_shady = 1 ) )
+       REMOVE_ARROW (arrow1)            //  Remove arrow from him
+       SET z_e_1_out_of_screen_shady = 0                  //  Lock this IF and unlocks the previous IF
+    ENDIF
+    
+    //  Checking...
+    
+    IF ( HAS_CAR_JUST_SUNK(z_e_1_cop_car) )      //  The cop car just sunk
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1684)        //  "This ain't no submarine, Gecko. You blew it."
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(z_e_1_cop_car) )      //  The cop car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1683)        //  "You needed that Cop Car, Gecko. Resignation accepted."
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(z_e_1_shady_char) )    //  If Shady died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1692)        //  "Shady's dead ahead of schedule and that makes me look stupid, Gecko. Disappear!"
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone1_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  Shady entered the cop car
+
+ DISPLAY_BRIEF (1694)                           //  "Take Shady to the Zaibatsu Car Crusher in North-East Zarelli."
+ POINT_ARROW_AT (arrow1, 171.50, 11.50, 2.00)   //  Point arrow at the car crusher
+ 
+ //  While the player does not reach the car crusher
+ WHILE_EXEC ( NOT ( LOCATE_CHARACTER_BY_CAR(p1, 171.50, 11.50, 2.00, 24.00, 8.00) ) )
+    
+    //  If the player leaves the cop car
+    IF ( NOT ( IS_CHARACTER_IN_CAR(p1, z_e_1_cop_car) ) )
+       
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1695)              //  "Quit shooting the breeze, Gecko, and get back in the Cop Car."
+       POINT_ARROW_AT (arrow1, z_e_1_cop_car)       //  Point arrow at the cop car
+       
+       WHILE_EXEC ( NOT ( IS_CHARACTER_IN_CAR(p1, z_e_1_cop_car) ) )    //  While the player does not get back to the cop car
+       
+          IF ( HAS_CAR_JUST_SUNK(z_e_1_cop_car) )      //  The cop car just sunk
+             CLEAR_ALL_BRIEFS ()
+	            DISPLAY_BRIEF_NOW (1684)        //  "This ain't no submarine, Gecko. You blew it."
+	            DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	            SET flag_failed_mission = 1
+             SET flag_failed_zaib_easy_phone1_m1 = 1
+             RETURN
+          ENDIF
+    
+          IF ( IS_CAR_WRECKED(z_e_1_cop_car) )      //  The cop car has been destroyed
+             CLEAR_ALL_BRIEFS ()
+	            DISPLAY_BRIEF_NOW (1683)        //  "You needed that Cop Car, Gecko. Resignation accepted."
+	            DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	            SET flag_failed_mission = 1
+             SET flag_failed_zaib_easy_phone1_m1 = 1
+             RETURN
+          ENDIF
+          
+          IF ( HAS_CHARACTER_DIED(z_e_1_shady_char) )    //  If Shady died
+             CLEAR_ALL_BRIEFS ()
+             DISPLAY_BRIEF_NOW (1692)        //  "Shady's dead ahead of schedule and that makes me look stupid, Gecko. Disappear!"
+             DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+             SET flag_failed_mission = 1
+             SET flag_failed_zaib_easy_phone1_m1 = 1
+             RETURN
+          ENDIF
+          
+          ENDEXEC
+       
+       ENDWHILE
+       
+       //  The player returned to the cop car
+       
+       DISPLAY_BRIEF_NOW (1696)                      //  "The Zaibatsu Car Crusher in North-East Zarelli - remember?"
+       POINT_ARROW_AT (arrow1, 171.50, 11.50, 2.00)  //  Point arrow to the car crusher again
+       
+    ENDIF
+    
+    //  Checking...
+    
+    IF ( HAS_CAR_JUST_SUNK(z_e_1_cop_car) )      //  The cop car just sunk
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1684)        //  "This ain't no submarine, Gecko. You blew it."
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( IS_CAR_WRECKED(z_e_1_cop_car) )      //  The cop car has been destroyed
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1683)        //  "You needed that Cop Car, Gecko. Resignation accepted."
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(z_e_1_shady_char) )    //  If Shady died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1692)        //  "Shady's dead ahead of schedule and that makes me look stupid, Gecko. Disappear!"
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone1_m1 = 1
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The player arrives at the car crusher
+ 
+ REMOVE_ARROW (arrow1)
+ DISPLAY_BRIEF (1697)                  //  "Get out of the Cop Car, Gecko, and let the crane take over."
+ 
+ //  While the cop car is not crushed
+ WHILE_EXEC ( NOT ( IS_CAR_CRUSHED(z_e_1_cop_car) ) )
+ 
+    IF ( IS_CAR_WRECKED(z_e_1_cop_car) )      //  The cop car has been destroyed (by other means)
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1683)        //  "You needed that Cop Car, Gecko. Resignation accepted."
+	      DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+	      SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( HAS_CHARACTER_DIED(z_e_1_shady_char) )    //  If Shady died
+       CLEAR_ALL_BRIEFS ()
+       DISPLAY_BRIEF_NOW (1692)        //  "Shady's dead ahead of schedule and that makes me look stupid, Gecko. Disappear!"
+       DISPLAY_MESSAGE (1125)          //  JOB FAILED!
+       SET flag_failed_mission = 1
+       SET flag_failed_zaib_easy_phone1_m1 = 1
+       RETURN
+    ENDIF
+    
+    IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 171.50, 11.50, 2.00, 24.00, 8.00) ) AND ( IS_CHARACTER_IN_CAR(p1, z_e_1_cop_car) ) )
+       SET z_e_1_fit_conditions_crusher = 1
+    ELSE
+       SET z_e_1_fit_conditions_crusher = 0
+    ENDIF
+    
+    //  If the player leaves the car crusher but still in the cop car
+    IF ( ( z_e_1_fit_conditions_crusher = 0 ) AND ( IS_CHARACTER_IN_CAR(p1, z_e_1_cop_car) ) )
+       IF ( z_e_1_return_place_flag_2 = 0 )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF (7008)            //  "Hey! Get back to the Car Crusher!"
+          POINT_ARROW_AT (arrow1, 171.50, 11.50, 2.00)   //  Point arrow to car crusher
+          SET z_e_1_return_place_flag_2 = 1                 //  Lock this IF
+       ENDIF
+    ENDIF
+    
+    
+    IF ( IS_CAR_IN_BLOCK(z_e_1_cop_car, 171.50, 11.50, 2.00, 24.00, 8.00) )
+       SET z_e_1_car_correct_place = 1
+    ELSE
+       SET z_e_1_car_correct_place = 0
+    ENDIF
+    
+    
+    IF ( IS_CHARACTER_IN_CAR(p1, z_e_1_cop_car) )
+       SET z_e_1_player_out_of_car_2 = 0
+    ENDIF
+    
+    //  If the player isn't on the car and the car isn't on the right place
+    IF ( ( z_e_1_player_out_of_car_2 = 0 ) AND ( z_e_1_car_correct_place = 0 ) )
+       IF ( NOT ( IS_CHARACTER_IN_CAR(p1, z_e_1_cop_car) ) )
+          CLEAR_ALL_BRIEFS ()
+          DISPLAY_BRIEF_NOW (1691)                //  "I think you will find the horn easier to activate from inside the Cop Car, Gecko."   (????)
+          POINT_ARROW_AT (arrow1, z_e_1_cop_car)         //  Point arrow to the cop car
+          SET z_e_1_player_out_of_car_2 = 1                         //  Lock this IF
+          SET z_e_1_return_place_flag_2 = 0                         //  Unlock the "player leaves the car crusher but still in the cop car" IF
+       ENDIF
+    ENDIF
+    
+    
+    
+    //  If the car is on the right place
+    IF ( ( LOCATE_CHARACTER_BY_CAR(p1, 171.50, 11.50, 2.00, 24.00, 8.00) ) AND ( IS_CHARACTER_IN_CAR(p1, z_e_1_cop_car) ) )
+       REMOVE_ARROW (arrow1)
+       SET z_e_1_return_place_flag_2 = 0
+    ENDIF
+    
+    
+    
+    //  If the cop car is on the crusher
+    IF ( ( z_e_1_played_scream_sound = 0 ) AND ( IS_CAR_IN_BLOCK(z_e_1_cop_car, 176.00, 9.00, 3.00) ) )
+       z_e_1_scream_sound = CREATE_SOUND (176.50, 9.50, 3.00) SCREAM PLAY_INSTANT END       //  Wahhhhh!!
+       SET z_e_1_played_scream_sound = 1                 //  Lock this IF
+    ENDIF
+ 
+ ENDWHILE
+ 
+ //  The car was crushed
+
+ IF ( flag_failed_mission = 0 )                     //  If the player does not failed the mission
+ 
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF (1689)
+    DISPLAY_MESSAGE (1124)             //  JOB COMPLETE!
+    ADD_SCORE (p1, 20000)
+    ADD_MULTIPLIER (p1, 1)
+    CLEAR_WANTED_LEVEL (p1)
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (zaibatsugang, p1, 1)
+    
+    SET flag_passed_zaib_easy_phone1_m1 = 1                 //  The player passed this mission
+    SET flag_on_mission = 0
+    
+    IF ( flag_passed_zaib_easy_phone1_m1 = 1 )              //  If the player passed this mission
+       SET_PHONE_DEAD (ph_zaib_easy_phone1)           //  Kill the Zaibatsu Easy phone 1
+       SET flag_kill_zaib_easy_phone1 = 1             //  Store that kill
+    ENDIF
+    
+ ENDIF
+
+RETURN
+
+
+
+
+clean_up_zaib_easy_phone1_m1:             //  Clean up
+
+	SET flag_failed_mission = 0
+	REMOVE_ARROW (arrow1)
+	CLEAR_WANTED_LEVEL (p1)
+	DELETE_ITEM (z_e_1_scream_sound)
+	MISSION_HAS_FINISHED ()
+ 
+ IF ( flag_passed_zaib_easy_phone1_m1 = 1 )     //  If the player completed this mission, count +1 (zaibatsu) mission passed
+	   ++flag_all_missions_passed
+	   ++flag_zaib_missions_passed
+	ENDIF
+ 
+ IF ( ( flag_failed_zaib_easy_phone1_m1 = 1 ) OR ( CHECK_DEATHARREST_EXECUTED() ) )       //  If the player failed this mission, count +1 (zaibatsu) mission failed
+    ++flag_all_missions_failed
+	   ++flag_zaib_missions_failed
+    CLEAR_WANTED_LEVEL (p1)
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (zaibatsugang, p1, -1)
+ ENDIF
+	
+	SET flag_on_mission = 0
+	SET flag_on_zaib_mission = 0
+ 
+RETURN
+
+MISSIONSTART
+GOSUB zaib_easy_phone1_m1:
+GOSUB clean_up_zaib_easy_phone1_m1:
+MISSIONEND

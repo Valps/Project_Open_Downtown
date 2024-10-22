@@ -1,0 +1,165 @@
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX ARMORED CAR CLASH! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// Decompiled from "wil_zh1.scr" Using Epic GTA2 Script Decompiler by T.M.
+
+// The command "FORWARD" is forbidden in a mission script
+
+//FORWARD zaib_hard_phone_m1:
+//FORWARD clean_up_zaib_hard_phone_m1:
+
+CAR_DATA z_h_1_miara_1_car
+CAR_DATA z_h_1_miara_2_car
+
+CHAR_DATA z_h_1_yakuza_1_driver
+CHAR_DATA z_h_1_yakuza_2_driver
+
+COUNTER z_h_1_miaras_destroyed = 0
+COUNTER z_h_1_miar_1_destroyed = 0
+COUNTER z_h_1_miar_2_destroyed = 0
+
+COUNTER z_h_1_internal_counter = 10799
+
+TIMER_DATA z_h_1_timer
+
+
+zaib_hard_phone_m1:        //  (The two miaras and their drivers have already created, see below right after MISSIONSTART)
+
+	SET flag_on_mission = 1
+	SET flag_on_zaib_mission = 1
+ 
+	SET flag_failed_zaib_hard_phone_m1 = 0
+ 
+	DISPLAY_MESSAGE (1987)    //  ARMORED CAR CLASH!
+	DISPLAY_BRIEF (1701)      //  "Hey, Gecko! Our Latin Biologist Doctor Cubana is being tortured for information in one of two Yakuza cars [...] Destroy the cars, before he squeals."
+ 
+	POINT_ARROW_AT (arrow1, z_h_1_miara_1_car)
+	POINT_ARROW_AT (arrow2, z_h_1_miara_2_car)
+ 
+	DISPLAY_TIMER (z_h_1_timer, 360)
+ 
+ WHILE_EXEC ( NOT ( z_h_1_miaras_destroyed = 2 ) )
+ 
+    --z_h_1_internal_counter                    //  Decrease counter
+    
+    //  First Miara destroyed
+    IF ( ( IS_CAR_WRECKED(z_h_1_miara_1_car) ) AND ( NOT ( z_h_1_miar_1_destroyed = 1 ) ) )
+       DISPLAY_BRIEF_NOW (1703)
+	      REMOVE_ARROW (arrow1)
+	      ++z_h_1_miaras_destroyed
+	      SET z_h_1_miar_1_destroyed = 1
+	      --z_h_1_internal_counter
+    ENDIF
+    
+    //  Second Miara destroyed
+    IF ( ( IS_CAR_WRECKED(z_h_1_miara_2_car) ) AND ( NOT ( z_h_1_miar_2_destroyed = 1 ) ) )
+       DISPLAY_BRIEF_NOW (1703)
+	      REMOVE_ARROW (arrow2)
+	      ++z_h_1_miaras_destroyed
+	      SET z_h_1_miar_2_destroyed = 1
+	      --z_h_1_internal_counter
+    ENDIF
+    
+    //  Time out
+    IF ( z_h_1_internal_counter = 0 )
+       CLEAR_ALL_BRIEFS ()
+	      DISPLAY_BRIEF_NOW (1705)   //  "Doctor Cubana talked and the Yakuza gained many Zaibatsu pharmaceutical secrets. You were tough, Gecko, but not tough enough."
+	      DISPLAY_MESSAGE (1125)
+	      SET flag_failed_mission = 1
+	      SET flag_failed_zaib_hard_phone_m1 = 1
+	      //--z_h_1_internal_counter
+       RETURN
+    ENDIF
+ 
+ ENDWHILE
+ 
+ IF ( ( flag_failed_mission = 0 ) AND ( NOT ( z_h_1_internal_counter = 0 ) ) )      //  If the player didn't fail the mission
+ 
+    CLEAR_ALL_BRIEFS ()
+    DISPLAY_BRIEF (1702)
+    DISPLAY_MESSAGE (1124)       //  JOB COMPLETE!
+    ADD_SCORE (p1, 60000)
+    ADD_MULTIPLIER (p1, 1)
+    CLEAR_WANTED_LEVEL (p1)
+    CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (zaibatsugang, p1, 1)      //  RESPECT +
+    
+    SET flag_passed_zaib_hard_phone_m1 = 1          //  The player passed this mission
+    
+ ENDIF
+ 
+RETURN
+
+
+
+
+clean_up_zaib_hard_phone_m1:         //  Clean up
+
+	SET flag_failed_mission = 0
+ 
+	REMOVE_ARROW (arrow1)
+	REMOVE_ARROW (arrow2)
+ 
+	CLEAR_TIMER (z_h_1_timer)
+ 
+	CLEAR_WANTED_LEVEL (p1)
+ 
+	MISSION_HAS_FINISHED ()
+ 
+ IF ( flag_passed_zaib_hard_phone_m1 = 1 )            //  If the player completed this mission, count +1 (zaibatsu) mission passed
+	   ++flag_all_missions_passed
+	   ++flag_zaib_missions_passed
+	ENDIF
+ 
+ IF ( ( flag_failed_zaib_hard_phone_m1 = 1 ) OR ( CHECK_DEATHARREST_EXECUTED() ) )       //  If the player failed this mission, count +1 (zaibatsu) mission failed
+	   ++flag_all_missions_failed
+	   ++flag_zaib_missions_failed
+	   CLEAR_WANTED_LEVEL (p1)
+	   CHANGE_GANG_CHAR_RESPECT_AND_UPDATE (zaibatsugang, p1, -1)
+	ENDIF
+ 
+	SET flag_on_mission = 0
+	SET flag_on_zaib_mission = 0
+ 
+RETURN
+
+MISSIONSTART
+
+EXEC
+
+    //  Creating the armored miara cars
+
+    z_h_1_miara_1_car = CREATE_GANG_CAR (124.50, 104.50, 2.00) 15 0 MIURA END
+    SET_CAR_BULLETPROOF (z_h_1_miara_1_car, ON)
+    SET_CAR_ROCKETPROOF (z_h_1_miara_1_car, ON)
+    SET_CAR_FLAMEPROOF (z_h_1_miara_1_car, ON)
+    
+    z_h_1_miara_2_car = CREATE_GANG_CAR (124.50, 100.50, 2.00) 15 0 MIURA END
+    SET_CAR_BULLETPROOF (z_h_1_miara_2_car, ON)
+    SET_CAR_ROCKETPROOF (z_h_1_miara_2_car, ON)
+    SET_CAR_FLAMEPROOF (z_h_1_miara_2_car, ON)
+    
+    //  Creating their drivers
+    
+    z_h_1_yakuza_1_driver = CREATE_CHAR_INSIDE_CAR (z_h_1_miara_1_car) 13 CRIMINAL END
+    SET_CHAR_DRIVE_AGGRESSION (z_h_1_yakuza_1_driver, ON)
+    SET_CHAR_THREAT_REACTION (z_h_1_yakuza_1_driver, NO_REACTION)
+    SET_CHAR_THREAT_SEARCH (z_h_1_yakuza_1_driver, NO_THREATS)
+    
+    z_h_1_yakuza_2_driver = CREATE_CHAR_INSIDE_CAR (z_h_1_miara_2_car) 13 CRIMINAL END
+    SET_CHAR_DRIVE_AGGRESSION (z_h_1_yakuza_2_driver, ON)
+    SET_CHAR_THREAT_SEARCH (z_h_1_yakuza_2_driver, NO_THREATS)
+    SET_CHAR_THREAT_REACTION (z_h_1_yakuza_2_driver, NO_REACTION)
+    
+    GIVE_WEAPON (z_h_1_yakuza_2_driver, PISTOL)
+    
+    //  Lock these miaras
+    CHANGE_CAR_LOCK (z_h_1_miara_1_car, LOCKED)
+    CHANGE_CAR_LOCK (z_h_1_miara_2_car, LOCKED)
+    
+ENDEXEC
+
+GOSUB zaib_hard_phone_m1:
+GOSUB clean_up_zaib_hard_phone_m1:
+
+MISSIONEND
