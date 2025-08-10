@@ -284,14 +284,17 @@ RETURN
 
 han_trai_miss_phone_m1:        // Mission Handler
 
- IF ( flag_on_mission = 0 )             // Not inside a mission
-    IF ( flag_passed_tutorial = 0 )    // Not completed tutorial yet
-       IF ( flag_failed_tutorial = 0 ) // Not failed tutorial
-          GOSUB trai_miss_phone_m1:    // Start Training Mission
-	         GOSUB clean_up_trai_miss_phone_m1:    // Clean up
-       ENDIF
-    ENDIF
+ IF ( ( ( flag_on_mission = 0 )                  // Not inside a mission
+    AND ( flag_passed_tutorial = 0 ) )           // Not completed tutorial yet
+    AND ( flag_failed_tutorial = 0 ) )           // Not failed tutorial
+
+    GOSUB trai_miss_phone_m1:    // Start Training Mission
+    GOSUB clean_up_trai_miss_phone_m1:    // Clean up
  ENDIF
+ IF ( flag_passed_tutorial = 0 )
+				ENABLE_THREAD_TRIGGER (thr_trai_miss_phone)
+	ENDIF
+RETURN
  
 
 RETURN
